@@ -1,0 +1,7 @@
+[
+  "testing.py::test_echo_invalid_inputs",
+  "testing.py::test_find_series_invalid_inputs",
+  "testing.py::test_find_study_invalid_inputs",
+  "testing.py::test_get_invalid_inputs",
+  "testing.py::test_replace_default_parameters"
+]
