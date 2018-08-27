@@ -1,1 +1,0 @@
-This is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
