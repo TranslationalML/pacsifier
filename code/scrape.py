@@ -11,6 +11,7 @@ from sanity_checks import check_ids, check_dates, check_ip, check_port, check_AE
 from datetime import datetime
 from typing import Iterator
 from convert import convert_all
+from cerberus import Validator
 
 warnings.filterwarnings("ignore")
 
@@ -80,6 +81,10 @@ def get_and_store_patients(
 	check_port(port)
 	check_AET(aec , server = True)
 
+
+	schema = {'PatientID' : {'type' : 'string', 'maxlength' : 64}, 'date' : {'type' : 'string', 'maxlength' : 17}}
+
+
 	#delete patients text file if already exists.
 	if os.path.isfile(text_file) : 
 		os.remove(text_file)
@@ -89,7 +94,9 @@ def get_and_store_patients(
 	res = run(dump_query)
 
 	for i, id_ in enumerate(patient_ids) : 
-		
+		validator = Validator(schema)
+		document = {'PatientID' : str(id_) , 'date' : dates[i]}
+		if not validator.validate(document) : raise ValueError("Invalid input file element at position "+ str(i) + " "+ str(validator.errors))
 		check_ids(str(id_))
 		res = run(scrape_patients_query.format(str(id_), dates[i]))
 		write_file(res, file = text_file)
@@ -202,7 +209,7 @@ def main(argv) :
 	calling_aet = parameters["server_AET"]
 	output_dir = parameters["directory"]
 
-	#TODO replace this by full flexible safe parsing
+	#TODO replace this by full flexible safe parsing	
 
 	table = read_csv("../files/"+argv[0])
 	cols= table.columns
