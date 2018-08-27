@@ -1,0 +1,4 @@
+# query patient names and IDs
+(0008,0052) CS [PATIENT]     # QueryRetrieveLevel
+(0010,0010) PN []            # PatientName
+(0010,0020) LO []            # PatientID
