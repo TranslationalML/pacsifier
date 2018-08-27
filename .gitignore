@@ -5,3 +5,7 @@
 /code/TODO.txt
 /code/special_queries.py
 /code/fuzz.py
+/.git
+/.pytest_cache
+/.ipynb_checkpoints
+/__pycache__
