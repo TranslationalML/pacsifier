@@ -6,6 +6,7 @@ from sanity_checks import check_parameters_inputs, check_ids, check_dates, check
 import shlex
 import subprocess
 from typing import List, Dict, Tuple
+from sanity_checks import check_filter
 
 warnings.filterwarnings("ignore")
 
