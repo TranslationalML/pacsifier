@@ -11,7 +11,7 @@ from sanity_checks import check_filter
 warnings.filterwarnings("ignore")
 
 #Query default parameters
-PATIENTID_1, STUDYUID = '"PAT004"', '"Fergusson^^^Dr"'
+PATIENTID = '"PAT004"'
 PATIENTID_2, STUDYDESC = '"PAT004"',""
 PATIENTID_3, STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"PAT004"', '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.461"', '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.462"', "../data" 
 
@@ -19,7 +19,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 echo_command = 'echoscu -ll trace {}'
-find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES --key 0020,1003 --key 0008,103E -k 0010,0020={} --key 0008,0021 -k 0020,000d={} --key 0008,0020={} --key 0020,000e'
+find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 8,30'
 find_studies_command = 'findscu -v {} --study -k QueryRetrieveLevel=STUDY --key 0010,0020={} --key 10,10 --key 0020,000d --key 0008,0061 --key 0008,0030 --key 0008,0020={} --key 0020,1206'
 move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
@@ -50,12 +50,16 @@ def echo(
 
 def find_series(
 	AET : str,
-	date : str,
 	server_ip : str = "88.202.185.144",
 	server_AET : str = "theServerAET",
 	port : int = 104, 
-	PATIENTID : str = PATIENTID_1,
-	STUDYUID : str = STUDYUID) -> str : 
+	PATIENTID : str = "",
+	STUDYUID : str = "",
+	SERIESINSTANCEUID : str ="",
+	SERIESDESCRIPTION : str ="", 
+	PROTOCOLNAME : str = "", 
+	ACQUISITIONDATE : str = "", 
+	STUDYDATE : str = "") -> str : 
 	"""
   	builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
@@ -63,18 +67,31 @@ def find_series(
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
 		port (int) : port 
-		PATIENTID_1 (string) : patient id 
+		PATIENTID (string) : patient id 
 		STUDYUID (string) : Study unique idetifier.
+		SERIESINSTANCEUID (string) : Series Instance UID.
+		SERIESDESCRIPTION (string) : Series Description.
+		PROTOCOLNAME (string) : protocol name.
+		ACQUISITIONDATE (string) : Acquisition Date.
+		STUDYDATE (string) : Study Date.
 	Returns : 
 		string : The log lines.
 	"""
 
-	check_ids(PATIENTID)
-	check_ids(STUDYUID , attribute = "Study instance UID")
+	#check_ids(PATIENTID)
+	#check_ids(STUDYUID , attribute = "Study instance UID")
 
 	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
-	command = find_series_command.format(modified_params, PATIENTID, STUDYUID, date)
-
+	command = find_series_command.format(
+		modified_params,
+		PATIENTID,
+		STUDYUID,
+		SERIESINSTANCEUID,
+		SERIESDESCRIPTION,
+		PROTOCOLNAME,
+		ACQUISITIONDATE,
+		STUDYDATE)
+	
 	return run(command)
 
 def find_study(
@@ -83,7 +100,7 @@ def find_study(
 	server_ip : str = "88.202.185.144",
 	server_AET : str = "theServerAET",
 	port : int = 104, 
-	PATIENTID : str = PATIENTID_2) -> str:
+	PATIENTID : str = PATIENTID) -> str:
 	"""
 	builds a query for findscu of QueryRetrieveLevel of study using the parameters passed as arguments.
 	Args : 
@@ -91,7 +108,7 @@ def find_study(
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
 		port (int) : port 
-		PATIENTID_2 (string) : patient id 
+		PATIENTID (string) : patient id 
 		STUDYDESC (string) : Study description.
 	Returns : 
 		string : The log lines.
@@ -110,19 +127,19 @@ def get(
 	server_ip : str = "88.202.185.144",
 	server_AET : str = "theServerAET",
 	port : int = 104, 
-	PATIENTID : str = PATIENTID_3,
+	PATIENTID : str = PATIENTID,
 	STUDYINSTANCEUID : str = STUDYINSTANCEUID,
 	SERIESINSTANCEUID : str = SERIESINSTANCEUID,
 	move_port : int = 4006,
 	OUTDIR : str  = OUTDIR) -> str:
 	"""
-	builds a query for getscu.
+	builds a query for movescu.
 	Args : 
 		AET (string) : Called AET
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
 		port (int) : port 
-		PATIENTID_3 (string) : patient id 
+		PATIENTID (string) : patient id 
 		STUDYINSTANCEUID (string) : Study instance unique idetifier.
 		SERIESINSTANCEUID (string) : Series instance unique identifier
 		OUTDIR (string) : directory of output files

@@ -18,6 +18,16 @@ warnings.filterwarnings("ignore")
 #Default paths to get the patient ids 
 dump_path = "../files/query_patient_ids.dcm"
 dump_txt_path = "../files/dump.txt"
+ALLOWED_FILTERS = ["PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName"]
+
+attribute_to_tag = {
+"PatientID" : "(0010,0020)",
+"StudyDate" : "(0008,0020)",
+"SeriesDecription": "(0008,103E)",
+"StudyInstanceUID" : "(0020,000d)",
+"SeriesInstanceUIDs" : "(0020,000e)",
+"AcquisitionDate" : "(0008,0022)",
+"ProtocolName" : "(0018,1030)"}
 
 ########################################################################################################################
 ########################################################FUNCTIONS#######################################################
@@ -110,10 +120,10 @@ def readLineByLine(filename : str) -> Iterator[str]:
 		Iterator : list of text lines in file.
 	"""
 	with open(filename, 'r', encoding = "utf8") as f:
-		for line in f:   
+		for line in f:
 			yield line.strip('\n')
 
-def process_text_files(filename : str, target_id : str = "PATIENT") -> list:
+def process_text_files(filename : str) -> list:
 	"""
 	Gives list of patient ids, study instance UID or series instance UID
 	Args : 
@@ -123,33 +133,57 @@ def process_text_files(filename : str, target_id : str = "PATIENT") -> list:
 	Returns : 
 		list : list of unique ids.
 	"""
-	tag_to_id = {
-	"PATIENT" : "(0010,0020)",
-	"STUDY" : "(0020,000d)",
-	"STUDY_DATE" : "(0008,0020)", 
-	"STUDY_TIME" : "(0008,0030)",
-	"SERIES" : "(0020,000e)"}
-
+	start = False
+	tag_to_attribute ={
+	"(0008,0020)" : "StudyDate", 
+	"(0008,0030)" : "StudyTime", 
+	"(0008,103e)" : "SeriesDecription", 
+	"(0010,0020)" : "PatientID", 
+	"(0018,1030)" : "ProtocolName", 
+	"(0020,000d)" : "StudyInstanceUID", 
+	"(0020,000e)" : "SeriesInstanceUID"
+	}
+    
 	id_table = []
     
     #Iterate over text lines
 	for line in readLineByLine(filename):
-		#if current line contains a given tag then extract information from it.
-		if tag_to_id[target_id] in line:
+
+		sample_dict = {
+		"StudyDate" : "",
+		"StudyTime" : "",
+		"SeriesDecription" : "",
+		"PatientID" : "",
+		"ProtocolName": "",
+		"StudyInstanceUID" : "",
+		"SeriesInstanceUID" : ""}
+
+		if "------------" in line or "Releasing Association" in line : 
+			if start : id_table.append(output_dict)
 			
-			id_ = ""
-			try : 
-				id_ = line.split(" ")[3]
+			start = True
+			output_dict = sample_dict
+			continue
 
-			#In case line.split gives a list of length less that 4 pass to next line.
-			except IndexError : pass
+		if not start : continue
+		for tag in sorted(tag_to_attribute.keys()) : 
 
-			id_ = id_.replace("[","").replace("]","")
+			#if current line contains a given tag then extract information from it.
+			if tag in line:
+				
+				item = ""
+				try : 
+					item = line.split("[")[1].split("]")[0].replace(" ","")
 
-			if id_ == "(no" : continue
-			id_table.append(id_)
-	
-	return list(id_table)
+				#In case line.split gives a list of length less that 4 pass to next line.
+				except IndexError : pass
+
+				
+
+				if item == "(no" : continue
+				output_dict[tag_to_attribute[tag]] = item
+		
+	return id_table
 
 
 def parse_date(date : str) -> str : 
@@ -172,6 +206,7 @@ def parse_date(date : str) -> str :
 	
 	return addition + splitted[2] + splitted[1] + splitted[0]
 
+
 def process_date(date : str) -> str : 
 	"""
 	Process a date according to its format (a simple date or a date range)
@@ -179,22 +214,56 @@ def process_date(date : str) -> str :
 		date (string) : date or date range in format dd/mm/yy or dd/mm/yy-dd/mm/yy
 	Returns : processed date/date range.
 	"""
-
+	if date == "" : return ""
 	#Case a date range was passed
 	if len(date.split("-")) == 2 :
 		dates = date.split("-")
 		dates = [parse_date(dat) for dat in dates]
 		return dates[0]+"-"+dates[1]
+	
 	#Case of a single date (not a date range)
 	elif len(date.split("-")) == 1 :
 		return parse_date(date) 
+	
 	#Otherwise raise an error.
 	else : 
 		raise ValueError("Invalid date input!")
 
+def check_table(table, allowed_filters : list = ALLOWED_FILTERS) : 
+	"""
+	
+	"""
+	cols = table.columns
+	for col in cols : 
+		if col not in allowed_filters : 
+			raise ValueError("Attribute "+ col +" not allowed! Please check the input table's column names.")
+
+	return 
+
+def parse_table(table, allowed_filters) :
+	attributes_list = []
+	for idx in table.index : 
+		
+		filter_dictionary = {
+		"PatientID" : "",
+		"StudyDate" : "",
+		"StudyInstanceUID" : "",
+		"SeriesInstanceUID" : "",
+		"SeriesDecription": "",
+		"AcquisitionDate" : "",
+		"ProtocolName" : ""}
+
+		for col in table.columns :
+			filter_dictionary[col] = table.loc[idx, col]
+			attributes_list.append(filter_dictionary)
+
+	return attributes_list
+
+
 ########################################################################################################################
 ##########################################################MAIN##########################################################
 ########################################################################################################################
+
 
 def main(argv) : 
 	
@@ -211,114 +280,77 @@ def main(argv) :
 
 	#TODO replace this by full flexible safe parsing	
 
-	table = read_csv("../files/"+argv[0])
-	cols= table.columns
-	target_ids = list(table[cols[0]])
+	table = read_csv("../files/"+argv[0])	
+	additional = argv[1:]
 	
-	dates = list(table[cols[1]])
-	dates = [process_date(date) for date in dates]
+	check_table(table)
+	attributes_list = parse_table(table , ALLOWED_FILTERS)
 
-	#echo
-	echo_res = echo(called_aet, server_ip = pacs_server, server_AET = calling_aet, port = port)
-
-	
-	#Getting all patient ids.
-	get_and_store_patients(target_ids , dates, server_ip = pacs_server, port = port, aec = calling_aet)
-	ids_ = process_text_files("../files/patients.txt")
-	
-	print("Retrieving images...")
-	
-	#Loop over all patient ids. 
-	k = -1
-	for patient_id in tqdm(ids_) : 
-		k+=1
-		patient_dir = os.path.join(output_dir, "sub-"+ patient_id)
-
-		#Store all later retrieved files of current patient within the patient_id directory.
-		if not os.path.isdir(patient_dir):
-			os.mkdir(patient_dir)
-
-		#Look for studies of current patient.
-		find_study_res = find_study(
+	for tuple_ in attributes_list : 
+		PATIENTID = tuple_["PatientID"]
+		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
+		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
+		SERIESDESCRIPTION = tuple_["SeriesDecription"] 
+		PROTOCOLNAME = tuple_["ProtocolName"]
+		ACQUISITIONDATE = tuple_["AcquisitionDate"]
+		STUDYDATE = process_date(tuple_["StudyDate"])
+		#print(attributes_list)
+		#Look for series of current patient and current study.
+		find_series_res = find_series(
 			called_aet,
-			dates[k],
 			server_ip = pacs_server,
 			server_AET = calling_aet,
 			port = port,
-			PATIENTID = patient_id)
+			PATIENTID = PATIENTID,
+			STUDYUID = STUDYINSTANCEUID,
+			SERIESINSTANCEUID = SERIESINSTANCEUID,
+			SERIESDESCRIPTION = SERIESDESCRIPTION,
+			PROTOCOLNAME = PROTOCOLNAME, 
+			ACQUISITIONDATE = ACQUISITIONDATE, 
+			STUDYDATE = STUDYDATE)
+
+		if os.path.isfile("current.txt") : 
+			os.remove("current.txt")
+
+		write_file(find_series_res, file = "current.txt")
+
+		#Extract all series ids.
+		series = process_text_files("current.txt")
 		
-		#Generate study_reponses text of current patient.
-		study_txt = os.path.join(patient_dir,'study_responses.txt')
-		
-		if os.path.isfile(study_txt) : 
-			os.remove(study_txt)
-		
-		write_file(find_study_res, file = study_txt)
-		
-		#Extract all study ids.
-		study_ids = process_text_files(study_txt, target_id = "STUDY")
-		study_dates = process_text_files(study_txt, target_id = "STUDY_DATE")
-		study_times = process_text_files(study_txt, target_id = "STUDY_TIME")
+		#loop over series
+		for serie in tqdm(series) :
+			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 
-		study_dates = study_dates[1:]
+			if not os.path.isdir(patient_dir):
+				os.mkdir(patient_dir)
 
-		#Basic sanity checks... 
-		assert len(study_dates) == len(study_ids)
-		assert len(study_times) == len(study_ids)
+			patient_study_output_dir = os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
 
-		#loop over studies.
-		for i, study in enumerate(study_ids) : 
-
-			patient_study_output_dir = os.path.join(patient_dir, "ses-" + study_dates[i] + study_times[i])
-
-			#Store all later retrieved files of current study within the study_id directory.
 			if not os.path.isdir(patient_study_output_dir):
 				os.mkdir(patient_study_output_dir)
-			
-			
-			#Generate response_series text of current study.
-			serie_txt = os.path.join(patient_study_output_dir,"response_series.txt")
 
-			if os.path.isfile(serie_txt) : 
-				os.remove(serie_txt)
+			
+			patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie["SeriesDecription"])
 
-			#Look for series of current patient and current study.
-			find_series_res = find_series(
+			#Store all later retrieved files of current patient within the serie_id directory.
+			if not os.path.isdir(patient_serie_output_dir):
+				os.mkdir(patient_serie_output_dir)
+			
+			#Retrieving files of current patient, study and serie.
+			get_res = get(
 				called_aet,
-				dates[k],
+				serie["StudyDate"],
+				additional,
 				server_ip = pacs_server,
 				server_AET = calling_aet,
 				port = port,
-				PATIENTID = patient_id,
-				STUDYUID = study)
-			
-			write_file(find_series_res, file = serie_txt)
+				PATIENTID = serie["PatientID"],
+				STUDYINSTANCEUID = serie["StudyInstanceUID"],
+				SERIESINSTANCEUID = serie["SeriesInstanceUID"],
+				OUTDIR  = patient_serie_output_dir)
 
-			#Extract all series ids.
-			series_ids = process_text_files(serie_txt, target_id = "SERIES")
-			
-			#loop over series
-			for serie_id in series_ids :
-				patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie_id)
-
-				#Store all later retrieved files of current patient within the serie_id directory.
-				if not os.path.isdir(patient_serie_output_dir):
-					os.mkdir(patient_serie_output_dir)
-				
-				#Retrieving files of current patient, study and serie.
-				get_res = get(
-					called_aet,
-					dates[k],
-					['0008,0060="MR"', '0010,0020=""'],
-					server_ip = pacs_server,
-					server_AET = calling_aet,
-					port = port,
-					PATIENTID = patient_id,
-					STUDYINSTANCEUID = study,
-					SERIESINSTANCEUID = serie_id,
-					OUTDIR  = patient_serie_output_dir)
-
-	
+	if os.path.isfile("current.txt") : 
+		os.remove("current.txt")
 
 if __name__ == "__main__" : 
 	main(sys.argv[1:])

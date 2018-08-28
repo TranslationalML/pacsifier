@@ -75,7 +75,7 @@ def check_dates(date : str) :
   	Args : 
 		date (string) : date
 	"""
-
+	if date == "" : return
 	message = "Invalid date input" 
 	splitted_date = date.split("/")
 
