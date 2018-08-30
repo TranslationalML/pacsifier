@@ -8,5 +8,5 @@
 /.git
 /.pytest_cache
 /.ipynb_checkpoints
-/__pycache__
+__pycache__
 /code/__pycache__
