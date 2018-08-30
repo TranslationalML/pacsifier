@@ -1,5 +1,6 @@
 #!/bin/bash
-miniconda_root="/home/localadmin/anaconda2"
+'''usage: bash /path/to/installation_python_modules.sh /path/to/miniconda3_root_dir (i.e /home/localadmin/Softwares/miniconda3)'''
+miniconda_root=$1
 
 DIR=`dirname "$0"`
 PACSMANDIR=`dirname "$DIR"`
