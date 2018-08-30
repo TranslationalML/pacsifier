@@ -3,7 +3,7 @@ from execute_commands import run
 import os
 from tqdm import tqdm
 import sys
-
+import nipype
 
 def list_files(path : str) -> list : 
 	"""
@@ -34,17 +34,50 @@ def convert(subject : str, session : str , base : str) :
 		session (string) : session identifier
 		base (string) : directory path
 	"""
+
+	"""
+	heudiconv -d /home/localadmin/Téléchargements/data_test_heudiconv/sub-{subject}/ses-{session}/*/* \
+	-o /home/localadmin/Téléchargements/data_test_heudiconv/Nifti/ \
+	-f /home/localadmin/Téléchargements/data_test_heudiconv/Nifti/code/heuristic.py \
+	-s 2936187 -ss 20171013133317 \
+	-c dcm2niix -b --overwrite
+	"""
 	
-	command = "docker run --rm -it -v {}:/base -v {}/Nifti/code/heuristic.py:/base/Nifti/code/heuristic.py nipy/heudiconv:latest -d /base/sub-{}/ses-{}/*/* -o /base/Nifti -f /base/Nifti/code/heuristic.py -s {} -ss {} -c dcm2niix -b --overwrite".format(
-		base,
+	command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c none --overwrite".format(
 		base,
 		"{subject}",
 		"{session}",
+		os.path.join(base,"Nifti"),
+		os.path.join(base,"..","code","convertall.py"),
 		subject,
 		session)
 	
-	return run(command) 
-#glob("../data/Nifti/sub-*/*")
+	global_path = os.path.join(base, "sub-*","ses-*","*","*")
+	print(command)
+	teff = run(command)
+	print(teff)
+
+	command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c dcm2niix -b --overwrite".format(
+		base,
+		"{subject}",
+		"{session}",
+		os.path.join(base,"Nifti"),
+		os.path.join(base,"..","code","heuristic.py"),
+		subject,
+		session)
+	
+	global_path = os.path.join(base, "sub-*","ses-*","*","*")
+	print(command)
+	teff = run(command)
+	print(teff)
+	
+	paths = glob(global_path)
+	
+	# for i, path in enumerate(paths):
+		
+	# 	c3d_command = 'python c3d_nipype.py '+ path  +" "+ os.path.join(base,"Nifti", str(i)+'.nii.gz')
+	# 	teff = run(c3d_command)
+
 def convert_all(base) :
 	"""
 	Converts all dicom files within base directory to nifti files
@@ -53,13 +86,15 @@ def convert_all(base) :
 	"""
 	
 	global_path = os.path.join(base, "sub-*","*")
+
 	paths = list_files(global_path )
 	tuples = process_list(paths)
 	
 	abs_path = os.path.abspath(base)
+	
 	print("Converting dicom files to nifti")
 	for tuple_ in tqdm(tuples) :
-		run = convert(tuple_[0], tuple_[1], abs_path)
+		convert(tuple_[0], tuple_[1], abs_path)
 
 
 def main(argv) : 
