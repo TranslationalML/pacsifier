@@ -1,5 +1,8 @@
 #!/bin/bash
-'''usage: bash /path/to/installation_python_modules.sh /path/to/miniconda3_root_dir (i.e /home/localadmin/Softwares/miniconda3)'''
+'''
+usage: bash /path/to/installation_python_modules.sh /path/to/miniconda3_root_dir (i.e /home/localadmin/Softwares/miniconda3)
+note: on the assumption that the conda environment is named "heudiconvquery". It can be created using utils/create_miniconda3_environment.sh
+'''
 miniconda_root=$1
 
 DIR=`dirname "$0"`
