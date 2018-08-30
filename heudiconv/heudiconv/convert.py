@@ -280,10 +280,23 @@ def convert(items, converter, scaninfo_suffix, custom_callable, with_prov,
                     res, prov_file = nipype_convert(item_dicoms, prefix, with_prov,
                                                     bids, tmpdir)
 
+                    dicom_series_dir = os.path.abspath(os.path.join(res.outputs.converted_files[0], os.pardir))
+
+                    lgr.info("Dicom series dir:")
+                    lgr.info(dicom_series_dir)
+                    lgr.info("Prefix:")
+                    lgr.info(prefix)
+
                     bids_outfiles = save_converted_files(res, item_dicoms, bids,
                                                          outtype, prefix,
                                                          outname_bids,
                                                          overwrite=overwrite)
+
+                    res = nipype_convert3d(dicom_series_dir,prefix)
+
+                    if res != 0:
+                        lgr.info("C3D output:")
+                        lgr.info(res.outputs.out_file)
 
                     # save acquisition time information if it's BIDS
                     # at this point we still have acquisition date
@@ -380,6 +393,22 @@ def convert_dicom(item_dicoms, bids, prefix,
 #                else:
 #                    os.link(filename, outfile)
                 shutil.copyfile(filename, outfile)
+
+
+def nipype_convert3d(dicom_series_dir,prefix):
+    """ """
+    from nipype.pipeline.engine import Node
+    from .interfaces.nipype_c3d import Convert3DSeries
+    try:
+        converter_dicom_series =  Node(interface=Convert3DSeries(),name="c3d_series_converter")
+        converter_dicom_series.inputs.dicom_series_dir = dicom_series_dir
+        converter_dicom_series.inputs.out_file = os.path.abspath('{}_c3d.nii.gz'.format(prefix))
+        # Execute the node
+        eg = converter_dicom_series.run()
+        return eg
+    except:
+        lgr.info("exception caught @ convert3D")
+        return 0
 
 
 def nipype_convert(item_dicoms, prefix, with_prov, bids, tmpdir):
