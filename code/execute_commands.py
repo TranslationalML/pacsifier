@@ -19,7 +19,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 echo_command = 'echoscu -ll trace {}'
-find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 8,30'
+find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 10,10 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30'
 find_studies_command = 'findscu -v {} --study -k QueryRetrieveLevel=STUDY --key 0010,0020={} --key 10,10 --key 0020,000d --key 0008,0061 --key 0008,0030 --key 0008,0020={} --key 0020,1206'
 move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
@@ -59,6 +59,8 @@ def find_series(
 	SERIESDESCRIPTION : str ="", 
 	PROTOCOLNAME : str = "", 
 	ACQUISITIONDATE : str = "", 
+	PATIENTNAME : str = "",
+	PATIENTBIRTHDATE : str = "",
 	STUDYDATE : str = "") -> str : 
 	"""
   	builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
@@ -90,7 +92,9 @@ def find_series(
 		SERIESDESCRIPTION,
 		PROTOCOLNAME,
 		ACQUISITIONDATE,
-		STUDYDATE)
+		STUDYDATE, 
+		PATIENTNAME,PATIENTBIRTHDATE)
+	
 	
 	return run(command)
 
@@ -167,7 +171,7 @@ def get(
 	for filter_ in additional_filters : 
 		check_filter(filter_)
 		command += " --key "+ filter_ + " "
-	
+
 	return run(command)
 	
 def write_file(results : str, file : str = "output.txt"): 
@@ -220,7 +224,12 @@ def run(query: str) -> str:
     Returns : 
     	string : The log lines.
     """
-    cmd = shlex.split(query)
+
+    try : 
+    	cmd = shlex.split(query)
+    except ValueError : 
+    	
+    	exit()
     completed = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     lines = completed.stderr.decode('latin1').splitlines()
     lines = [line.replace('\x00', '') for line in lines]

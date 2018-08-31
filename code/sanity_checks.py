@@ -104,8 +104,8 @@ def check_ids(UID : str, attribute : str = "Patient ID"):
 		attribute (string) : The attribute name.
 	"""
 	
-	if UID == "" : 
-		raise ValueError("Emtpy " + attribute+" passed")
+	"""if UID == "" : 
+					raise ValueError("Emtpy " + attribute+" passed")"""
 	if len(UID) > 64 : 
 		raise ValueError(attribute + " is too long")
 	return 

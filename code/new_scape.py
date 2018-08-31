@@ -10,7 +10,6 @@ import json
 from sanity_checks import check_ids, check_dates, check_ip, check_port, check_AET
 from datetime import datetime
 from typing import Iterator
-from convert import convert_all
 from cerberus import Validator
 #from shutil import copyfile
 
@@ -21,7 +20,7 @@ warnings.filterwarnings("ignore")
 #Default paths to get the patient ids 
 dump_path = "../files/query_patient_ids.dcm"
 dump_txt_path = "../files/dump.txt"
-ALLOWED_FILTERS = ["PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName", "StudyInstanceUID", "SeriesInstanceUID"]
+ALLOWED_FILTERS = ["PatientName", "PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName","PatientBirthDate", "StudyInstanceUID", "SeriesInstanceUID"]
 
 attribute_to_tag = {
 "PatientID" : "(0010,0020)",
@@ -107,9 +106,7 @@ def get_and_store_patients(
 	res = run(dump_query)
 
 	for i, id_ in enumerate(patient_ids) : 
-		validator = Validator(schema)
-		document = {'PatientID' : str(id_) , 'date' : dates[i]}
-		if not validator.validate(document) : raise ValueError("Invalid input file element at position "+ str(i) + " "+ str(validator.errors))
+		
 		check_ids(str(id_))
 		res = run(scrape_patients_query.format(str(id_), dates[i]))
 		write_file(res, file = text_file)
@@ -144,7 +141,9 @@ def process_text_files(filename : str) -> list:
 	"(0010,0020)" : "PatientID", 
 	"(0018,1030)" : "ProtocolName", 
 	"(0020,000d)" : "StudyInstanceUID", 
-	"(0020,000e)" : "SeriesInstanceUID"
+	"(0020,000e)" : "SeriesInstanceUID",
+	"(0010,0010)" : "PatientName",
+	"(0010,0030)" : "PatientBirthDate"
 	}
     
 	id_table = []
@@ -159,6 +158,8 @@ def process_text_files(filename : str) -> list:
 		"PatientID" : "",
 		"ProtocolName": "",
 		"StudyInstanceUID" : "",
+		"PatientName" : "",
+		"PatientBirthDate" : "",
 		"SeriesInstanceUID" : ""}
 
 		if "------------" in line or "Releasing Association" in line : 
@@ -246,6 +247,10 @@ def check_table(table, allowed_filters : list = ALLOWED_FILTERS) :
 			raise ValueError("Attribute "+ col +" not allowed! Please check the input table's column names.")
 
 	return 
+def parse_birth_date(date) :
+	if date == "" : return ""
+	date = date.split(".")
+	return date[2]+date[1]+date[0]
 
 def parse_table(table, allowed_filters) :
 	"""
@@ -270,7 +275,10 @@ def parse_table(table, allowed_filters) :
 
 	return attributes_list
 
-
+def process_names(name) : 
+	splitted_name = name.upper().split(" ")
+	splitted_name = "*"+ "^" +"*"+ splitted_name[-1]+"*"
+	return splitted_name
 ########################################################################################################################
 ##########################################################MAIN##########################################################
 ########################################################################################################################
@@ -295,22 +303,54 @@ def main(argv) :
 
 
 	check_table(table)
-	
 	#Flexible parsing.
 	attributes_list = parse_table(table , ALLOWED_FILTERS)
 	
+	schema = {
+	'PatientID' : {'type' : 'string', 'maxlength' : 64}, 
+	'StudyDate' : {'type' : 'string', 'maxlength' : 17},
+	'StudyInstanceUID' : {'type' : 'string', 'maxlength' : 64},
+	'SeriesInstanceUID' : {'type' : 'string', 'maxlength' : 64},
+	'ProtocolName' : {'type' : 'string', 'maxlength' : 64},
+	'PatientName': {'type' : 'string', 'maxlength' : 64},
+	'SeriesDecription' : {'type' : 'string', 'maxlength' : 64},
+	'AcquisitionDate' : {'type' : 'string', 'maxlength' : 8},
+	'PatientBirthDate' : {'type' : 'string', 'maxlength' : 8}
+	}
+
+	validator = Validator(schema)
+
 	for i, tuple_ in enumerate(attributes_list) : 
 		
 		print("Retrieving images for subject number ", i)
 
-		PATIENTID = tuple_["PatientID"]
+		PATIENTID = str(tuple_["PatientID"])
 		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
 		SERIESDESCRIPTION = tuple_["SeriesDecription"] 
 		PROTOCOLNAME = tuple_["ProtocolName"]
 		ACQUISITIONDATE = tuple_["AcquisitionDate"]
 		STUDYDATE = process_date(tuple_["StudyDate"])
+		PATIENTNAME = process_names(tuple_["PatientName"])
+		PATIENTBIRTHDATE = parse_birth_date(tuple_ ["PatientBirthDate"])
 		
+		
+
+		inputs = {
+		'PatientID' : PATIENTID, 
+		'StudyDate' : STUDYDATE,
+		'StudyInstanceUID' : STUDYINSTANCEUID,
+		'SeriesInstanceUID' : SERIESINSTANCEUID,
+		'ProtocolName' : PROTOCOLNAME,
+		'PatientName': PATIENTNAME,
+		'SeriesDecription' : SERIESDESCRIPTION,
+		'AcquisitionDate' : ACQUISITIONDATE,
+		'PatientBirthDate' : PATIENTBIRTHDATE
+		}
+
+		if not validator.validate(inputs) : 
+			raise ValueError("Invalid input file element at position "+ str(i) + " "+ str(validator.errors))
+
 		#Look for series of current patient and current study.
 		find_series_res = find_series(
 			called_aet,
@@ -323,15 +363,17 @@ def main(argv) :
 			SERIESDESCRIPTION = SERIESDESCRIPTION,
 			PROTOCOLNAME = PROTOCOLNAME, 
 			ACQUISITIONDATE = ACQUISITIONDATE, 
-			STUDYDATE = STUDYDATE)
+			STUDYDATE = STUDYDATE,
+			PATIENTNAME = PATIENTNAME,
+			PATIENTBIRTHDATE = PATIENTBIRTHDATE)
 
-		if os.path.isfile("current.txt") : 
-			os.remove("current.txt")
+		"""if os.path.isfile("current"+str(i)+".txt") : 
+									os.remove("current"+str(i)+".txt")"""
 
-		write_file(find_series_res, file = "current.txt")
+		write_file(find_series_res, file = PATIENTNAME.replace(" ","")+".txt")
 
 		#Extract all series ids.
-		series = process_text_files("current.txt")
+		series = process_text_files(PATIENTNAME.replace(" ","")+".txt")
 		
 		#loop over series
 		for serie in tqdm(series) :
@@ -366,8 +408,8 @@ def main(argv) :
 				SERIESINSTANCEUID = serie["SeriesInstanceUID"],
 				OUTDIR  = patient_serie_output_dir)
 
-	if os.path.isfile("current.txt") : 
-		os.remove("current.txt")
+	"""if os.path.isfile("current.txt") : 
+					os.remove("current.txt")"""
 
 if __name__ == "__main__" : 
 	main(sys.argv[1:])
