@@ -77,6 +77,7 @@ def check_dates(date : str) :
 	"""
 	if date == "" : return
 	message = "Invalid date input" 
+	
 	splitted_date = date.split("/")
 
 	for split in splitted_date : 
@@ -117,3 +118,18 @@ def check_filter(filter_text : str) :
 		filter_text (string) : 
 	"""
 	if len(filter_text.split("=")) != 2 : raise ValueError("Invalid filter input.")
+
+def check_tuple(tuple_ : dict) : 
+	"""
+	Checks that the table has an acceptable input parameters. 
+	Args : 
+		tuple_ : dictionary that contains all parameters for query.
+	"""
+	empty = True
+	for item in tuple_.values() : 
+		if '*' in str(item) : 
+			raise ValueError("Can't use * for inputs !")
+		if len(str(item)) > 0 : 
+			empty = False
+
+	if empty : raise ValueError("Empty line in table ! ")
