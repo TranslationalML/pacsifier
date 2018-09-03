@@ -99,7 +99,6 @@ def find_series(
 		PATIENTBIRTHDATE,
 		DEVICESERIALNUMBER)
 	
-	
 	return run(command)
 
 def find_study(

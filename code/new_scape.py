@@ -21,7 +21,6 @@ warnings.filterwarnings("ignore")
 #Default paths to get the patient ids 
 dump_path = "../files/query_patient_ids.dcm"
 dump_txt_path = "../files/dump.txt"
-ALLOWED_FILTERS = ["PatientName", "PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName","PatientBirthDate", "DeviceSerialNumber" ,"StudyInstanceUID", "SeriesInstanceUID"]
 
 tag_to_attribute ={
 "(0008,0020)" : "StudyDate",
@@ -32,9 +31,12 @@ tag_to_attribute ={
 "(0020,000d)" : "StudyInstanceUID",
 "(0020,000e)" : "SeriesInstanceUID",
 "(0010,0010)" : "PatientName",
-"(0010,0030)" : "PatientBirthDate"
-"(0018,1000)" : "DeviceSerialNumber"
+"(0010,0030)" : "PatientBirthDate",
+"(0018,1000)" : "DeviceSerialNumber", 
+"(0008,0022)" : "AcquisitionDate"
 }
+
+ALLOWED_FILTERS = list(tag_to_attribute.values())
 
 ########################################################################################################################
 ########################################################FUNCTIONS#######################################################
@@ -350,7 +352,7 @@ def main(argv) :
 		STUDYDATE = process_date(tuple_["StudyDate"])
 		PATIENTNAME = process_names(tuple_["PatientName"])
 		PATIENTBIRTHDATE = parse_birth_date(tuple_ ["PatientBirthDate"])
-		DEVICESERIALNUMBER = tuple_["DeviceSerialNumber"]
+		DEVICESERIALNUMBER = str(tuple_["DeviceSerialNumber"])
 		
 		
 
@@ -366,6 +368,7 @@ def main(argv) :
 		'PatientBirthDate' : PATIENTBIRTHDATE,
 		'DeviceSerialNumber' : DEVICESERIALNUMBER
 		}
+
 
 		if not validator.validate(inputs) : 
 			raise ValueError("Invalid input file element at position "+ str(i) + " " + str(validator.errors))
@@ -386,6 +389,7 @@ def main(argv) :
 			PATIENTNAME = PATIENTNAME,
 			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
 			DEVICESERIALNUMBER = DEVICESERIALNUMBER)
+
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")
