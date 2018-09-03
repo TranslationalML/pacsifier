@@ -280,7 +280,7 @@ def convert(items, converter, scaninfo_suffix, custom_callable, with_prov,
                     res, prov_file = nipype_convert(item_dicoms, prefix, with_prov,
                                                     bids, tmpdir)
 
-                    dicom_series_dir = os.path.abspath(os.path.join(res.outputs.converted_files[0], os.pardir))
+                    dicom_series_dir = os.path.abspath(os.path.join(item_dicoms[0], os.pardir))
 
                     lgr.info("Dicom series dir:")
                     lgr.info(dicom_series_dir)
