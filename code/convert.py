@@ -56,10 +56,9 @@ def convert(subject : str, session : str , base : str) :
 		session)
 
 	global_path = os.path.join(base, "sub-*","ses-*","*","*")
-	print(command)
-	teff = run(command)
-	print(teff)
-
+	
+	run(command)
+	
 	command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c dcm2niix -b --overwrite".format(
 		base,
 		"{subject}",
@@ -70,9 +69,8 @@ def convert(subject : str, session : str , base : str) :
 		session)
 
 	global_path = os.path.join(base, "sub-*","ses-*","*","*")
-	print(command)
-	teff = run(command)
-	print(teff)
+	
+	run(command)
 
 	paths = glob(global_path)
 

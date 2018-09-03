@@ -7,10 +7,11 @@ import os
 import warnings
 from pandas import read_csv
 import json
-from sanity_checks import check_ids, check_dates, check_ip, check_port, check_AET
+from sanity_checks import check_ids, check_dates, check_ip, check_port, check_AET, check_tuple
 from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
+import csv
 #from shutil import copyfile
 
 
@@ -22,14 +23,17 @@ dump_path = "../files/query_patient_ids.dcm"
 dump_txt_path = "../files/dump.txt"
 ALLOWED_FILTERS = ["PatientName", "PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName","PatientBirthDate", "StudyInstanceUID", "SeriesInstanceUID"]
 
-attribute_to_tag = {
-"PatientID" : "(0010,0020)",
-"StudyDate" : "(0008,0020)",
-"SeriesDecription": "(0008,103E)",
-"StudyInstanceUID" : "(0020,000d)",
-"SeriesInstanceUIDs" : "(0020,000e)",
-"AcquisitionDate" : "(0008,0022)",
-"ProtocolName" : "(0018,1030)"}
+tag_to_attribute ={
+"(0008,0020)" : "StudyDate",
+"(0008,0030)" : "StudyTime",
+"(0008,103e)" : "SeriesDecription",
+"(0010,0020)" : "PatientID",
+"(0018,1030)" : "ProtocolName",
+"(0020,000d)" : "StudyInstanceUID",
+"(0020,000e)" : "SeriesInstanceUID",
+"(0010,0010)" : "PatientName",
+"(0010,0030)" : "PatientBirthDate"
+}
 
 ########################################################################################################################
 ########################################################FUNCTIONS#######################################################
@@ -134,17 +138,6 @@ def process_text_files(filename : str) -> list:
 		list : list of unique ids.
 	"""
 	start = False
-	tag_to_attribute ={
-	"(0008,0020)" : "StudyDate", 
-	"(0008,0030)" : "StudyTime", 
-	"(0008,103e)" : "SeriesDecription", 
-	"(0010,0020)" : "PatientID", 
-	"(0018,1030)" : "ProtocolName", 
-	"(0020,000d)" : "StudyInstanceUID", 
-	"(0020,000e)" : "SeriesInstanceUID",
-	"(0010,0010)" : "PatientName",
-	"(0010,0030)" : "PatientBirthDate"
-	}
     
 	id_table = []
     
@@ -202,7 +195,7 @@ def parse_date(date : str) -> str :
 	check_dates(date)
 	addition = "20"
 	splitted = date.split("/")
-	if int(splitted[2]) > datetime.now().year %100 : 
+	if int(splitted[2]) > datetime.now().year % 100 : 
 		addition = "19"
 
 	if len(splitted[0]) == 1 : splitted[0] = "0" + splitted[0]
@@ -221,13 +214,13 @@ def process_date(date : str) -> str :
 	"""
 	if date == "" : return ""
 	#Case a date range was passed
-	if len(date.split("-")) == 2 :
+	if len(str(date).split("-")) == 2 :
 		dates = date.split("-")
 		dates = [parse_date(dat) for dat in dates]
 		return dates[0]+"-"+dates[1]
 	
 	#Case of a single date (not a date range)
-	elif len(date.split("-")) == 1 :
+	elif len(str(date).split("-")) == 1 :
 		return parse_date(date) 
 	
 	#Otherwise raise an error.
@@ -276,9 +269,16 @@ def parse_table(table, allowed_filters) :
 	return attributes_list
 
 def process_names(name) : 
+	"""
+	Processing name to be the input of the query. 
+	Args : 
+		name (string) : patient name. 
+	Returns : 
+		string : patient name in the format it will be used in the query.
+	"""
 	splitted_name = name.upper().split(" ")
-	splitted_name = "*"+ "^" +"*"+ splitted_name[-1]+"*"
-	return splitted_name
+	new_name = "*"+ "^" +"*"+ splitted_name[-1]+"*"
+	return new_name
 ########################################################################################################################
 ##########################################################MAIN##########################################################
 ########################################################################################################################
@@ -298,11 +298,24 @@ def main(argv) :
 	output_dir = parameters["directory"]
 
 	#Reading table.
-	table = read_csv("../files/"+argv[0])	
-	additional = argv[1:]
+	table = read_csv("../files/"+argv[0]).fillna("")
 
+	#processing command line inputs
+	additional = argv[1:]
+	additional = [add for add in additional if add[0] != '-']
+	options = [opt for opt in argv[1:] if opt[0] == '-']
+
+	info = False
+	save = False
+
+	if '-info' in options : 
+		info = True
+
+	if '-save' in options : 
+		save = True
 
 	check_table(table)
+
 	#Flexible parsing.
 	attributes_list = parse_table(table , ALLOWED_FILTERS)
 	
@@ -323,7 +336,8 @@ def main(argv) :
 	for i, tuple_ in enumerate(attributes_list) : 
 		
 		print("Retrieving images for subject number ", i)
-
+		
+		check_tuple(tuple_)
 		PATIENTID = str(tuple_["PatientID"])
 		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
@@ -349,7 +363,7 @@ def main(argv) :
 		}
 
 		if not validator.validate(inputs) : 
-			raise ValueError("Invalid input file element at position "+ str(i) + " "+ str(validator.errors))
+			raise ValueError("Invalid input file element at position "+ str(i) + " " + str(validator.errors))
 
 		#Look for series of current patient and current study.
 		find_series_res = find_series(
@@ -367,13 +381,13 @@ def main(argv) :
 			PATIENTNAME = PATIENTNAME,
 			PATIENTBIRTHDATE = PATIENTBIRTHDATE)
 
-		"""if os.path.isfile("current"+str(i)+".txt") : 
-									os.remove("current"+str(i)+".txt")"""
+		if os.path.isfile("current.txt") : 
+			os.remove("current.txt")
 
-		write_file(find_series_res, file = PATIENTNAME.replace(" ","")+".txt")
+		write_file(find_series_res, file = "current.txt")
 
 		#Extract all series ids.
-		series = process_text_files(PATIENTNAME.replace(" ","")+".txt")
+		series = process_text_files("current.txt")
 		
 		#loop over series
 		for serie in tqdm(series) :
@@ -394,22 +408,30 @@ def main(argv) :
 			if not os.path.isdir(patient_serie_output_dir):
 				os.mkdir(patient_serie_output_dir)
 
-			
+		 
 			#Retrieving files of current patient, study and serie.
-			get_res = get(
-				called_aet,
-				serie["StudyDate"],
-				additional,
-				server_ip = pacs_server,
-				server_AET = calling_aet,
-				port = port,
-				PATIENTID = serie["PatientID"],
-				STUDYINSTANCEUID = serie["StudyInstanceUID"],
-				SERIESINSTANCEUID = serie["SeriesInstanceUID"],
-				OUTDIR  = patient_serie_output_dir)
+			if save :
+				get_res = get(
+					called_aet,
+					serie["StudyDate"],
+					additional,
+					server_ip = pacs_server,
+					server_AET = calling_aet,
+					port = port,
+					PATIENTID = serie["PatientID"],
+					STUDYINSTANCEUID = serie["StudyInstanceUID"],
+					SERIESINSTANCEUID = serie["SeriesInstanceUID"],
+					OUTDIR  = patient_serie_output_dir)
+			if info : 
+				
+				#Writing series info to csv file.
+				with open(patient_serie_output_dir+'.csv', 'w') as f: 
+				    w = csv.DictWriter(f, serie.keys())
+				    w.writeheader()
+				    w.writerow(serie)
 
-	"""if os.path.isfile("current.txt") : 
-					os.remove("current.txt")"""
+	if os.path.isfile("current.txt") : 
+		os.remove("current.txt")
 
-if __name__ == "__main__" : 
+if __name__ == "__main__" :
 	main(sys.argv[1:])
