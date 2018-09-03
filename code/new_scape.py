@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 #Default paths to get the patient ids 
 dump_path = "../files/query_patient_ids.dcm"
 dump_txt_path = "../files/dump.txt"
-ALLOWED_FILTERS = ["PatientName", "PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName","PatientBirthDate", "StudyInstanceUID", "SeriesInstanceUID"]
+ALLOWED_FILTERS = ["PatientName", "PatientID", "StudyDate", "SeriesDecription", "AcquisitionDate", "ProtocolName","PatientBirthDate", "DeviceSerialNumber" ,"StudyInstanceUID", "SeriesInstanceUID"]
 
 tag_to_attribute ={
 "(0008,0020)" : "StudyDate",
@@ -33,6 +33,7 @@ tag_to_attribute ={
 "(0020,000e)" : "SeriesInstanceUID",
 "(0010,0010)" : "PatientName",
 "(0010,0030)" : "PatientBirthDate"
+"(0018,1000)" : "DeviceSerialNumber"
 }
 
 ########################################################################################################################
@@ -153,7 +154,8 @@ def process_text_files(filename : str) -> list:
 		"StudyInstanceUID" : "",
 		"PatientName" : "",
 		"PatientBirthDate" : "",
-		"SeriesInstanceUID" : ""}
+		"SeriesInstanceUID" : "",
+		"DeviceSerialNumber" : ""}
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)
@@ -328,7 +330,8 @@ def main(argv) :
 	'PatientName': {'type' : 'string', 'maxlength' : 64},
 	'SeriesDecription' : {'type' : 'string', 'maxlength' : 64},
 	'AcquisitionDate' : {'type' : 'string', 'maxlength' : 8},
-	'PatientBirthDate' : {'type' : 'string', 'maxlength' : 8}
+	'PatientBirthDate' : {'type' : 'string', 'maxlength' : 8}, 
+	"DeviceSerialNumber" : {'type' : 'string', 'maxlength' : 64}
 	}
 
 	validator = Validator(schema)
@@ -347,6 +350,7 @@ def main(argv) :
 		STUDYDATE = process_date(tuple_["StudyDate"])
 		PATIENTNAME = process_names(tuple_["PatientName"])
 		PATIENTBIRTHDATE = parse_birth_date(tuple_ ["PatientBirthDate"])
+		DEVICESERIALNUMBER = tuple_["DeviceSerialNumber"]
 		
 		
 
@@ -359,7 +363,8 @@ def main(argv) :
 		'PatientName': PATIENTNAME,
 		'SeriesDecription' : SERIESDESCRIPTION,
 		'AcquisitionDate' : ACQUISITIONDATE,
-		'PatientBirthDate' : PATIENTBIRTHDATE
+		'PatientBirthDate' : PATIENTBIRTHDATE,
+		'DeviceSerialNumber' : DEVICESERIALNUMBER
 		}
 
 		if not validator.validate(inputs) : 
@@ -379,7 +384,8 @@ def main(argv) :
 			ACQUISITIONDATE = ACQUISITIONDATE, 
 			STUDYDATE = STUDYDATE,
 			PATIENTNAME = PATIENTNAME,
-			PATIENTBIRTHDATE = PATIENTBIRTHDATE)
+			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
+			DEVICESERIALNUMBER = DEVICESERIALNUMBER)
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")

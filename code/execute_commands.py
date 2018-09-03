@@ -19,7 +19,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 echo_command = 'echoscu -ll trace {}'
-find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 10,10 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30'
+find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 10,10 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={}'
 find_studies_command = 'findscu -v {} --study -k QueryRetrieveLevel=STUDY --key 0010,0020={} --key 10,10 --key 0020,000d --key 0008,0061 --key 0008,0030 --key 0008,0020={} --key 0020,1206'
 move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
@@ -61,7 +61,8 @@ def find_series(
 	ACQUISITIONDATE : str = "", 
 	PATIENTNAME : str = "",
 	PATIENTBIRTHDATE : str = "",
-	STUDYDATE : str = "") -> str : 
+	STUDYDATE : str = "",
+	DEVICESERIALNUMBER : str = "") -> str : 
 	"""
   	builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
@@ -76,6 +77,7 @@ def find_series(
 		PROTOCOLNAME (string) : protocol name.
 		ACQUISITIONDATE (string) : Acquisition Date.
 		STUDYDATE (string) : Study Date.
+		DEVICESERIALNUMBER (string) : MRI device serial number.
 	Returns : 
 		string : The log lines.
 	"""
@@ -93,7 +95,9 @@ def find_series(
 		PROTOCOLNAME,
 		ACQUISITIONDATE,
 		STUDYDATE, 
-		PATIENTNAME,PATIENTBIRTHDATE)
+		PATIENTNAME,
+		PATIENTBIRTHDATE,
+		DEVICESERIALNUMBER)
 	
 	
 	return run(command)
