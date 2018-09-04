@@ -12,8 +12,6 @@ from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
 import csv
-#from shutil import copyfile
-
 
 
 warnings.filterwarnings("ignore")
@@ -33,7 +31,8 @@ tag_to_attribute ={
 "(0010,0010)" : "PatientName",
 "(0010,0030)" : "PatientBirthDate",
 "(0018,1000)" : "DeviceSerialNumber", 
-"(0008,0022)" : "AcquisitionDate"
+"(0008,0022)" : "AcquisitionDate", 
+"(0008,0008)" : "ImageType"
 }
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
@@ -100,10 +99,6 @@ def get_and_store_patients(
 	check_port(port)
 	check_AET(aec , server = True)
 
-
-	schema = {'PatientID' : {'type' : 'string', 'maxlength' : 64}, 'date' : {'type' : 'string', 'maxlength' : 17}}
-
-
 	#delete patients text file if already exists.
 	if os.path.isfile(text_file) : 
 		os.remove(text_file)
@@ -157,7 +152,8 @@ def process_text_files(filename : str) -> list:
 		"PatientName" : "",
 		"PatientBirthDate" : "",
 		"SeriesInstanceUID" : "",
-		"DeviceSerialNumber" : ""}
+		"DeviceSerialNumber" : "",
+		"ImageType" : ""}
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)
@@ -244,7 +240,14 @@ def check_table(table, allowed_filters : list = ALLOWED_FILTERS) :
 			raise ValueError("Attribute "+ col +" not allowed! Please check the input table's column names.")
 
 	return 
-def parse_birth_date(date) :
+def parse_birth_date(date : str) -> str :
+	"""
+	Parses the patients birth date into format YYYYMMDD.
+	Args : 
+		date (string) : date in format DD.MM.YYYY .
+	Returns : 
+		string : String in YYYYMMMDD format.
+	"""
 	if date == "" : return ""
 	date = date.split(".")
 	return date[2]+date[1]+date[0]
@@ -333,7 +336,8 @@ def main(argv) :
 	'SeriesDecription' : {'type' : 'string', 'maxlength' : 64},
 	'AcquisitionDate' : {'type' : 'string', 'maxlength' : 8},
 	'PatientBirthDate' : {'type' : 'string', 'maxlength' : 8}, 
-	"DeviceSerialNumber" : {'type' : 'string', 'maxlength' : 64}
+	"DeviceSerialNumber" : {'type' : 'string', 'maxlength' : 64},
+	"ImageType" : {'type' : 'string', 'maxlength' : 16}
 	}
 
 	validator = Validator(schema)
@@ -353,6 +357,7 @@ def main(argv) :
 		PATIENTNAME = process_names(tuple_["PatientName"])
 		PATIENTBIRTHDATE = parse_birth_date(tuple_ ["PatientBirthDate"])
 		DEVICESERIALNUMBER = str(tuple_["DeviceSerialNumber"])
+		IMAGETYPE = tuple_["ImageType"]
 		
 		
 
@@ -366,7 +371,8 @@ def main(argv) :
 		'SeriesDecription' : SERIESDESCRIPTION,
 		'AcquisitionDate' : ACQUISITIONDATE,
 		'PatientBirthDate' : PATIENTBIRTHDATE,
-		'DeviceSerialNumber' : DEVICESERIALNUMBER
+		'DeviceSerialNumber' : DEVICESERIALNUMBER,
+		'ImageType' : IMAGETYPE
 		}
 
 
@@ -388,7 +394,8 @@ def main(argv) :
 			STUDYDATE = STUDYDATE,
 			PATIENTNAME = PATIENTNAME,
 			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
-			DEVICESERIALNUMBER = DEVICESERIALNUMBER)
+			DEVICESERIALNUMBER = DEVICESERIALNUMBER,
+			IMAGETYPE = IMAGETYPE)
 
 
 		if os.path.isfile("current.txt") : 
