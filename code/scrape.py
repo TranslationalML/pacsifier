@@ -13,6 +13,7 @@ from typing import Iterator
 from cerberus import Validator
 import csv
 from typing import Dict, Any
+import time
 
 warnings.filterwarnings("ignore")
 
@@ -326,7 +327,7 @@ def main(argv) :
 	attributes_list = parse_table(table , ALLOWED_FILTERS)
 	
 	schema = {
-	'PatientID' : {'type' : 'string', 'maxlength' : 64}, 
+	'PatientID' : {'type' : 'string', 'maxlength' : 64}, #Add more checking to the inputs.
 	'StudyDate' : {'type' : 'string', 'maxlength' : 17},
 	'StudyInstanceUID' : {'type' : 'string', 'maxlength' : 64},
 	'SeriesInstanceUID' : {'type' : 'string', 'maxlength' : 64},
@@ -404,9 +405,12 @@ def main(argv) :
 
 		#Extract all series ids.
 		series = process_text_files("current.txt")
-		
+		k = 0 
 		#loop over series
 		for serie in tqdm(series) :
+			k+=1
+			if k % 50 == 0 : 
+				time.sleep(60)
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 
 			if not os.path.isdir(patient_dir):
