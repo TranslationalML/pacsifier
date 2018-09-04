@@ -125,7 +125,7 @@ def check_tuple(tuple_ : dict) :
 	"""
 	empty = True
 	for item in tuple_.values() : 
-		if '*' in str(item) : 
+		if str(item) == "*" : 
 			raise ValueError("Can't use * for inputs !")
 		if len(str(item)) > 0 : 
 			empty = False

@@ -11,23 +11,26 @@ def infotodict(seqinfo):
     seqitem: run number during scanning
     subindex: sub index within group
     """
-    t1w = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_run-00{item:01d}_T1w')
+    t1w = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_run-00{item:01d}_T1w') # MPRAGE
     func = create_key('sub-{subject}/{session}/func/sub-{subject}_{session}_run-00{item:01d}_func')
     fmap_mag =  create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_magnitude')
     fmap_phase = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_phasediff')
-    dwi = create_key('sub-{subject}/{session}/dwi/sub-{subject}_{session}_run-00{item:01d}_dwi')
+    dwi = create_key('sub-{subject}/{session}/dwi/sub-{subject}_{session}_run-00{item:01d}_dwi') # diffusion weighted imaging == DTI == HARDI == DSI
     t1_map = create_key('sub-{subject}/{session}/t1_map/sub-{subject}_{session}_run-00{item:01d}_t1_map')
     t1 = create_key('sub-{subject}/{session}/t1/sub-{subject}_{session}_run-00{item:01d}_t1')
     t2 = create_key('sub-{subject}/{session}/t2/sub-{subject}_{session}_run-00{item:01d}_t2')
     t2_map = create_key('sub-{subject}/{session}/t2_map/sub-{subject}_{session}_run-00{item:01d}_t2_map')
     other = create_key('sub-{subject}/{session}/other/sub-{subject}_{session}_run-00{item:01d}_other')
+    # ADD FLAIR
 
 
     info = {t1w: [], func: [],  t1_map : [], t2_map : [] , fmap_phase: [], dwi: [], t1 : [], t2:[], other : []}
     
     for idx, s in enumerate(seqinfo):
         
-        if "DTI" in s.series_description or ((s.sequence_name =="*tfl3d1_16ns") and not ('DEV' in s.image_type) and not ('TIV' in s.image_type) and not ('LABELS' in s.image_type)):
+        # check DWI - maybe seq name starts with ep_ ? Ask Yasser
+
+        if "DTI" in s.series_description or (and not ('DEV' in s.image_type) and not ('TIV' in s.image_type) and not ('LABELS' in s.image_type)):
             info[t1w].append(s.series_id)
         
         if (s.sequence_name == '*ep_b0') and not s.is_derived and (s.dim4 > 40) : 
@@ -55,5 +58,5 @@ def infotodict(seqinfo):
             info[t2].append(s.series_id)
         else : 
             info[other].append(s.series_id)
-        print(info)
+        
     return info
