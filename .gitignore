@@ -7,8 +7,10 @@
 /code/fuzz.py
 /.pytest_cache
 /.ipynb_checkpoints
-__pycache__
-/code/__pycache__
+__pycache__/
+/code/__pycache__/
 protocol.csv
 /build
 /data
+/code/current.txt
+/code/__pycache__/

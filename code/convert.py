@@ -35,14 +35,6 @@ def convert(subject : str, session : str , base : str) :
 		base (string) : directory path
 	"""
 
-	"""
-	heudiconv -d /home/localadmin/Téléchargements/data_test_heudiconv/sub-{subject}/ses-{session}/*/* \
-	-o /home/localadmin/Téléchargements/data_test_heudiconv/Nifti/ \
-	-f /home/localadmin/Téléchargements/data_test_heudiconv/Nifti/code/heuristic.py \
-	-s 2936187 -ss 20171013133317 \
-	-c dcm2niix -b --overwrite
-	"""
-
 	#Get the directory where this file is (PACSMANS/code)
 	dirname = os.path.dirname(__file__)
 
@@ -73,11 +65,6 @@ def convert(subject : str, session : str , base : str) :
 	run(command)
 
 	paths = glob(global_path)
-
-	# for i, path in enumerate(paths):
-
-	# 	c3d_command = 'python c3d_nipype.py '+ path  +" "+ os.path.join(base,"Nifti", str(i)+'.nii.gz')
-	# 	teff = run(c3d_command)
 
 def convert_all(base) :
 	"""

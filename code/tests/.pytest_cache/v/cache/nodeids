@@ -3,5 +3,11 @@
   "testing.py::test_find_series_invalid_inputs",
   "testing.py::test_find_study_invalid_inputs",
   "testing.py::test_get_invalid_inputs",
-  "testing.py::test_replace_default_parameters"
+  "testing.py::test_replace_default_parameters",
+  "testing.py::test_modify_query_params",
+  "testing.py::test_get_and_store_patients",
+  "testing.py::test_parse_date",
+  "testing.py::test_process_date",
+  "testing.py::test_parse_birth_date",
+  "testing.py::test_process_text_file"
 ]
