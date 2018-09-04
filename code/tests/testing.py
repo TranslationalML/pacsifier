@@ -75,16 +75,16 @@ def test_find_series_invalid_inputs():
 		find_series("dummyAETdummyAETdummyAET", "19930911")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", server_ip = "128.132.185.16.1")
+		find_series("AET", STUDYDATE = "19930911", server_ip = "128.132.185.16.1")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", server_ip = "128.s132.185.16")
+		find_series("AET",  STUDYDATE = "19930911", server_ip = "128.s132.185.16")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", server_ip = "128.132..16")
+		find_series("AET",  STUDYDATE = "19930911", server_ip = "128.132..16")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", server_ip = "128.132.1855.16")
+		find_series("AET",  STUDYDATE = "19930911", server_ip = "128.132.1855.16")
 def test_find_study_invalid_inputs(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	
@@ -155,12 +155,6 @@ def test_get_invalid_inputs():
 		get("AET", "19930911", SERIESINSTANCEUID = dummy_long_string)
 	
 	with pytest.raises(ValueError) : 
-		get("AET", "19930911", STUDYINSTANCEUID = "")
-	
-	with pytest.raises(ValueError) : 
-		get("AET", "19930911", SERIESINSTANCEUID = "")
-
-	with pytest.raises(ValueError) : 
 		get("dummyAETdummyAETdummyAET", "19930911")
 
 	with pytest.raises(ValueError) : 
@@ -214,7 +208,7 @@ def test_replace_default_parameters() :
 		replace_default_params(PARAMETERS, "AET", "214.54.1.1","",80)
 
 def test_modify_query_params() :
-	scrape_command = "findscu 127.0.0.1 80 -k 0010,0020={} --key 0008,0020={} -aec hello --patient path_to_dump.dcm"
+	scrape_command = "findscu 127.0.0.1 80 -k 0010,0020={} --key 0008,0020={} --key 0008,0030 -aec hello --patient path_to_dump.dcm"
 	dump_query = "dump2dcm path_to_dump_txt.txt path_to_dump.dcm"
 
 	queries = modify_query_parameters(
@@ -305,9 +299,45 @@ def test_process_date() :
 	with pytest.raises(ValueError) : 
 		process_date("2/5/15-2/6/16-2/6/17")
 
-	with pytest.raises(ValueError) : 
-		process_date("")
+	
+	assert process_date("") == ""
 
 	assert process_date("15/2/17-15/2/18") == "20170215-20180215"
 	assert process_date("15/2/17") == "20170215"
 	assert process_date("15/2/99-15/2/18") == "19990215-20180215"
+def test_parse_birth_date() : 
+	###!!!!!!!!!!!!!!!!!! TODO : add imput validation for birth date!!!!!!!!!!!!!!!!!!!!!
+	assert parse_birth_date("15.02.2017") == "20170215"
+	assert parse_birth_date("") == ""
+def test_process_text_file() : 
+	
+	res = [{ 
+	"StudyDate" : "20171020",
+	"StudyTime" : "104457",
+	"SeriesDecription" : "4metas24Gy_PTV18Gy_68min-RTDOSE",
+	"PatientID" : "dummyid",
+	"ProtocolName": "",
+	"StudyInstanceUID" : "1.2.826.0.1.3680043.2.146.2.20.3171184.1700225197.0",
+	"PatientName" : "dummyname",
+	"PatientBirthDate" : "19640417",
+	"SeriesInstanceUID" : "1.2.840.114358.359.1.20171101170336.1838414727465",
+	"ImageType" : ""}, 
+	{"StudyDate" : "20171020",
+	"StudyTime" : "104457",
+	"SeriesDecription" : "4metas24Gy_PTV18Gy_68min",
+	"PatientID" : "dummyid",
+	"ProtocolName": "",
+	"StudyInstanceUID" : "1.2.826.0.1.3680043.2.146.2.20.3171184.170022.173107110677054118",
+	"PatientName" : "dummyname",
+	"PatientBirthDate" : "19640417",
+	"SeriesInstanceUID" : "1.2.840.114358.1230.20171101171003.1",
+	"ImageType" : ""}
+	]
+
+	#Testing all the dictionaries in the list are identical.
+	dict_list =  process_text_files(filename = "test.txt")
+
+	for i, dict_ in enumerate(dict_list) :
+		shared_items = {k: res[i][k] for k in res[i] if k in dict_ and res[i][k] == dict_[k]}
+		assert len(shared_items) == len(res[i])
+		

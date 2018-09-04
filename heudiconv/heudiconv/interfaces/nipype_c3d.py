@@ -38,7 +38,7 @@ class Convert3DSeries(BaseInterface):
         # grab series ID - subprocess.run passed a list takes care of escaping and quoting correctly if dicom_series_dir
         # has weird chars like spaces
         c3d_cmd_1 = "c3d -dicom-series-list %s" % (self.inputs.dicom_series_dir)
-        print(c3d_cmd_1)
+        
         process = subprocess.Popen(c3d_cmd_1, shell = True, stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         proc_stdout = process.communicate()[0].strip()
         # print(proc_stdout)
@@ -57,7 +57,7 @@ class Convert3DSeries(BaseInterface):
         # convert to NIFTI
         c3d_cmd_2 = ['c3d', '-dicom-series-read', self.inputs.dicom_series_dir, dicom_series_id,
                      '-o', self.inputs.out_file]
-        print(c3d_cmd_2)
+        
         c3d_cmd_2_out = subprocess.call(c3d_cmd_2, stdout=subprocess.PIPE)
 
         return runtime
