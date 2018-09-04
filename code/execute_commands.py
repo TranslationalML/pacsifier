@@ -12,14 +12,13 @@ warnings.filterwarnings("ignore")
 
 #Query default parameters
 PATIENTID = '"PAT004"'
-PATIENTID_2, STUDYDESC = '"PAT004"',""
-PATIENTID_3, STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"PAT004"', '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.461"', '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.462"', "../data" 
+STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.461"', '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.462"', "../data" 
 
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 echo_command = 'echoscu -ll trace {}'
-find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 10,10 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={}'
+find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 10,10 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,8={}'
 find_studies_command = 'findscu -v {} --study -k QueryRetrieveLevel=STUDY --key 0010,0020={} --key 10,10 --key 0020,000d --key 0008,0061 --key 0008,0030 --key 0008,0020={} --key 0020,1206'
 move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
@@ -62,7 +61,8 @@ def find_series(
 	PATIENTNAME : str = "",
 	PATIENTBIRTHDATE : str = "",
 	STUDYDATE : str = "",
-	DEVICESERIALNUMBER : str = "") -> str : 
+	DEVICESERIALNUMBER : str = "",
+	IMAGETYPE : str = "") -> str : 
 	"""
   	builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
@@ -78,12 +78,13 @@ def find_series(
 		ACQUISITIONDATE (string) : Acquisition Date.
 		STUDYDATE (string) : Study Date.
 		DEVICESERIALNUMBER (string) : MRI device serial number.
+		IMAGETYPE (string) : Image Type.
 	Returns : 
 		string : The log lines.
 	"""
 
-	#check_ids(PATIENTID)
-	#check_ids(STUDYUID , attribute = "Study instance UID")
+	check_ids(PATIENTID)
+	check_ids(STUDYUID , attribute = "Study instance UID")
 
 	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
 	command = find_series_command.format(
@@ -97,7 +98,8 @@ def find_series(
 		STUDYDATE, 
 		PATIENTNAME,
 		PATIENTBIRTHDATE,
-		DEVICESERIALNUMBER)
+		DEVICESERIALNUMBER,
+		IMAGETYPE)
 	
 	return run(command)
 
