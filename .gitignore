@@ -15,4 +15,6 @@ protocol.csv
 /code/.mypy_cache/3.5
 /code/.pytest_cache
 /code/current.txt
+/code/tests/.pytest_cache
+/code/tests/__pycache__
 /files/mapper.json
