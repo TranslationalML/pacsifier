@@ -70,6 +70,7 @@ def anonymize_all(
 	Returns : 
 		dict : Dictionary keeping track of the new patientIDs and old patientIDs mappings.
 	"""
+
 	#Listing patient files.
 	patients_folders = next(os.walk(datapath))[1]
 
@@ -87,7 +88,8 @@ def anonymize_all(
 
 	return new2old_idx
 
-def main(argv): 
+def main(argv):
+	
 	json_path = argv[0]
 	print("Anonymizing ...")
 

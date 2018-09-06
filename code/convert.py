@@ -66,7 +66,7 @@ def convert(subject : str, session : str , base : str) :
 
 	paths = glob(global_path)
 
-def convert_all(base) :
+def convert_all(base : str) :
 	"""
 	Converts all dicom files within base directory to nifti files
 	Args :

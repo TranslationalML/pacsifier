@@ -46,7 +46,7 @@ def modify_query_parameters(
 	port : int = 104,
 	dump_path_ : str = dump_path,
 	dump_txt_path_ : str = dump_txt_path,
-	aec : str = "theServerAET") -> tuple:
+	aec : str = "theServerAET") -> tuple :
 	"""
 	Modifies the command paramaters such as the dicom server ip, port number and the path to dump the results of the find. 
 	Args : 
@@ -58,6 +58,7 @@ def modify_query_parameters(
 	Returns : 
 		tuple of strings : modified commands using input parameters.
 	"""
+
 	dump_query = "dump2dcm "+ dump_txt_path_+ " " + dump_path_
 	scrape_patients_query = 'findscu '+ server_ip +' '+ str(port) +' -k 0010,0020={} --key 0008,0020={} --key 0008,0030 -aec '+ aec +' --patient ' + dump_path
 	
