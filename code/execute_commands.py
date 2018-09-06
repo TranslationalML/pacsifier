@@ -100,7 +100,7 @@ def find_series(
 		PATIENTBIRTHDATE,
 		DEVICESERIALNUMBER,
 		IMAGETYPE)
-	
+	print(command)
 	return run(command)
 
 def find_study(
