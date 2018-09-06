@@ -9,19 +9,35 @@ import json
 
 def fuzz_date(date, fuzz_parameter = 60): 
 	"""
-	
+	Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
+	Args : 
+		date (string) : date.
+		fuzz_parameter (int) : the parameter by which the date will be fuzzed.
+	Returns : 
+		string : new fuzzed date.
 	"""
+
 	year = int(date[:4])
 	month = int(date[4:6])
 	day = int(date[6:8])
 
+	#Generating random fuzz parameter.
 	fuzz = random.randint(-fuzz_parameter, fuzz_parameter)
 
+	#Processing new date.
 	date = datetime(day = day, month = month, year = year)
 	date = (date + timedelta(days = fuzz)).strftime("%Y%m%d")
 	return date
 
 def anonymize(filename, output_filename, PatientID = "test1", PatientName = "test1"):
+	"""
+	Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
+	Args : 
+		filename (string) : path to dicom image.
+		output_filename (string) : output path of anonymized image. 
+		PatientID (string) : the new patientID after anonymization.
+		PatientName (string) : The new PatientName after anonymization.
+	"""
 	# Load the current dicom file to 'anonymize'
 	dataset = pydicom.read_file(filename)
 
@@ -37,7 +53,16 @@ def anonymize(filename, output_filename, PatientID = "test1", PatientName = "tes
 	dataset.save_as(output_filename)
 
 def anonymize_all(output_folder = ".",datapath = os.path.join("..","data"), subject_dicom_path = os.path.join("ses-*","*","*")):
-	
+		"""
+	Anonymizes all dicom images located at the datapath in the structure specified by subject_dicom_path parameter.
+	Args : 
+		output_folder (string) : path where anonymized images will be located.
+		datapath (string) : The path to the dicom images.
+		subject_dicom_path (string) : the (generic) path to the dicom images starting from the patient folder.
+	Returns : 
+		dict : Dictionary keeping track of the new patientIDs and old patientIDs mappings.
+	"""
+
 	#Listing patient files.
 	patients_folders = next(os.walk(datapath))[1]
 	
