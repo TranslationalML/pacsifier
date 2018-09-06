@@ -327,17 +327,17 @@ def main(argv) :
 	attributes_list = parse_table(table , ALLOWED_FILTERS)
 	
 	schema = {
-	'PatientID' : {'type' : 'string', 'maxlength' : 64}, #Add more checking to the inputs.
-	'StudyDate' : {'type' : 'string', 'maxlength' : 17},
-	'StudyInstanceUID' : {'type' : 'string', 'maxlength' : 64},
+	'PatientID' 		: {'type' : 'string', 'maxlength' : 64}, #Add more checking to the inputs.
+	'StudyDate' 		: {'type' : 'string', 'maxlength' : 17},
+	'StudyInstanceUID' 	: {'type' : 'string', 'maxlength' : 64},
 	'SeriesInstanceUID' : {'type' : 'string', 'maxlength' : 64},
-	'ProtocolName' : {'type' : 'string', 'maxlength' : 64},
-	'PatientName': {'type' : 'string', 'maxlength' : 64},
-	'SeriesDecription' : {'type' : 'string', 'maxlength' : 64},
-	'AcquisitionDate' : {'type' : 'string', 'maxlength' : 8},
-	'PatientBirthDate' : {'type' : 'string', 'maxlength' : 8}, 
-	"DeviceSerialNumber" : {'type' : 'string', 'maxlength' : 64},
-	"ImageType" : {'type' : 'string', 'maxlength' : 16}
+	'ProtocolName' 		: {'type' : 'string', 'maxlength' : 64},
+	'PatientName'		: {'type' : 'string', 'maxlength' : 64},
+	'SeriesDecription' 	: {'type' : 'string', 'maxlength' : 64},
+	'AcquisitionDate' 	: {'type' : 'string', 'maxlength' : 8 },
+	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 }, 
+	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
+	"ImageType" 		: {'type' : 'string', 'maxlength' : 16}
 	}
 
 	validator = Validator(schema)
@@ -362,17 +362,17 @@ def main(argv) :
 		
 
 		inputs = {
-		'PatientID' : PATIENTID, 
-		'StudyDate' : STUDYDATE,
-		'StudyInstanceUID' : STUDYINSTANCEUID,
+		'PatientID' 		: PATIENTID, 
+		'StudyDate' 		: STUDYDATE,
+		'StudyInstanceUID' 	: STUDYINSTANCEUID,
 		'SeriesInstanceUID' : SERIESINSTANCEUID,
-		'ProtocolName' : PROTOCOLNAME,
-		'PatientName': PATIENTNAME,
-		'SeriesDecription' : SERIESDESCRIPTION,
-		'AcquisitionDate' : ACQUISITIONDATE,
-		'PatientBirthDate' : PATIENTBIRTHDATE,
-		'DeviceSerialNumber' : DEVICESERIALNUMBER,
-		'ImageType' : IMAGETYPE
+		'ProtocolName' 		: PROTOCOLNAME,
+		'PatientName'		: PATIENTNAME,
+		'SeriesDecription'  : SERIESDESCRIPTION,
+		'AcquisitionDate' 	: ACQUISITIONDATE,
+		'PatientBirthDate' 	: PATIENTBIRTHDATE,
+		'DeviceSerialNumber': DEVICESERIALNUMBER,
+		'ImageType' 		: IMAGETYPE
 		}
 
 
@@ -405,11 +405,11 @@ def main(argv) :
 
 		#Extract all series ids.
 		series = process_text_files("current.txt")
-		k = 0 
+		counter = 0 
 		#loop over series
 		for serie in tqdm(series) :
-			k+=1
-			if k % 50 == 0 : 
+			counter+=1
+			if counter % 50 == 0 : 
 				time.sleep(60)
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 

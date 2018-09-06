@@ -5,6 +5,7 @@ import sys
 import os
 from tqdm import tqdm
 import random
+import json
 
 def fuzz_date(date, fuzz_parameter = 60): 
     
@@ -33,15 +34,28 @@ def anonymize(filename, output_filename, PatientID = "test1", PatientName = "tes
 	# write the 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 
+def anonymize_all(output_folder = ".",datapath = os.path.join("..","data"), subject_dicom_path = os.path.join("ses-*","*","*")):
+	patients_folders = next(os.walk(datapath))[1]
+	#patient_ids = [patient_folder.split("-")[1].replace(" ","") for patient_folder in patients_folders]
+	old2new_idx = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
+	
+	for patient in tqdm(patients_folders) : 
+		current_path = os.path.join(datapath, patient, subject_dicom_path)
+		files = glob(current_path)
+
+		for file in files:
+			
+			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "FIFISIDKOM")
+		os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]))
+	new2old_idx = {new : old.split("-")[1].replace(" ","") for old, new in old2new_idx.items()}
+	
+	return new2old_idx
 
 def main(argv): 
-	path = argv[0]
+	json_path = argv[0]
 	print("Anonymizing ...")
-	files = glob(os.path.join(path,'*'))
-
-	for file in tqdm(files) : 
-		
-		anonymize(file, file)
-
+	mapper = anonymize_all()
+	with open(os.path.join(json_path,'mapper.json'), 'w') as fp:
+		json.dump(mapper, fp)
 if __name__ == "__main__" : 
 	main(sys.argv[1:])
