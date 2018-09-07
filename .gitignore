@@ -18,3 +18,4 @@ protocol.csv
 /code/tests/.pytest_cache
 /code/tests/__pycache__
 /files/mapper.json
+/files/schizo.csv

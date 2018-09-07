@@ -17,41 +17,19 @@ STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"1.2.276.0.7230010.3.1.4.20324036
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
-echo_command = 'echoscu -ll trace {}'
-find_series_command= 'findscu -v {} --study -k QueryRetrieveLevel=SERIES -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,8={}'
-find_studies_command = 'findscu -v {} --study -k QueryRetrieveLevel=STUDY --key 0010,0020={} --key 10,10 --key 0020,000d --key 0008,0061 --key 0008,0030 --key 0008,0020={} --key 0020,1206'
+find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,8={}'
 move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
 ######################################################################################################################## 
 ########################################################FUNCTIONS#######################################################
 ########################################################################################################################
 
-def echo(
-	AET : str,
-	server_ip : str = "88.202.185.144",
-	server_AET : str = "theServerAET",
-	port : int = 104) -> str: 
-	"""
-	Builds a command line string for echoscu using the parameters passed as arguments.
-	Args : 
-		AET (string) : Called AET
-		server_ip (string) : server ip
-		server_AET (string) : server_AET
-		port (int) : port 
-	Returns : 
-		string : The log lines.
-	"""
-
-	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
-	command = echo_command.format(modified_params)
-
-	return run(command)
-
-def find_series(
+def find(
 	AET : str,
 	server_ip : str = "88.202.185.144",
 	server_AET : str = "theServerAET",
 	port : int = 104, 
+	QUERYRETRIVELEVEL : str = "SERIES",
 	PATIENTID : str = "",
 	STUDYUID : str = "",
 	SERIESINSTANCEUID : str ="",
@@ -64,7 +42,7 @@ def find_series(
 	DEVICESERIALNUMBER : str = "",
 	IMAGETYPE : str = "") -> str : 
 	"""
-  	builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
+  	Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
 		AET (string) : Called AET
 		server_ip (string) : server ip
@@ -87,8 +65,9 @@ def find_series(
 	check_ids(STUDYUID , attribute = "Study instance UID")
 
 	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
-	command = find_series_command.format(
+	command = find_command.format(
 		modified_params,
+		QUERYRETRIVELEVEL,
 		PATIENTID,
 		STUDYUID,
 		SERIESINSTANCEUID,
@@ -100,32 +79,6 @@ def find_series(
 		PATIENTBIRTHDATE,
 		DEVICESERIALNUMBER,
 		IMAGETYPE)
-	print(command)
-	return run(command)
-
-def find_study(
-	AET : str,
-	date : str,
-	server_ip : str = "88.202.185.144",
-	server_AET : str = "theServerAET",
-	port : int = 104, 
-	PATIENTID : str = PATIENTID) -> str:
-	"""
-	builds a query for findscu of QueryRetrieveLevel of study using the parameters passed as arguments.
-	Args : 
-		AET (string) : Called AET
-		server_ip (string) : server ip
-		server_AET (string) : server_AET
-		port (int) : port 
-		PATIENTID (string) : patient id 
-		STUDYDESC (string) : Study description.
-	Returns : 
-		string : The log lines.
-	"""
-	
-	check_ids(PATIENTID)
-	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
-	command = find_studies_command.format(modified_params, PATIENTID, date)
 	
 	return run(command)
 
@@ -142,7 +95,7 @@ def get(
 	move_port : int = 4006,
 	OUTDIR : str  = OUTDIR) -> str:
 	"""
-	builds a query for movescu.
+	Builds a query for movescu.
 	Args : 
 		AET (string) : Called AET
 		server_ip (string) : server ip
