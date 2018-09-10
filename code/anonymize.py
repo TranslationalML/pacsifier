@@ -48,6 +48,15 @@ def anonymize(
 
 	dataset.PatientID = PatientID
 	dataset.PatientName = PatientName
+	dataset.InstitutionAddress = "Address"
+	dataset.ReferringPhysicianTelephoneNumbers = ""
+	dataset.PatientTelephoneNumbers = ""
+	dataset.PersonTelephoneNumbers = ""
+	dataset.OrderCallbackPhoneNumber = ""
+	age = dataset.PatientAge
+
+	if int(age[:3]) > 89 : 
+		dataset.PatientAge = "90+Y"
 
 	# Same as above but for blanking data elements that are type 2.
 	for name in ['PatientBirthDate']:

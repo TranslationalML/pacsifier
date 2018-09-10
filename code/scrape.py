@@ -221,7 +221,7 @@ def main(argv):
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
 		SERIESDESCRIPTION = tuple_["SeriesDecription"] 
 		PROTOCOLNAME = tuple_["ProtocolName"]
-		ACQUISITIONDATE = tuple_["AcquisitionDate"]
+		ACQUISITIONDATE = str(tuple_["AcquisitionDate"])
 		STUDYDATE = str(tuple_["StudyDate"])
 		PATIENTNAME = process_names(tuple_["PatientName"])
 		PATIENTBIRTHDATE = str(tuple_ ["PatientBirthDate"])
