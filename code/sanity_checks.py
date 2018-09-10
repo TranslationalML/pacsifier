@@ -60,40 +60,10 @@ def check_parameters_inputs(
 		server_AET (string) : server_AET
 		port (int) : port 
 	"""
-
-	
 	check_AET(AET)
 	check_AET(server_AET, server = True)
 	check_port(port)
 	check_ip(server_ip)
-
-	return
-
-def check_dates(date : str) :
-	"""
-  	Checks if a date is valid. Raises a ValueError if not the case.
-  	Args : 
-		date (string) : date
-	"""
-	if date == "" : return
-	message = "Invalid date input" 
-	
-	splitted_date = date.split("/")
-
-	for split in splitted_date : 
-		try : 
-			int(split)
-		except ValueError : 
-			raise ValueError(message)
-	
-	if(len(splitted_date) != 3 
-		or int(splitted_date[1]) > 12 
-		or int(splitted_date[1]) < 1 
-		or int(splitted_date[0]) < 1 
-		or int(splitted_date[0]) > 31 
-		or int(splitted_date[2]) < 0
-		or int(splitted_date[2]) > 99): 
-		raise ValueError(message)
 
 	return
 
@@ -131,3 +101,44 @@ def check_tuple(tuple_ : dict) :
 			empty = False
 
 	if empty : raise ValueError("Empty line in table ! ")
+
+def check_date_range(date : str):
+	"""
+	Checks that a date (possibly a date range) is valid.
+	Args : 
+		date : date or date range to be checked.
+	"""
+	if date == "" : return 
+	if len(date) == 17: 
+		if date.split("-") != 2 : 
+			raise ValueError("Invalid date  input!")
+		dates = date.split("-")
+
+		check_date(dates[0])
+		check_date(dates[1])
+	else : check_date(date)
+	return
+
+def check_date(date : str):
+	"""
+	Checks that a date is valid.
+	Args : 
+		date : date to be checked.
+	"""
+
+	if date == "" : return
+	if len(date) != 8 : 
+		raise ValueError("Invalid date input")
+	try : 
+		int(date)
+	except ValueError : 
+		raise ValueError("Date must contain only numeric characters!")
+	year, month, day = int(date[:4]), int(date[4:6]), int(date[6:])
+
+	if year < 1900 or year > datetime.now().year : 
+		raise ValueError("Invalid year range!")
+	if month not in range(1,13) : 
+		raise ValueError("Invalid month range!")
+	if day not in range(1,32) : 
+		raise ValueError("Invalid day value!")
+	return

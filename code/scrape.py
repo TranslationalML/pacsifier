@@ -7,7 +7,7 @@ import os
 import warnings
 from pandas import read_csv
 import json
-from sanity_checks import check_ids, check_dates, check_ip, check_port, check_AET, check_tuple
+from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple
 from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
@@ -102,57 +102,10 @@ def process_text_files(filename : str) -> list:
 				#In case line.split gives a list of length less that 4 pass to next line.
 				except IndexError : pass
 
-				
-
 				if item == "(no" : continue
 				output_dict[tag_to_attribute[tag]] = item
 		
 	return id_table
-
-
-def parse_date(date : str) -> str : 
-	"""
-	Transforms a date passed as an argument to a date in format YYYYMMDD exaacly like the VR DA.
-	Args : 
-		date (string) : date in format dd/mm/yy (yy : two last digits of year)
-	Returns : 
-		list : parsed dates.
-	"""
-
-	check_dates(date)
-	addition = "20"
-	splitted = date.split("/")
-	if int(splitted[2]) > datetime.now().year % 100 : 
-		addition = "19"
-
-	if len(splitted[0]) == 1 : splitted[0] = "0" + splitted[0]
-	if len(splitted[1]) == 1 : splitted[1] = "0" + splitted[1]
-	
-	return addition + splitted[2] + splitted[1] + splitted[0]
-
-
-def process_date(date : str) -> str : 
-	"""
-	Process a date according to its format (a simple date or a date range)
-	Args : 
-		date (string) : date or date range in format dd/mm/yy or dd/mm/yy-dd/mm/yy
-	Returns : 
-		string : processed date/date range.
-	"""
-	if date == "" : return ""
-	#Case a date range was passed
-	if len(str(date).split("-")) == 2 :
-		dates = date.split("-")
-		dates = [parse_date(dat) for dat in dates]
-		return dates[0]+"-"+dates[1]
-	
-	#Case of a single date (not a date range)
-	elif len(str(date).split("-")) == 1 :
-		return parse_date(date) 
-	
-	#Otherwise raise an error.
-	else : 
-		raise ValueError("Invalid date input!")
 
 def check_table(table, allowed_filters : list = ALLOWED_FILTERS) : 
 	"""
@@ -167,18 +120,7 @@ def check_table(table, allowed_filters : list = ALLOWED_FILTERS) :
 			raise ValueError("Attribute "+ col +" not allowed! Please check the input table's column names.")
 
 	return 
-def parse_birth_date(date : str) -> str :
-	"""
-	Parses the patients birth date into format YYYYMMDD.
-	Args : 
-		date (string) : date in format DD.MM.YYYY .
-	Returns : 
-		string : String in YYYYMMMDD format.
-	"""
-	if date == "" : return ""
-	splitted_date = date.split(".")
-	date_ret = splitted_date[2]+splitted_date[1]+splitted_date[0]
-	return date_ret
+
 
 def parse_table(table, allowed_filters) :
 	"""
@@ -191,7 +133,7 @@ def parse_table(table, allowed_filters) :
 			   In case an attribute has no corresponding column in the csv table, an empty string is given. 
 	"""
 	attributes_list = []
-	for idx in table.index : 
+	for idx in table.index :
 		
 		#Initializing item dictionary.
 		filter_dictionary= {filter_ : "" for filter_ in allowed_filters}
@@ -203,7 +145,7 @@ def parse_table(table, allowed_filters) :
 
 	return attributes_list
 
-def process_names(name) : 
+def process_names(name : str) : 
 	"""
 	Processing name to be the input of the query. 
 	Args : 
@@ -214,17 +156,16 @@ def process_names(name) :
 	splitted_name = name.upper().split(" ")
 	new_name = "*"+ "^" +"*"+ splitted_name[-1]+"*"
 	return new_name
+
 ########################################################################################################################
 ##########################################################MAIN##########################################################
 ########################################################################################################################
 
-
-def main(argv) : 
+def main(argv):
 	
 	#Reading config file.
 	with open('../files/config.json') as f:
 		parameters = json.load(f)
-
 
 	pacs_server = parameters["server_ip"] 
 	port = int(parameters["port"])
@@ -255,7 +196,7 @@ def main(argv) :
 	attributes_list = parse_table(table , ALLOWED_FILTERS)
 	
 	schema = {
-	'PatientID' 		: {'type' : 'string', 'maxlength' : 64}, #Add more checking to the inputs.
+	'PatientID' 		: {'type' : 'string', 'maxlength' : 64},
 	'StudyDate' 		: {'type' : 'string', 'maxlength' : 17},
 	'StudyInstanceUID' 	: {'type' : 'string', 'maxlength' : 64},
 	'SeriesInstanceUID' : {'type' : 'string', 'maxlength' : 64},
@@ -286,8 +227,6 @@ def main(argv) :
 		PATIENTBIRTHDATE = str(tuple_ ["PatientBirthDate"])
 		DEVICESERIALNUMBER = str(tuple_["DeviceSerialNumber"])
 		IMAGETYPE = tuple_["ImageType"]
-		
-		
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
@@ -303,9 +242,13 @@ def main(argv) :
 		'ImageType' 		: IMAGETYPE
 		}
 
-
 		if not validator.validate(inputs) : 
 			raise ValueError("Invalid input file element at position "+ str(i) + " " + str(validator.errors))
+
+		check_date_range(STUDYDATE)
+		check_date_range(ACQUISITIONDATE)
+		check_date(PATIENTBIRTHDATE)
+
 
 		#Look for series of current patient and current study.
 		find_series_res = find(
@@ -324,7 +267,6 @@ def main(argv) :
 			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
 			DEVICESERIALNUMBER = DEVICESERIALNUMBER,
 			IMAGETYPE = IMAGETYPE)
-
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")
@@ -348,14 +290,12 @@ def main(argv) :
 
 			if not os.path.isdir(patient_study_output_dir):
 				os.mkdir(patient_study_output_dir)
-
 			
 			patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie["SeriesDecription"])
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir):
 				os.mkdir(patient_serie_output_dir)
-
 		 
 			#Retrieving files of current patient, study and serie.
 			if save :

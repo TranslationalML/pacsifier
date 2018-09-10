@@ -2,7 +2,7 @@
 from datetime import date
 import os
 import warnings
-from sanity_checks import check_parameters_inputs, check_ids, check_dates, check_port
+from sanity_checks import check_parameters_inputs, check_ids, check_port
 import shlex
 import subprocess
 from typing import List, Dict, Tuple
@@ -182,7 +182,6 @@ def run(query: str) -> str:
     Returns : 
     	string : The log lines.
     """
-
     try : 
     	cmd = shlex.split(query)
     except ValueError : 
