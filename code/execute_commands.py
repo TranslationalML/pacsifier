@@ -60,10 +60,11 @@ def find(
 	Returns : 
 		string : The log lines.
 	"""
-
 	check_ids(PATIENTID)
 	check_ids(STUDYUID , attribute = "Study instance UID")
-
+	check_ids(SERIESINSTANCEUID, attribute = "Series instance UID")
+	check_port(port)
+	
 	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
 	command = find_command.format(
 		modified_params,
@@ -108,7 +109,6 @@ def get(
 	Returns : 
 		string : The log lines.
 	"""
-
 	check_ids(PATIENTID)
 	check_ids(SERIESINSTANCEUID, attribute = "Series instance UID")
 	check_ids(STUDYINSTANCEUID, attribute = "Study instance UID")

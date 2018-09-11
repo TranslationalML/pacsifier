@@ -5,124 +5,50 @@ from execute_commands import *
 from scrape import *
 from sanity_checks import *
 import pytest
+from anonymize import *
 
-
-def test_echo_invalid_inputs():
-	with pytest.raises(ValueError):
-		echo("")
-	with pytest.raises(ValueError):
-		echo("AET", port = 0)
-	with pytest.raises(ValueError):
-		echo("AET", port = 65536)
-	with pytest.raises(ValueError): 
-		echo("AET", port = 0)
-
-	with pytest.raises(ValueError):
-		echo("AET",server_AET = "dummyserverAETdummyserverAETdummyserverAET")
-
-	with pytest.raises(ValueError):
-		echo("AET",server_AET = "")
-
-	with pytest.raises(ValueError):
-		echo("dummyAETdummyAETdummyAET")
-
-	with pytest.raises(ValueError):
-		echo("AET", server_AET = "")
-
-	with pytest.raises(ValueError):
-		echo("AET", server_ip = "128.132.185.16.1")
-
-	with pytest.raises(ValueError):
-		echo("AET", server_ip = "128.s132.185.16")
-
-	with pytest.raises(ValueError):
-		echo("AET",server_ip = "128.132..16")
-
-	with pytest.raises(ValueError):
-		echo("AET", server_ip = "128.132.1855.16")
-
-	with pytest.raises(ValueError):
-		echo("AET", server_ip = "California Dreaming")
-
-def test_find_series_invalid_inputs(): 
+def test_find_invalid_inputs(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	
 	with pytest.raises(ValueError):
-		find_series("", "19930911")
+		find("", "19930911")
 
 	with pytest.raises(ValueError):
-		find_series("AET", "19930911", port = 0)
+		find("AET", "19930911", port = 0)
 
 	with pytest.raises(ValueError):
-		find_series("AET", "19930911", port = 65536)
+		find("AET", "19930911", port = 65536)
 
 	with pytest.raises(ValueError):
-		find_series("AET", "19930911", port = 0)
+		find("AET", "19930911", port = 0)
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", PATIENTID = dummy_long_string )
+		find("AET", "19930911", PATIENTID = dummy_long_string )
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", STUDYUID = dummy_long_string ,PATIENTID = "PAT004" )
+		find("AET", "19930911", STUDYUID = dummy_long_string ,PATIENTID = "PAT004" )
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", server_AET = "dummyserverAETdummyserverAETdummyserverAET")
+		find("AET", "19930911", server_AET = "dummyserverAETdummyserverAETdummyserverAET")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", "19930911", server_AET = "")
+		find("AET", "19930911", server_AET = "")
 
 	with pytest.raises(ValueError) : 
-		find_series("dummyAETdummyAETdummyAET", "19930911")
+		find("dummyAETdummyAETdummyAET", "19930911")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET", STUDYDATE = "19930911", server_ip = "128.132.185.16.1")
+		find("AET", STUDYDATE = "19930911", server_ip = "128.132.185.16.1")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET",  STUDYDATE = "19930911", server_ip = "128.s132.185.16")
+		find("AET",  STUDYDATE = "19930911", server_ip = "128.s132.185.16")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET",  STUDYDATE = "19930911", server_ip = "128.132..16")
+		find("AET",  STUDYDATE = "19930911", server_ip = "128.132..16")
 
 	with pytest.raises(ValueError) : 
-		find_series("AET",  STUDYDATE = "19930911", server_ip = "128.132.1855.16")
-def test_find_study_invalid_inputs(): 
-	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	
-	with pytest.raises(ValueError):
-		find_study("", "19930911")
+		find("AET",  STUDYDATE = "19930911", server_ip = "128.132.1855.16")
 
-	with pytest.raises(ValueError): 
-		find_study("AET", "19930911", port = 0)
-
-	with pytest.raises(ValueError): 
-		find_study("AET", "19930911", port = 65536)
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", port = 0)
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", PATIENTID = dummy_long_string )
-	
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", server_AET = "dummyserverAETdummyserverAETdummyserverAET")
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", server_AET = "")
-
-	with pytest.raises(ValueError) : 
-		find_study("dummyAETdummyAETdummyAET", "19930911")
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", server_ip = "128.132.185.16.1")
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", server_ip = "128.s132.185.16")
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", server_ip = "128.132..16")
-
-	with pytest.raises(ValueError) : 
-		find_study("AET", "19930911", server_ip = "128.132.1855.16")
 
 def test_get_invalid_inputs(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -207,108 +133,7 @@ def test_replace_default_parameters() :
 	with pytest.raises(ValueError) : 
 		replace_default_params(PARAMETERS, "AET", "214.54.1.1","",80)
 
-def test_modify_query_params() :
-	scrape_command = "findscu 127.0.0.1 80 -k 0010,0020={} --key 0008,0020={} --key 0008,0030 -aec hello --patient path_to_dump.dcm"
-	dump_query = "dump2dcm path_to_dump_txt.txt path_to_dump.dcm"
 
-	queries = modify_query_parameters(
-		server_ip = "127.0.0.1", 
-		port = 80,
-		dump_path_ = "path_to_dump.dcm",
-		dump_txt_path_ = "path_to_dump_txt.txt", 
-		aec = "hello" )
-	
-	assert queries[0] == dump_query
-	assert queries[1] == scrape_command
-
-def test_get_and_store_patients(): 
-	
-	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	
-	with pytest.raises(ValueError) :
-		get_and_store_patients([dummy_long_string], dates = ["20150625"])
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "127.0.0.1", port = -1)
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "127.0.0.1", port = 65536)
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "127.0.0554.1")
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "California Dreaming")
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "124.20.564.45.45")
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "214..54.454")
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "214.54.1")
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], server_ip = "214.54.a.1")
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], aec = dummy_long_string)
-
-	with pytest.raises(ValueError) : 
-		get_and_store_patients(["NormalID"], dates = ["20150625"], aec = "")
-
-def test_parse_date() : 
-	with pytest.raises(ValueError) : 
-		parse_date("12/08/171")
-
-	with pytest.raises(ValueError) : 
-		parse_date("12/08/")
-
-	with pytest.raises(ValueError) : 
-		parse_date("12/13/17")
-
-	with pytest.raises(ValueError) : 
-		parse_date("40/11/17")
-
-	with pytest.raises(ValueError) : 
-		parse_date("12//17")
-
-	with pytest.raises(ValueError) : 
-		parse_date("hihi/1/17")
-
-	with pytest.raises(ValueError) : 
-		parse_date("12/1/-2")
-
-	with pytest.raises(ValueError) : 
-		parse_date("Hello")
-
-	with pytest.raises(ValueError) : 
-		parse_date("1/2")
-
-	assert parse_date("12/2/99") == "19990212"
-	assert parse_date("12/2/12") == "20120212"
-
-def test_process_date() : 
-	with pytest.raises(ValueError) : 
-		process_date("Not a date")
-
-	with pytest.raises(ValueError) : 
-		process_date("Not-date")
-
-	with pytest.raises(ValueError) : 
-		process_date("2/5/15-2/6/16-2/6/17")
-
-	
-	assert process_date("") == ""
-
-	assert process_date("15/2/17-15/2/18") == "20170215-20180215"
-	assert process_date("15/2/17") == "20170215"
-	assert process_date("15/2/99-15/2/18") == "19990215-20180215"
-def test_parse_birth_date() : 
-	###!!!!!!!!!!!!!!!!!! TODO : add imput validation for birth date!!!!!!!!!!!!!!!!!!!!!
-	assert parse_birth_date("15.02.2017") == "20170215"
-	assert parse_birth_date("") == ""
 def test_process_text_file() : 
 	
 	res = [{ 
@@ -340,4 +165,147 @@ def test_process_text_file() :
 	for i, dict_ in enumerate(dict_list) :
 		shared_items = {k: res[i][k] for k in res[i] if k in dict_ and res[i][k] == dict_[k]}
 		assert len(shared_items) == len(res[i])
-		
+
+def test_check_table() : 
+
+	table = read_csv("test.csv").fillna("")
+	with pytest.raises(ValueError) :
+		check_table(table)
+	valid_table = read_csv("valid.csv").fillna("")
+	assert check_table(valid_table) == None
+
+def test_parse_table() : 
+
+	table = read_csv("valid.csv")
+	parsed_table = parse_table(table)
+
+	expected = [{'DeviceSerialNumber': '',
+	'ProtocolName': '', 
+	'StudyInstanceUID': '',
+	'SeriesInstanceUID': '',
+	'PatientBirthDate': '',
+	'PatientID': 125,
+	'StudyTime': '',
+	'AcquisitionDate': '',
+	'SeriesDecription': '',
+	'PatientName': '',
+	'StudyDate': 20170814,
+	'ImageType': ''}]
+
+	for i, dict_ in enumerate(parsed_table) :
+		shared_items = {k: expected[i][k] for k in expected[i] if k in dict_ and expected[i][k] == dict_[k]}
+		assert len(shared_items) == len(expected[i])
+
+def test_fuzz_date():
+	
+	fuzzed = fuzz_date("20180911", fuzz_parameter = 2)
+	assert fuzzed in ["20180910", "20180909", "20180911", "20180912", "20180913"]
+	with pytest.raises(ValueError):
+		fuzz_date("20180911",fuzz_parameter = random.randint(-10000,0))
+
+def test_sanity_checks(): 
+	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	with pytest.raises(ValueError):
+		check_ip("California Dreaming")
+
+	with pytest.raises(ValueError): 
+		check_ip("128.132.185.16.1")
+
+	with pytest.raises(ValueError): 
+		check_ip("128.s132.185.16")
+
+	with pytest.raises(ValueError): 
+		check_ip("128.132..16")
+
+	with pytest.raises(ValueError): 
+		check_ip("128.132.1855.16")
+
+	with pytest.raises(ValueError): 
+		check_ip("124.20.564.45.45")
+
+	with pytest.raises(ValueError):
+		check_port(14785425)
+	
+	with pytest.raises(ValueError):
+		check_port(-2)
+
+	with pytest.raises(ValueError):
+		check_AET(dummy_long_string)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs(dummy_long_string, "1.1.1.1","Hello", 80)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("hello", "1.1.1.1",dummy_long_string, 80)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("AET", "1.1.1.1","Hello", -80)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("AET", "1.1.1.1","Hello", 100000000)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("hello", "1.1.1.1.","teff", 80)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("hello", "1.1s.1.1","teff", 80)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("hello", "1..1.1","teff", 80)
+
+	with pytest.raises(ValueError):
+		check_parameters_inputs("hello", "California Dreaming","teff", 80)
+
+	with pytest.raises(ValueError):
+		check_ids(dummy_long_string)
+
+	with pytest.raises(ValueError):
+		check_filter("hello")
+
+	with pytest.raises(ValueError):
+		check_tuple({"shrek" : "*" , "is" : 1, "love" : 2, "shrek is" : 3 , "life" : 4})
+
+	with pytest.raises(ValueError):
+		check_tuple({"shrek" : "" , "is" : "", "love" : "", "shrek is" : "" , "life" : ""})
+
+
+	with pytest.raises(ValueError):
+		check_date("18930402")
+
+	with pytest.raises(ValueError):
+		check_date("19934402")
+	
+	with pytest.raises(ValueError):
+		check_date("19930472")
+
+	with pytest.raises(ValueError):
+		check_date("189304029")
+
+	with pytest.raises(ValueError):
+		check_date("1804029")
+
+	with pytest.raises(ValueError):
+		check_date("dakdjak")
+
+	assert check_date("") == None
+	assert check_date("20180825") == None
+	assert check_date_range("") == None
+	assert check_date_range("20180825") == None
+
+	with pytest.raises(ValueError):
+		check_date_range("18930402-20180722")
+
+	with pytest.raises(ValueError):
+		check_date_range("19930825-19934402")
+	
+	with pytest.raises(ValueError):
+		check_date_range("19930825-19930472")
+
+	with pytest.raises(ValueError):
+		check_date_range("19930825-189304029")
+
+	with pytest.raises(ValueError):
+		check_date_range("19930825-1804029")
+
+	with pytest.raises(ValueError):
+		check_date_range("19930825-dakdjak")
