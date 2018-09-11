@@ -17,6 +17,8 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 	Returns : 
 		string : new fuzzed date.
 	"""
+	if fuzz_parameter <= 0 : 
+		raise ValueError("Fuzz parameter must be strictly positive!")
 
 	year = int(date[:4])
 	month = int(date[4:6])
@@ -44,6 +46,7 @@ def anonymize(
 		PatientName (string) : The new PatientName after anonymization.
 	"""
 	# Load the current dicom file to 'anonymize'
+	
 	dataset = pydicom.read_file(filename)
 
 	dataset.PatientID = PatientID
@@ -54,6 +57,8 @@ def anonymize(
 	dataset.PersonTelephoneNumbers = ""
 	dataset.OrderCallbackPhoneNumber = ""
 	age = dataset.PatientAge
+	studyUID = dataset.StudyInstanceUID
+	dataset.StudyInstanceUID = studyUID.replace(old_id , dataset.PatientID)
 
 	if int(age[:3]) > 89 : 
 		dataset.PatientAge = "90+Y"
@@ -63,7 +68,7 @@ def anonymize(
 	    if name in dataset:
 	        dataset.data_element(name).value = fuzz_date(dataset.data_element(name).value)
 	        
-	# write the 'anonymized' DICOM out under the new filename
+	# write thoutput_foldere 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 
 def anonymize_all(
@@ -91,7 +96,7 @@ def anonymize_all(
 
 		for file in files:
 			
-			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "FIFISIDKOM")
+			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
 		os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-anony-"+old2new_idx[patient]))
 	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 
@@ -100,10 +105,12 @@ def anonymize_all(
 def main(argv):
 	
 	json_path = argv[0]
+	data_path = argv[1]
+
 	print("Anonymizing ...")
 
 	#Anonymizing all files.
-	mapper = anonymize_all()
+	mapper = anonymize_all(output_folder = data_path, datapath = data_path)
 
 	#dumping new ids to a json file.
 	with open(os.path.join(json_path,'mapper.json'), 'w') as fp:

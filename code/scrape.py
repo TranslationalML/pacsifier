@@ -122,7 +122,7 @@ def check_table(table, allowed_filters : list = ALLOWED_FILTERS) :
 	return 
 
 
-def parse_table(table, allowed_filters) :
+def parse_table(table , allowed_filters : list = ALLOWED_FILTERS) -> list :
 	"""
 	Takes the table passed as script input and parse it using its attributes in the query/retrieve command.
 	Args : 
@@ -145,7 +145,7 @@ def parse_table(table, allowed_filters) :
 
 	return attributes_list
 
-def process_names(name : str) : 
+def process_names(name : str) -> str : 
 	"""
 	Processing name to be the input of the query. 
 	Args : 
@@ -211,7 +211,7 @@ def main(argv):
 
 	validator = Validator(schema)
 
-	for i, tuple_ in enumerate(attributes_list) : 
+	for i, tuple_ in enumerate(attributes_list):
 		
 		print("Retrieving images for subject number ", i)
 		

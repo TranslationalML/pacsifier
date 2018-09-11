@@ -54,9 +54,9 @@ def infotodict(seqinfo):
         if "t1" in s.protocol_name.lower() : 
             info[t1].append(s.series_id)
 
-        if "t2" in s.protocol_name.lower() : 
+        if "t2" in s.protocol_name.lower():
             info[t2].append(s.series_id)
-        else : 
+        else :
             info[other].append(s.series_id)
         
     return info
