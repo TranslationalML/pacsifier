@@ -48,7 +48,7 @@ def anonymize(
 	# Load the current dicom file to 'anonymize'
 	
 	dataset = pydicom.read_file(filename)
-
+	old_id = dataset.PatientID
 	dataset.PatientID = PatientID
 	dataset.PatientName = PatientName
 	dataset.InstitutionAddress = "Address"
@@ -58,7 +58,7 @@ def anonymize(
 	dataset.OrderCallbackPhoneNumber = ""
 	age = dataset.PatientAge
 	studyUID = dataset.StudyInstanceUID
-	dataset.StudyInstanceUID = studyUID.replace(old_id , dataset.PatientID)
+	dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
 
 	if int(age[:3]) > 89 : 
 		dataset.PatientAge = "90+Y"
@@ -68,7 +68,7 @@ def anonymize(
 	    if name in dataset:
 	        dataset.data_element(name).value = fuzz_date(dataset.data_element(name).value)
 	        
-	# write thoutput_foldere 'anonymized' DICOM out under the new filename
+	# write the 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 
 def anonymize_all(

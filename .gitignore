@@ -19,3 +19,4 @@ protocol.csv
 /code/tests/__pycache__
 /files/mapper.json
 /files/schizo.csv
+/code/sghipt.py
