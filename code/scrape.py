@@ -205,8 +205,8 @@ def main(argv):
 	'SeriesDecription' 	: {'type' : 'string', 'maxlength' : 64},
 	'AcquisitionDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 }, 
-	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
-	"ImageType" 		: {'type' : 'string', 'maxlength' : 16}
+	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64}
+	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16}
 	}
 
 	validator = Validator(schema)
@@ -238,8 +238,8 @@ def main(argv):
 		'SeriesDecription'  : SERIESDESCRIPTION,
 		'AcquisitionDate' 	: ACQUISITIONDATE,
 		'PatientBirthDate' 	: PATIENTBIRTHDATE,
-		'DeviceSerialNumber': DEVICESERIALNUMBER,
-		'ImageType' 		: IMAGETYPE
+		'DeviceSerialNumber': DEVICESERIALNUMBER
+		#'ImageType' 		: IMAGETYPE
 		}
 
 		if not validator.validate(inputs) : 
@@ -249,6 +249,9 @@ def main(argv):
 		check_date_range(ACQUISITIONDATE)
 		check_date(PATIENTBIRTHDATE)
 
+		QUERYRETRIVELEVEL = "SERIES"
+		if IMAGETYPE != "":
+			QUERYRETRIVELEVEL = "IMAGE"
 
 		#Look for series of current patient and current study.
 		find_series_res = find(
@@ -256,6 +259,7 @@ def main(argv):
 			server_ip = pacs_server,
 			server_AET = calling_aet,
 			port = port,
+			QUERYRETRIVELEVEL = QUERYRETRIVELEVEL,
 			PATIENTID = PATIENTID,
 			STUDYUID = STUDYINSTANCEUID,
 			SERIESINSTANCEUID = SERIESINSTANCEUID,
