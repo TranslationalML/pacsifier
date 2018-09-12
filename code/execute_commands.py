@@ -174,7 +174,7 @@ def replace_default_params(
 		"88.202.185.144", server_ip).replace(
 		"MY_AET",AET)
 
-def run(query: str) -> str:
+def run(query : str) -> str:
     """
     Runs a the command passed as parameter. 
     Args:
@@ -184,9 +184,8 @@ def run(query: str) -> str:
     """
     try : 
     	cmd = shlex.split(query)
-    except ValueError : 
-    	
-    	exit()
+    except ValueError : exit()
+    
     completed = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     lines = completed.stderr.decode('latin1').splitlines()
     lines = [line.replace('\x00', '') for line in lines]
