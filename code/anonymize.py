@@ -45,9 +45,11 @@ def anonymize(
 		PatientID (string) : the new patientID after anonymization.
 		PatientName (string) : The new PatientName after anonymization.
 	"""
+
 	# Load the current dicom file to 'anonymize'
-	
 	dataset = pydicom.read_file(filename)
+
+	#Update attributes to make it anonymous.
 	old_id = dataset.PatientID
 	dataset.PatientID = PatientID
 	dataset.PatientName = PatientName
@@ -57,6 +59,7 @@ def anonymize(
 	dataset.PersonTelephoneNumbers = ""
 	dataset.OrderCallbackPhoneNumber = ""
 	age = dataset.PatientAge
+					
 	studyUID = dataset.StudyInstanceUID
 	dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
 
@@ -65,16 +68,17 @@ def anonymize(
 
 	# Same as above but for blanking data elements that are type 2.
 	for name in ['PatientBirthDate']:
-	    if name in dataset:
-	        dataset.data_element(name).value = fuzz_date(dataset.data_element(name).value)
-	        
+		if name in dataset:
+			dataset.data_element(name).value = fuzz_date(dataset.data_element(name).value)
+			        	        
 	# write the 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 
 def anonymize_all(
 	output_folder : str = ".",
 	datapath : str  = os.path.join("..","data"),
-	subject_dicom_path : str = os.path.join("ses-*","*","*")) -> Dict[str,str]:
+	subject_dicom_path : str = os.path.join("ses-*","*","*"),
+	rename = True) -> Dict[str,str]:
 	"""
 	Anonymizes all dicom images located at the datapath in the structure specified by subject_dicom_path parameter.
 	Args : 
@@ -97,7 +101,8 @@ def anonymize_all(
 		for file in files:
 			
 			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
-		os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-anony-"+old2new_idx[patient]))
+		if rename :
+			os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-anony-"+old2new_idx[patient]))
 	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 
 	return new2old_idx

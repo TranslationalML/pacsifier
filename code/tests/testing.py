@@ -6,6 +6,13 @@ from scrape import *
 from sanity_checks import *
 import pytest
 from anonymize import *
+from convert import *
+import os
+import pydicom
+import shutil
+
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for coverage execute : py.test --cov=../../ testing.py !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ../../ points to the project folder !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 def test_find_invalid_inputs(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -50,52 +57,52 @@ def test_find_invalid_inputs():
 		find("AET",  STUDYDATE = "19930911", server_ip = "128.132.1855.16")
 
 
-def test_get_invalid_inputs(): 
+def test_get_invalid_inputs():
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-	
+
 	with pytest.raises(ValueError):
 		get("", "19930911")
 
 	with pytest.raises(ValueError): 
 		get("AET", "19930911", port = 0)
 
-	with pytest.raises(ValueError): 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", port = 65536)
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", port = 0)
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", PATIENTID = dummy_long_string )
 	
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", server_AET = "dummyserverAETdummyserverAETdummyserverAET")
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", server_AET = "")
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", STUDYINSTANCEUID = dummy_long_string)
 	
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", SERIESINSTANCEUID = dummy_long_string)
 	
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("dummyAETdummyAETdummyAET", "19930911")
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", server_ip = "128.132.185.16.1")
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", server_ip = "128.s132.185.16")
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", server_ip = "128.132..16")
 
-	with pytest.raises(ValueError) : 
+	with pytest.raises(ValueError):
 		get("AET", "19930911", server_ip = "128.132.1855.16")
 
-def test_replace_default_parameters() :
+def test_replace_default_parameters():
 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
@@ -309,3 +316,52 @@ def test_sanity_checks():
 
 	with pytest.raises(ValueError):
 		check_date_range("19930825-dakdjak")
+
+def test_process_list():
+	
+	paths = ["sub-25647/ses-20170425114530","sub-14569/ses-20170525114530","sub-5879/ses-20170625114530","sub-69875/ses-20170725114530"]
+	assert process_list(paths) == [("25647","20170425114530"),("14569","20170525114530"),("5879","20170625114530"),("69875","20170725114530")]
+
+def test_list_files():
+	path = os.path.join("..","..","code","*.py")
+	expected_result = {'../../code/sanity_checks.py', '../../code/scrape.py', '../../code/sghipt.py', '../../code/execute_commands.py', '../../code/heuristic.py', '../../code/depannage.py', '../../code/anonymize.py', '../../code/convertall.py', '../../code/convert.py'}
+	assert set(list_files(path)) == expected_result
+
+def test_anonymize():
+	anonymize("sample_image","output_sample_image",PatientID = "000420", PatientName = "Hello")
+	dataset = pydicom.read_file("output_sample_image")
+
+	assert dataset.PatientID == "000420"
+	assert dataset.PatientName == "Hello"
+	assert dataset.InstitutionAddress == "Address"
+	assert dataset.ReferringPhysicianTelephoneNumbers == ""
+	assert dataset.PatientTelephoneNumbers == ""
+	assert dataset.PersonTelephoneNumbers == ""
+	assert dataset.OrderCallbackPhoneNumber == ""
+
+	dataset.PatientAge = "091"
+	dataset.save_as("output_sample_image")
+
+
+	anonymize("output_sample_image","output_sample_image",PatientID = "000420", PatientName = "Hello")
+	dataset = pydicom.read_file("output_sample_image")
+	assert dataset.PatientAge == "90+Y"
+
+def test_anonymize_all(): 
+	dict_ = anonymize_all(output_folder = ".", datapath=".", subject_dicom_path = "output_sample_image", rename = False)
+	assert dict_ == {'000000': '.pytest_cache', '000001': '__pycache__'}
+
+def test_read_line_by_line():
+	lines = list(readLineByLine("test.txt"))[:4]
+	assert lines == [
+	'I: Requesting Association',
+	'I: Association Accepted (Max Send PDV: 32756)',
+	'I: Sending Find Request (MsgID 1)',
+	'I: Request Identifiers:']
+
+def test_process_name():
+	assert process_names("Obi-Wan Kenobi") == "*^*KENOBI*"
+
+
+def test_run():
+	assert [] == run("echo Shrek is love, shrek is life.")
