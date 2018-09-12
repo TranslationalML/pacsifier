@@ -25,3 +25,5 @@ protocol.csv
 /code/tests/sample_image
 /code/tests/output_sample_image
 /code/tests/.coverage
+/code/tests/testing.pyc
+/.coverage
