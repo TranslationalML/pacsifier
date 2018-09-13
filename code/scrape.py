@@ -12,7 +12,7 @@ from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
 import csv
-from typing import Dict, Any
+from typing import Dict, Any,Type
 import time
 
 warnings.filterwarnings("ignore")
@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 dump_path = "../files/query_patient_ids.dcm"
 dump_txt_path = "../files/dump.txt"
 
-tag_to_attribute = { # type : Dict[Any,Any] 
+tag_to_attribute = { # type : Dict[str,str]
 "(0008,0020)" : "StudyDate",
 "(0008,0030)" : "StudyTime",
 "(0008,103e)" : "SeriesDecription",
@@ -63,13 +63,13 @@ def process_text_files(filename : str) -> list:
 	"""
 	start = False
     
-	id_table = []
-	output_dict = Dict[Any,Any]
+	id_table = [] # type : List[str]
+	output_dict = {"":""} # type : Dict[str,str]
 
     #Iterate over text lines
 	for line in readLineByLine(filename):
 
-		sample_dict = { # type : Dict[Any,Any]
+		sample_dict = { # type : Dict[str,str]
 		"StudyDate" : "",
 		"StudyTime" : "",
 		"SeriesDecription" : "",

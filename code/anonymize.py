@@ -28,9 +28,11 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 	fuzz = random.randint(-fuzz_parameter, fuzz_parameter)
 
 	#Processing new date.
-	date = datetime(day = day, month = month, year = year)
-	date = (date + timedelta(days = fuzz)).strftime("%Y%m%d")
-	return date
+	date_time = datetime(day = day, month = month, year = year) # type : datetime
+	str_date = (date_time + timedelta(days = fuzz)).strftime("%Y%m%d") # type : str
+	
+	del date_time
+	return str_date
 
 def anonymize(
 	filename : str,
@@ -58,13 +60,18 @@ def anonymize(
 	dataset.PatientTelephoneNumbers = ""
 	dataset.PersonTelephoneNumbers = ""
 	dataset.OrderCallbackPhoneNumber = ""
-	age = dataset.PatientAge
-					
+	
+	try : 
+		age = dataset.PatientAge
+		if int(age[:3]) > 89 : 
+			dataset.PatientAge = "90+Y"
+	except AttributeError : 
+		pass
+
 	studyUID = dataset.StudyInstanceUID
 	dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
 
-	if int(age[:3]) > 89 : 
-		dataset.PatientAge = "90+Y"
+	
 
 	# Same as above but for blanking data elements that are type 2.
 	for name in ['PatientBirthDate']:

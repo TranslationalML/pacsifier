@@ -10,6 +10,8 @@ from convert import *
 import os
 import pydicom
 import shutil
+from hypothesis import given, example
+from hypothesis.strategies import text
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for coverage execute : py.test --cov=../../ testing.py !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ../../ points to the project folder !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -364,4 +366,21 @@ def test_process_name():
 
 def test_run():
 	assert [] == run("echo Shrek is love, shrek is life.")
+
+@given(s = text())
+@example(s='Obi-Wan Kenobi')
+def test_check_date_input(s):
+	assert process_names(s) == "*^*"+s.split(" ")[-1].upper()+"*"
+
+"""
+TODO :
+- Hypothesis testing.
+- Heuristic mapping.
+- Mypy.
+- Docker version.
+
+""" 
+
+if __name__ == '__main__':
+    test_check_date_input()
 
