@@ -11,7 +11,7 @@ import os
 import pydicom
 import shutil
 from hypothesis import given, example
-from hypothesis.strategies import text
+from hypothesis.strategies import text, integers
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for coverage execute : py.test --cov=../../ testing.py !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ../../ points to the project folder !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -368,19 +368,40 @@ def test_run():
 	assert [] == run("echo Shrek is love, shrek is life.")
 
 @given(s = text())
-@example(s='Obi-Wan Kenobi')
+@example(s = 'Obi-Wan Kenobi')
 def test_check_date_input(s):
 	assert process_names(s) == "*^*"+s.split(" ")[-1].upper()+"*"
 
 """
+WHY ISN'T THIS SECTION WORKING.
+
+possible_dates = []
+for year in range(1900,2019):
+	for month in range(1,13):
+		for day in range(1,32):
+			if day > 28 and month == 2 : continue
+			if day == 31 and month in [4,6,9,11] : continue
+			day_add = ""
+			month_add = ""
+			if day < 10 : day_add = "0"
+			if month < 10 : month_add = "0"
+			possible_dates.append(str(year)+month_add+str(month)+day_add+str(day))
+
+
+@given(s = text(alphabet = [str(i) for i in range(10)], min_size=8, average_size=8, max_size=8).filter(lambda x : x in possible_dates), t = integers(min_value = 1))
+def hyp_fuzz_date(s,t):
+	fuzz_date(s,fuzz_parameter = t)
+"""
+
+
+
+"""
 TODO :
-- Hypothesis testing.
+- Hypothesis testing. on what?
 - Heuristic mapping.
-- Mypy.
 - Docker version.
 
 """ 
 
 if __name__ == '__main__':
     test_check_date_input()
-

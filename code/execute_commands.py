@@ -129,7 +129,7 @@ def get(
 	for filter_ in additional_filters : 
 		check_filter(filter_)
 		command += " --key "+ filter_ + " "
-
+		
 	return run(command)
 	
 def write_file(results : str, file : str = "output.txt"): 

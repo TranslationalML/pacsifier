@@ -27,3 +27,6 @@ protocol.csv
 /code/tests/.coverage
 /code/tests/testing.pyc
 /.coverage
+/code/fails.txt
+/files/id_mapper.json
+/files/complete_schizo.csv

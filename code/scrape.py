@@ -167,6 +167,14 @@ def main(argv):
 	with open('../files/config.json') as f:
 		parameters = json.load(f)
 
+	with open("../files/new_ids.csv") as f: 
+		reader = csv.reader(f)
+		new_ids = list(reader)
+	
+	new_ids = [id_[0].replace(" ","") for id_ in new_ids]
+
+	id_tuples = {}
+
 	pacs_server = parameters["server_ip"] 
 	port = int(parameters["port"])
 	called_aet = parameters["AET"] 
@@ -280,12 +288,18 @@ def main(argv):
 		#Extract all series ids.
 		series = process_text_files("current.txt")
 		counter = 0 
+		
 		#loop over series
 		for serie in tqdm(series) :
+			study_counter = 0 
 			counter+=1
 			if counter % 50 == 0 : 
 				time.sleep(60)
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
+			
+			if study_counter == 0 : 
+				id_tuples[serie["PatientID"]] = new_ids[i]
+				study_counter += 1
 
 			if not os.path.isdir(patient_dir):
 				os.mkdir(patient_dir)
@@ -324,6 +338,10 @@ def main(argv):
 
 	if os.path.isfile("current.txt") : 
 		os.remove("current.txt")
+
+	
+	with open("../files/id_mapper.json","w") as fp: 
+		json.dump(id_tuples,fp)
 
 if __name__ == "__main__" :
 	main(sys.argv[1:])
