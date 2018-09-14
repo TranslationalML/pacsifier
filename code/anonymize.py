@@ -52,15 +52,22 @@ def anonymize(
 	dataset = pydicom.read_file(filename)
 
 	#Update attributes to make it anonymous.
-	old_id = dataset.PatientID
-	dataset.PatientID = PatientID
-	dataset.PatientName = PatientName
-	dataset.InstitutionAddress = "Address"
-	dataset.ReferringPhysicianTelephoneNumbers = ""
-	dataset.PatientTelephoneNumbers = ""
-	dataset.PersonTelephoneNumbers = ""
-	dataset.OrderCallbackPhoneNumber = ""
-	
+	try : 
+		old_id = dataset.PatientID
+
+		dataset.PatientID = PatientID
+		dataset.PatientName = PatientName
+		dataset.InstitutionAddress = "Address"
+		dataset.ReferringPhysicianTelephoneNumbers = ""
+		dataset.PatientTelephoneNumbers = ""
+		dataset.PersonTelephoneNumbers = ""
+		dataset.OrderCallbackPhoneNumber = ""
+	except AttributeError : 
+		text_file = open("fails.txt", "a")
+
+		text_file.write(filename + "\n")
+		text_file.close()
+		return
 	try : 
 		age = dataset.PatientAge
 		if int(age[:3]) > 89 : 
@@ -85,6 +92,7 @@ def anonymize_all(
 	output_folder : str = ".",
 	datapath : str  = os.path.join("..","data"),
 	subject_dicom_path : str = os.path.join("ses-*","*","*"),
+	new_ids = None, 
 	rename = True) -> Dict[str,str]:
 	"""
 	Anonymizes all dicom images located at the datapath in the structure specified by subject_dicom_path parameter.
@@ -98,8 +106,9 @@ def anonymize_all(
 
 	#Listing patient files.
 	patients_folders = next(os.walk(datapath))[1]
-
-	old2new_idx = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
+	if new_ids == None : 
+		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
+	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i].replace("sub-","")] for i in range(len(patients_folders))}
 
 	for patient in tqdm(patients_folders) : 
 		current_path = os.path.join(datapath, patient, subject_dicom_path)
@@ -108,8 +117,10 @@ def anonymize_all(
 		for file in files:
 			
 			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
+		
 		if rename :
-			os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-anony-"+old2new_idx[patient]))
+			os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]))
+	
 	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 
 	return new2old_idx
@@ -119,10 +130,13 @@ def main(argv):
 	json_path = argv[0]
 	data_path = argv[1]
 
+	with open('../files/id_mapper.json') as f:
+		new_ids = json.load(f)
+
 	print("Anonymizing ...")
 
 	#Anonymizing all files.
-	mapper = anonymize_all(output_folder = data_path, datapath = data_path)
+	mapper = anonymize_all(output_folder = data_path, datapath = data_path , new_ids = new_ids)
 
 	#dumping new ids to a json file.
 	with open(os.path.join(json_path,'mapper.json'), 'w') as fp:
