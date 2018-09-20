@@ -71,7 +71,7 @@ def anonymize(
 	try : 
 		age = dataset.PatientAge
 		if int(age[:3]) > 89 : 
-			dataset.PatientAge = "90+Y"
+			dataset.PatientAge = "90+Y" #set birth date to 19010101.
 	except AttributeError : 
 		pass
 
@@ -119,7 +119,9 @@ def anonymize_all(
 			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
 		
 		if rename :
-			os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]))
+			try:
+				os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]))
+			except OSError : os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]+"_2"))
 	
 	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 

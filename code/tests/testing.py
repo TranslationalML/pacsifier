@@ -372,8 +372,8 @@ def test_run():
 def test_check_date_input(s):
 	assert process_names(s) == "*^*"+s.split(" ")[-1].upper()+"*"
 
-"""
-WHY ISN'T THIS SECTION WORKING.
+
+#WHY ISN'T THIS SECTION WORKING.
 
 possible_dates = []
 for year in range(1900,2019):
@@ -388,10 +388,9 @@ for year in range(1900,2019):
 			possible_dates.append(str(year)+month_add+str(month)+day_add+str(day))
 
 
-@given(s = text(alphabet = [str(i) for i in range(10)], min_size=8, average_size=8, max_size=8).filter(lambda x : x in possible_dates), t = integers(min_value = 1))
+@given(s = text(alphabet = [str(i) for i in range(10)], min_size=7, average_size=8, max_size=8).filter(lambda x : x in possible_dates), t = integers(min_value = 1))
 def hyp_fuzz_date(s,t):
 	fuzz_date(s,fuzz_parameter = t)
-"""
 
 
 
@@ -405,3 +404,4 @@ TODO :
 
 if __name__ == '__main__':
     test_check_date_input()
+    hyp_fuzz_date()
