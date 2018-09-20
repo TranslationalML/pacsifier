@@ -71,7 +71,8 @@ def anonymize(
 	try : 
 		age = dataset.PatientAge
 		if int(age[:3]) > 89 : 
-			dataset.PatientAge = "90+Y" #set birth date to 19010101.
+			dataset.PatientAge = "90+Y"
+			dataset.PatientBirthDate = "19010101"
 	except AttributeError : 
 		pass
 
@@ -138,7 +139,7 @@ def main(argv):
 	print("Anonymizing ...")
 
 	#Anonymizing all files.
-	mapper = anonymize_all(output_folder = data_path, datapath = data_path , new_ids = new_ids)
+	mapper = anonymize_all(output_folder = data_path, datapath = data_path)
 
 	#dumping new ids to a json file.
 	with open(os.path.join(json_path,'mapper.json'), 'w') as fp:
