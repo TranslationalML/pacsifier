@@ -18,10 +18,6 @@ import argparse
 
 warnings.filterwarnings("ignore")
 
-#Default paths to get the patient ids 
-dump_path = "../files/query_patient_ids.dcm"
-dump_txt_path = "../files/dump.txt"
-
 tag_to_attribute = { # type : Dict[str,str]
 "(0008,0020)" : "StudyDate",
 "(0008,0030)" : "StudyTime",
@@ -201,7 +197,7 @@ def main(argv):
 	if args.save == "save" : save = True
 
 	#Reading table.
-	table = read_csv("../files/"+args.data).fillna("")
+	table = read_csv("../files/"+args.queryfile).fillna("")
 	
 	check_table(table)
 
