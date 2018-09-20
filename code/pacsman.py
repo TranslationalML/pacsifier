@@ -14,6 +14,7 @@ from cerberus import Validator
 import csv
 from typing import Dict, Any,Type
 import time
+import argparse
 
 warnings.filterwarnings("ignore")
 
@@ -179,25 +180,29 @@ def main(argv):
 	port = int(parameters["port"])
 	called_aet = parameters["AET"] 
 	calling_aet = parameters["server_AET"]
-	output_dir = parameters["directory"]
-
-	#Reading table.
-	table = read_csv("../files/"+argv[0]).fillna("")
+	output_dir = parameters["directory"]	
 
 	#processing command line inputs
 	additional = argv[1:]
 	additional = [add for add in additional if add[0] != '-']
 	options = [opt for opt in argv[1:] if opt[0] == '-']
 
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--save', help='save images')
+	parser.add_argument('--info', help ='save images info')
+	parser.add_argument("--queryfile", help = 'database')
+
+	args = parser.parse_args()
+
 	info = False
 	save = False
 
-	if '-info' in options : 
-		info = True
+	if args.info == "info" : info = True
+	if args.save == "save" : save = True
 
-	if '-save' in options : 
-		save = True
-
+	#Reading table.
+	table = read_csv("../files/"+args.data).fillna("")
+	
 	check_table(table)
 
 	#Flexible parsing.
@@ -212,9 +217,9 @@ def main(argv):
 	'PatientName'		: {'type' : 'string', 'maxlength' : 64},
 	'SeriesDecription' 	: {'type' : 'string', 'maxlength' : 64},
 	'AcquisitionDate' 	: {'type' : 'string', 'maxlength' : 8 },
-	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 }, 
+	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64}
-	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16}
+	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 
 	validator = Validator(schema)
@@ -329,7 +334,7 @@ def main(argv):
 					SERIESINSTANCEUID = serie["SeriesInstanceUID"],
 					OUTDIR  = patient_serie_output_dir)
 			if info : 
-				
+			
 				#Writing series info to csv file.
 				with open(patient_serie_output_dir+'.csv', 'w') as f: 
 				    w = csv.DictWriter(f, serie.keys())
