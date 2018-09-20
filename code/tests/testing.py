@@ -2,7 +2,7 @@ import unittest
 import sys
 sys.path.insert(0, '../')
 from execute_commands import *
-from scrape import *
+from pacsman import *
 from sanity_checks import *
 import pytest
 from anonymize import *
@@ -326,7 +326,7 @@ def test_process_list():
 
 def test_list_files():
 	path = os.path.join("..","..","code","*.py")
-	expected_result = {'../../code/sanity_checks.py', '../../code/scrape.py', '../../code/sghipt.py', '../../code/execute_commands.py', '../../code/heuristic.py', '../../code/depannage.py', '../../code/anonymize.py', '../../code/convertall.py', '../../code/convert.py'}
+	expected_result = {'../../code/sanity_checks.py', '../../code/depannage.py', '../../code/move_dumps.py', '../../code/execute_commands.py', '../../code/anonymize.py', '../../code/pacsman.py', '../../code/seek.py', '../../code/convertall.py', '../../code/heuristic.py', '../../code/convert.py'}
 	assert set(list_files(path)) == expected_result
 
 def test_anonymize():
@@ -401,7 +401,21 @@ TODO :
 - Docker version.
 
 """ 
+def check_id_presence():
+	ls = []
+	filename = "/home/localadmin/Bureau/PACSMAN/data/sub-1051363/ses-20150203160809/MPRAGE_P3/MR.1.3.12.2.1107.5.2.43.67014.201502031612481792906060"
+	dataset = pydicom.read_file(filename)
+	attributes = dataset.dir("")
+
+	for name in attributes : 
+		try:
+			if dataset.PatientID in dataset.data_element(name).value : 
+				ls.append(name)
+		except TypeError: 
+			continue
+	assert ls == ["PatientID", "StudyInstanceUID"]
 
 if __name__ == '__main__':
     test_check_date_input()
-    hyp_fuzz_date()
+    
+    #hyp_fuzz_date()

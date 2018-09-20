@@ -30,3 +30,5 @@ protocol.csv
 /code/fails.txt
 /files/id_mapper.json
 /files/complete_schizo.csv
+/files/log.txt
+/code/move_dumps.py
