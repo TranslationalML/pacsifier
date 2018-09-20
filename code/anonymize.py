@@ -50,7 +50,7 @@ def anonymize(
 
 	# Load the current dicom file to 'anonymize'
 	dataset = pydicom.read_file(filename)
-
+	ninety_plus = False
 	#Update attributes to make it anonymous.
 	try : 
 		old_id = dataset.PatientID
@@ -71,6 +71,8 @@ def anonymize(
 	try : 
 		age = dataset.PatientAge
 		if int(age[:3]) > 89 : 
+
+			ninety_plus = True
 			dataset.PatientAge = "90+Y"
 			dataset.PatientBirthDate = "19010101"
 	except AttributeError : 
@@ -79,13 +81,16 @@ def anonymize(
 	studyUID = dataset.StudyInstanceUID
 	dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
 
-	
 
-	# Same as above but for blanking data elements that are type 2.
 	for name in ['PatientBirthDate']:
 		if name in dataset:
-			dataset.data_element(name).value = fuzz_date(dataset.data_element(name).value)
-			        	        
+			new_date = fuzz_date(dataset.data_element(name).value)
+			dataset.data_element(name).value = new_date
+			if not ninety_plus : 
+				new_age = str(int((datetime.strptime(dataset.StudyDate, "%Y%m%d") - datetime.strptime(new_date, "%Y%m%d")).days / 365))
+				try : 
+					dataset.PatientAge = str(new_age).zfill(3) + "Y"
+				except AttributeError : pass
 	# write the 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 

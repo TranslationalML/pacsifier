@@ -179,10 +179,13 @@ def main(argv):
 	output_dir = parameters["directory"]	
 
 	#processing command line inputs
-	additional = argv[1:]
+	
+	"""	additional = argv[1:]
 	additional = [add for add in additional if add[0] != '-']
 	options = [opt for opt in argv[1:] if opt[0] == '-']
-
+	"""
+	
+	additional = []
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--save', help='save images')
 	parser.add_argument('--info', help ='save images info')
