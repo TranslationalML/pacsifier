@@ -81,6 +81,9 @@ def find(
 		DEVICESERIALNUMBER,
 		IMAGETYPE)
 	
+	f = open("../files/log.txt", "a")
+	f.write(str(command)+"\n")
+
 	return run(command)
 
 def get(
@@ -129,7 +132,10 @@ def get(
 	for filter_ in additional_filters : 
 		check_filter(filter_)
 		command += " --key "+ filter_ + " "
-		
+
+	f = open("../files/log.txt", "a")
+	f.write(str(command)+"\n")
+
 	return run(command)
 	
 def write_file(results : str, file : str = "output.txt"): 
