@@ -10,7 +10,7 @@ This is a batch query/retrieve interface for the CareStream PACS at Lausanne Uni
  - The --queryfile path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
 
 Note : you can download the images without the --info option or only dump the info if --save option is not included.
-
+o
  - Running the command above will download the dicom images by default into data folder of the project folder. 
  - You can specify the output directory by adding the option --out_directory path_to_output_directory.
  - You can also specify a different config file by adding the option --config path_to_config_file.
@@ -46,7 +46,7 @@ StudyDate,PatientID<br>
 A csv file like the one written above will retrieve:
 - Images correspoding to study done on 12/05/2015 and for patient with patientID 123421.
 - Images of patient with patient ID 45322.
-- Images of studies done the the 02/01/2018.
+- Images of studies done the 02/01/2018.
 
 #### Exmample 2 : 
 
@@ -61,3 +61,14 @@ StudyDate,PatientID<br>
 20150512,*
 
 The query for this csv file will fail because querying with values * is not allowed.
+
+## Config file : 
+
+The config file is a json file that should include keys server_ip (the server ip), port (the port), AET (The current station's application entity title), server_AET (The server's application entity title).
+
+# Anonymization : 
+!! Add description of how to use anonymization here !!
+
+# Converter : 
+
+!! Add description of how to convert dicom images to nifti here !!
