@@ -2,6 +2,7 @@ import unittest
 import sys
 sys.path.insert(0, '../')
 from execute_commands import *
+import pacsman
 from pacsman import *
 from sanity_checks import *
 import pytest
@@ -324,10 +325,111 @@ def test_process_list():
 	paths = ["sub-25647/ses-20170425114530","sub-14569/ses-20170525114530","sub-5879/ses-20170625114530","sub-69875/ses-20170725114530"]
 	assert process_list(paths) == [("25647","20170425114530"),("14569","20170525114530"),("5879","20170625114530"),("69875","20170725114530")]
 
-def test_list_files():
+def test_check_output(): 
+	"""
+	run the command : python pacsman.py --info info --save save --queryfile complete_schizo.csv --out_directory ./tests/test_set
+	"""
+	#pacsman.main(["--info info","--save bla", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config /home/localadmin/Bureau/PACSMAN/files/config.json"])
+	
+	subjects = glob("./test_set/*")
+	sessions = glob("./test_set/sub-*/ses-*")
+	csv_files = glob("./test_set/sub-*/ses-*/*.csv")
+	assert subjects == ['./test_set/sub-2936187', './test_set/sub-1051363', './test_set/sub-3171184']
+	assert sessions == ['./test_set/sub-2936187/ses-20180108152705', './test_set/sub-2936187/ses-20180104082740', './test_set/sub-1051363/ses-20150715154733', './test_set/sub-1051363/ses-20150203160809', './test_set/sub-3171184/ses-20171020104457', './test_set/sub-3171184/ses-20171020120002']
+	assert csv_files == ['./test_set/sub-2936187/ses-20180108152705/PTV1_Brain_Final_66min-RTDOSE.csv',
+	'./test_set/sub-2936187/ses-20180108152705/PTV2_6metas_FINAL_83min-RTSS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/PTV2_6metas_FINAL_83min.csv',
+	'./test_set/sub-2936187/ses-20180108152705/1FOVS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/Scano2.0.csv',
+	'./test_set/sub-2936187/ses-20180108152705/PTV2_6metas_FINAL_83min-RTDOSE.csv',
+	'./test_set/sub-2936187/ses-20180108152705/PTV1_Brain_Final_66min.csv',
+	'./test_set/sub-2936187/ses-20180108152705/PTV1_Brain_Final_66min-RTSS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/RTP1.0FOVS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/RTP1.0Natif.csv',
+	'./test_set/sub-2936187/ses-20180108152705/SecondaryCaptureSequence.csv',
+	'./test_set/sub-2936187/ses-20180104082740/mIP_Images(SW).csv',
+	'./test_set/sub-2936187/ses-20180104082740/SWI_Images.csv',
+	'./test_set/sub-2936187/ses-20180104082740/t1_mprage_sagGD_ND.csv',
+	'./test_set/sub-2936187/ses-20180104082740/perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/Mag_Images.csv',
+	'./test_set/sub-2936187/ses-20180104082740/t1_mprage_sagGD.csv',
+	'./test_set/sub-2936187/ses-20180104082740/perf_tra17_6.csv',
+	'./test_set/sub-2936187/ses-20180104082740/svs_se_135_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/Pha_Images.csv',
+	'./test_set/sub-2936187/ses-20180104082740/RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/CBV_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/KEY_IMAGESPR.csv',
+	'./test_set/sub-2936187/ses-20180104082740/RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/t1_gre_sag_45_3.csv',
+	'./test_set/sub-2936187/ses-20180104082740/MPRGDCOR.csv',
+	'./test_set/sub-2936187/ses-20180104082740/svs_se_135.csv',
+	'./test_set/sub-2936187/ses-20180104082740/CBVCORR_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/MTT_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/TTP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/MPRGDTRA.csv',
+	'./test_set/sub-2936187/ses-20180104082740/PBP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/GBP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/t2_tse_tra43_3.csv',
+	'./test_set/sub-1051363/ses-20150715154733/MPRAGE_P3.csv',
+	'./test_set/sub-1051363/ses-20150715154733/T2-Mapping_preWIP899_STRICT_T2map.csv',
+	'./test_set/sub-1051363/ses-20150715154733/gre_field_mapping_tra_STRICT.csv',
+	'./test_set/sub-1051363/ses-20150715154733/DSI_603_q4_half_tra_STRICT_FA.csv',
+	'./test_set/sub-1051363/ses-20150715154733/DSI_603_q4_half_tra_STRICT_ADC.csv',
+	'./test_set/sub-1051363/ses-20150715154733/MT_3_3Dsag.csv',
+	'./test_set/sub-1051363/ses-20150715154733/ep2d_bold_resting_state_STRICT.csv',
+	'./test_set/sub-1051363/ses-20150715154733/gre_field_mapping_STRICT.csv',
+	'./test_set/sub-1051363/ses-20150715154733/DSI_603_q4_half_tra_STRICT_TRACEW.csv',
+	'./test_set/sub-1051363/ses-20150715154733/MT_3_noMT_3Dsag.csv',
+	'./test_set/sub-1051363/ses-20150715154733/DSI_603_q4_half_tra_STRICT.csv',
+	'./test_set/sub-1051363/ses-20150715154733/DSI_603_q4_half_tra_STRICT_ColFA.csv',
+	'./test_set/sub-1051363/ses-20150715154733/T2-Mapping_preWIP899_STRICT_SIM-TE89ms.csv',
+	'./test_set/sub-1051363/ses-20150715154733/DSI_603_q4_half_tra_STRICT_TENSOR.csv',
+	'./test_set/sub-1051363/ses-20150203160809/DSI_603_q4_half_tra_strict_ColFA.csv',
+	'./test_set/sub-1051363/ses-20150203160809/DSI_603_q4_half_tra_strict_TRACEW.csv',
+	'./test_set/sub-1051363/ses-20150203160809/MPRAGE_P3.csv',
+	'./test_set/sub-1051363/ses-20150203160809/DSI_603_q4_half_tra_strict_FA.csv',
+	'./test_set/sub-1051363/ses-20150203160809/T2-Mapping_preWIP899_STRICT_T2map.csv',
+	'./test_set/sub-1051363/ses-20150203160809/gre_field_mapping.csv',
+	'./test_set/sub-1051363/ses-20150203160809/MT_3_3D.csv',
+	'./test_set/sub-1051363/ses-20150203160809/ep2d_bold_resting_state_STRICT.csv',
+	'./test_set/sub-1051363/ses-20150203160809/gre_field_mapping_STRICT.csv',
+	'./test_set/sub-1051363/ses-20150203160809/DSI_603_q4_half_tra_strict_ADC.csv',
+	'./test_set/sub-1051363/ses-20150203160809/T2-Mapping_preWIP899_STRICT_SIM-TE89ms.csv',
+	'./test_set/sub-1051363/ses-20150203160809/MT_3_noMT_3D.csv',
+	'./test_set/sub-1051363/ses-20150203160809/DSI_603_q4_half_tra_strict.csv',
+	'./test_set/sub-3171184/ses-20171020104457/RTP1.0CTCRANECFOVS.csv',
+	'./test_set/sub-3171184/ses-20171020104457/4metas24Gy_PTV18Gy_68min-RTDOSE.csv',
+	'./test_set/sub-3171184/ses-20171020104457/Scano2.0.csv',
+	'./test_set/sub-3171184/ses-20171020104457/4metas24Gy_PTV18Gy_68min.csv',
+	'./test_set/sub-3171184/ses-20171020104457/4metas24Gy_PTV18Gy_68min-RTSS.csv',
+	'./test_set/sub-3171184/ses-20171020104457/1CTCRANECFOVS.csv',
+	'./test_set/sub-3171184/ses-20171020104457/RTP1.0Natif.csv',
+	'./test_set/sub-3171184/ses-20171020104457/SecondaryCaptureSequence.csv',
+	'./test_set/sub-3171184/ses-20171020120002/mpragecor.csv',
+	'./test_set/sub-3171184/ses-20171020120002/AAHead_Scout_64ch-head-coil_MPR_cor.csv',
+	'./test_set/sub-3171184/ses-20171020120002/t1_mprage_sagGD_ND.csv',
+	'./test_set/sub-3171184/ses-20171020120002/MPRAGE_Morpho_wip900C_SkullStrip.csv',
+	'./test_set/sub-3171184/ses-20171020120002/MPRAGE_Morpho_wip900C_LabelIm.csv',
+	'./test_set/sub-3171184/ses-20171020120002/t1_mprage_sagGD.csv',
+	'./test_set/sub-3171184/ses-20171020120002/t1_gre_tra43_3.csv',
+	'./test_set/sub-3171184/ses-20171020120002/KEY_IMAGESPR.csv',
+	'./test_set/sub-3171184/ses-20171020120002/mpragegdtra.csv',
+	'./test_set/sub-3171184/ses-20171020120002/MPRAGE_Morpho_wip900C_DevMap.csv',
+	'./test_set/sub-3171184/ses-20171020120002/mpragetra.csv',
+	'./test_set/sub-3171184/ses-20171020120002/AAHead_Scout_64ch-head-coil_MPR_tra.csv',
+	'./test_set/sub-3171184/ses-20171020120002/AAHead_Scout_64ch-head-coil.csv',
+	'./test_set/sub-3171184/ses-20171020120002/mpragegdcor.csv',
+	'./test_set/sub-3171184/ses-20171020120002/MPRAGE_Morpho_wip900C.csv',
+	'./test_set/sub-3171184/ses-20171020120002/Inline_Morpho_Report.csv',
+	'./test_set/sub-3171184/ses-20171020120002/AAHead_Scout_64ch-head-coil_MPR_sag.csv',
+	'./test_set/sub-3171184/ses-20171020120002/t2_tse_tra43_3.csv']
+
+"""def test_list_files():
 	path = os.path.join("..","..","code","*.py")
 	expected_result = {'../../code/sanity_checks.py', '../../code/depannage.py', '../../code/move_dumps.py', '../../code/execute_commands.py', '../../code/anonymize.py', '../../code/pacsman.py', '../../code/seek.py', '../../code/convertall.py', '../../code/heuristic.py', '../../code/convert.py'}
-	assert set(list_files(path)) == expected_result
+	assert set(list_files(path)) == expected_result"""
 
 def test_anonymize():
 	anonymize("sample_image","output_sample_image",PatientID = "000420", PatientName = "Hello")
@@ -401,7 +503,7 @@ TODO :
 - Docker version.
 
 """ 
-def check_id_presence():
+"""def test_id_presence():
 	ls = []
 	filename = "/home/localadmin/Bureau/PACSMAN/data/sub-1051363/ses-20150203160809/MPRAGE_P3/MR.1.3.12.2.1107.5.2.43.67014.201502031612481792906060"
 	dataset = pydicom.read_file(filename)
@@ -413,9 +515,9 @@ def check_id_presence():
 				ls.append(name)
 		except TypeError: 
 			continue
-	assert ls == ["PatientID", "StudyInstanceUID"]
+	assert ls == ["PatientID", "StudyInstanceUID"]"""
 
 if __name__ == '__main__':
     test_check_date_input()
-    
     #hyp_fuzz_date()
+    #check_output()

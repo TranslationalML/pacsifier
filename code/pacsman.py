@@ -159,9 +159,22 @@ def process_names(name : str) -> str :
 ########################################################################################################################
 
 def main(argv):
-	
+	additional = []
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--config', help='configuration file path')
+	parser.add_argument('--save', help='save images')
+	parser.add_argument('--info', help ='save images info')
+	parser.add_argument("--queryfile", help = 'database')
+	parser.add_argument("--out_directory", help = 'Output directory where images will be saved')
+	args = parser.parse_args()
+
+
+
+
+	config_path = args.config
+	if config_path == None : config_path = "../files/config.json"
 	#Reading config file.
-	with open('../files/config.json') as f:
+	with open(config_path) as f:
 		parameters = json.load(f)
 
 	with open("../files/new_ids.csv") as f: 
@@ -176,7 +189,7 @@ def main(argv):
 	port = int(parameters["port"])
 	called_aet = parameters["AET"] 
 	calling_aet = parameters["server_AET"]
-	output_dir = parameters["directory"]	
+	output_dir = os.path.join("..","data")	
 
 	#processing command line inputs
 	
@@ -184,23 +197,16 @@ def main(argv):
 	additional = [add for add in additional if add[0] != '-']
 	options = [opt for opt in argv[1:] if opt[0] == '-']
 	"""
-	
-	additional = []
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--save', help='save images')
-	parser.add_argument('--info', help ='save images info')
-	parser.add_argument("--queryfile", help = 'database')
-
-	args = parser.parse_args()
 
 	info = False
 	save = False
 
 	if args.info == "info" : info = True
 	if args.save == "save" : save = True
+	if args.out_directory != None : output_dir = args.out_directory
 
 	#Reading table.
-	table = read_csv("../files/"+args.queryfile).fillna("")
+	table = read_csv("../files/"+args.queryfile, dtype=str).fillna("")
 	
 	check_table(table)
 
@@ -225,19 +231,19 @@ def main(argv):
 
 	for i, tuple_ in enumerate(attributes_list):
 		
-		print("Retrieving images for subject number ", i)
+		print("Retrieving images for study number ", i)
 		
 		check_tuple(tuple_)
-		PATIENTID = str(tuple_["PatientID"])
+		PATIENTID = tuple_["PatientID"]
 		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
 		SERIESDESCRIPTION = tuple_["SeriesDecription"] 
 		PROTOCOLNAME = tuple_["ProtocolName"]
-		ACQUISITIONDATE = str(tuple_["AcquisitionDate"])
-		STUDYDATE = str(tuple_["StudyDate"])
+		ACQUISITIONDATE = tuple_["AcquisitionDate"]
+		STUDYDATE = tuple_["StudyDate"]
 		PATIENTNAME = process_names(tuple_["PatientName"])
-		PATIENTBIRTHDATE = str(tuple_ ["PatientBirthDate"])
-		DEVICESERIALNUMBER = str(tuple_["DeviceSerialNumber"])
+		PATIENTBIRTHDATE = tuple_ ["PatientBirthDate"]
+		DEVICESERIALNUMBER = tuple_["DeviceSerialNumber"]
 		IMAGETYPE = tuple_["ImageType"]
 
 		inputs = {
@@ -253,7 +259,7 @@ def main(argv):
 		'DeviceSerialNumber': DEVICESERIALNUMBER
 		#'ImageType' 		: IMAGETYPE
 		}
-
+		
 		if not validator.validate(inputs) : 
 			raise ValueError("Invalid input file element at position "+ str(i) + " " + str(validator.errors))
 

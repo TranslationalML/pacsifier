@@ -32,3 +32,4 @@ protocol.csv
 /files/complete_schizo.csv
 /files/log.txt
 /code/move_dumps.py
+/code/tests/test_set
