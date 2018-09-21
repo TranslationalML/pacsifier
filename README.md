@@ -1,6 +1,6 @@
 This is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
 
-How to use : 
+#How to use : 
 
 # Query/Retrieve : 
 ## Command line : 
@@ -18,3 +18,14 @@ Note : you can download the images without the --info option or only dump the in
 
 ## Query file: 
 
+The query file is a csv file that should include one or many of these column names : 
+- StudyDate : The study dates of this column should be in the format YYYYMMDD (e.g 19900912 which indicates the 12th of September 1990)
+- StudyTime : The study time should be in the format HHMMSS (e.g 140500 which means 14:05:00)
+⁻ SeriesDecription : The series description.
+- PatientID :  The patient ID 
+- ProtocolName : The protocol names.
+- StudyInstanceUID : The Study Instance UID.
+- PatientName : The patient name. (It is not recommanded to use this filter since there is no clear norm on how the patient names were stored on the pacs server)
+- PatientBirthDate : Similarily to the Study Date 
+- SeriesInstanceUID : The Series Instance UID
+- ImageType : The image type as stored in the pacs server. (Note : using this filter significantly slows down the querying process. Use it only if absolutely necessary.)
