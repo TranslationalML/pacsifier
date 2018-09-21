@@ -38,10 +38,10 @@ Notes :
 
 #### Exmample 1 : 
 
-StudyDate,PatientID
-20150512,123421
-,45322
-20180102,
+StudyDate,PatientID<br>
+20150512,123421<br>
+,45322 <br>
+20180102,<br>
 
 A csv file like the one written above will retrieve:
 - Images correspoding to study done on 12/05/2015 and for patient with patientID 123421.
@@ -50,14 +50,14 @@ A csv file like the one written above will retrieve:
 
 #### Exmample 2 : 
 
-StudyDate,patientID
+StudyDate,patientID<br>
 20150512,123421
 
 The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above.
 
 #### Exmample 3 : 
 
-StudyDate,PatientID
+StudyDate,PatientID<br>
 20150512,*
 
 The query for this csv file will fail because querying with values * is not allowed.
