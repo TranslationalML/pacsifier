@@ -17,8 +17,6 @@ def infotodict(seqinfo):
     fmap_phase = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_phasediff')
     dwi = create_key('sub-{subject}/{session}/dwi/sub-{subject}_{session}_run-00{item:01d}_dwi') # diffusion weighted imaging == DTI == HARDI == DSI
     t1_map = create_key('sub-{subject}/{session}/t1_map/sub-{subject}_{session}_run-00{item:01d}_t1_map')
-    t1 = create_key('sub-{subject}/{session}/t1/sub-{subject}_{session}_run-00{item:01d}_t1')
-    t2 = create_key('sub-{subject}/{session}/t2/sub-{subject}_{session}_run-00{item:01d}_t2')
     t2_map = create_key('sub-{subject}/{session}/t2_map/sub-{subject}_{session}_run-00{item:01d}_t2_map')
     other = create_key('sub-{subject}/{session}/other/sub-{subject}_{session}_run-00{item:01d}_other')
     # ADD FLAIR
@@ -30,7 +28,7 @@ def infotodict(seqinfo):
         
         # check DWI - maybe seq name starts with ep_ ? Ask Yasser
 
-        if "DTI" in s.series_description or (and not ('DEV' in s.image_type) and not ('TIV' in s.image_type) and not ('LABELS' in s.image_type)):
+        if "DTI" in s.series_description or (not ('DEV' in s.image_type) and not ('TIV' in s.image_type) and not ('LABELS' in s.image_type)) or "tfl3d1" in s.sequence_name or "mp2rage3d1" in s.sequence_name:
             info[t1w].append(s.series_id)
         
         if (s.sequence_name == '*ep_b0') and not s.is_derived and (s.dim4 > 40) : 
