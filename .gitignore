@@ -19,6 +19,7 @@ protocol.csv
 /code/tests/__pycache__
 /files/mapper.json
 /files/schizo.csv
+/files/test.csv
 /code/sghipt.py
 /code/depannage.py
 /code/.coverage
