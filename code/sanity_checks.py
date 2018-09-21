@@ -110,8 +110,8 @@ def check_date_range(date : str):
 	"""
 	if date == "" : return 
 	if len(date) == 17: 
-		if date.split("-") != 2 : 
-			raise ValueError("Invalid date  input!")
+		if len(date.split("-")) != 2 : 
+			raise ValueError("Invalid date range input!")
 		dates = date.split("-")
 
 		check_date(dates[0])
