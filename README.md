@@ -1,6 +1,5 @@
 This is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
 
-#How to use : 
 
 # Query/Retrieve : 
 ## Command line : 
@@ -29,3 +28,36 @@ The query file is a csv file that should include one or many of these column nam
 - PatientBirthDate : Similarily to the Study Date 
 - SeriesInstanceUID : The Series Instance UID
 - ImageType : The image type as stored in the pacs server. (Note : using this filter significantly slows down the querying process. Use it only if absolutely necessary.)
+
+Notes : 
+- The query file could include one or many of the columns mentioned above. 
+- If a line in a csv file contains an empty string on a particular columns, then, the query will not include the attribute corresponding to the column in question.
+- The querying does not accept * value on any attribute. 
+
+### Example : 
+
+#### Exmample 1 : 
+
+StudyDate,PatientID
+20150512,123421
+,45322
+20180102,
+
+A csv file like the one written above will retrieve:
+- Images correspoding to study done on 12/05/2015 and for patient with patientID 123421.
+- Images of patient with patient ID 45322.
+- Images of studies done the the 02/01/2018.
+
+#### Exmample 2 : 
+
+StudyDate,patientID
+20150512,123421
+
+The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above.
+
+#### Exmample 3 : 
+
+StudyDate,PatientID
+20150512,*
+
+The query for this csv file will fail because querying with values * is not allowed.
