@@ -53,7 +53,7 @@ A csv file like the one written above will retrieve:
 StudyDate,patientID<br>
 20150512,123421
 
-The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above.
+The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above. (patientID should be PatientID)
 
 #### Exmample 3 : 
 
