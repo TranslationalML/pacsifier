@@ -36,7 +36,7 @@ Notes :
 
 ### Example : 
 
-#### Exmample 1 : 
+#### Example 1 : 
 
 StudyDate,PatientID<br>
 20150512,123421<br>
@@ -48,14 +48,14 @@ A csv file like the one written above will retrieve:
 - Images of patient with patient ID 45322.
 - Images of studies done the 02/01/2018.
 
-#### Exmample 2 : 
+#### Example 2 : 
 
 StudyDate,patientID<br>
 20150512,123421
 
 The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above. (patientID should be PatientID)
 
-#### Exmample 3 : 
+#### Example 3 : 
 
 StudyDate,PatientID<br>
 20150512,*
