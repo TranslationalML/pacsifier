@@ -131,7 +131,7 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
 
-# Converter : 
+# Converting to nifti : 
 
 ## Command line : 
 
