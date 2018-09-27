@@ -17,7 +17,7 @@ STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"1.2.276.0.7230010.3.1.4.20324036
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
-find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,8={}'
+find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={}'
 move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
 ######################################################################################################################## 
@@ -40,6 +40,7 @@ def find(
 	PATIENTBIRTHDATE : str = "",
 	STUDYDATE : str = "",
 	DEVICESERIALNUMBER : str = "",
+	MODALITY : str = "",
 	IMAGETYPE : str = "") -> str : 
 	"""
   	Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
@@ -79,6 +80,7 @@ def find(
 		PATIENTNAME,
 		PATIENTBIRTHDATE,
 		DEVICESERIALNUMBER,
+		MODALITY,
 		IMAGETYPE)
 	
 	f = open("../files/log.txt", "a")
