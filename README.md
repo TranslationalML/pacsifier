@@ -14,7 +14,7 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 
 ## Config file : 
 
-The config file is a json file that should include keys
+The config file is a json file that should include the keys : 
 - `server_ip` (the server IP)
 - `port` (the port)
 - `AET` (The current station's application entity title)
@@ -64,10 +64,10 @@ The query file can be built in Excel and exported to comma-separated values `.cs
 
 #### Example 1 : 
 
-StudyDate,PatientID<br>
-20150512,123421<br>
-,45322 <br>
-20180102,<br>
+	StudyDate,PatientID<br>
+	20150512,123421<br>
+	,45322 <br>
+	20180102,<br>
 
 A csv file like the one written above will retrieve:
 - Images correspoding to study done on 12/05/2015 and for patient with patientID 123421.
@@ -76,29 +76,29 @@ A csv file like the one written above will retrieve:
 
 #### Example 2 : 
 
-StudyDate,patientID<br>
-20150512,123421
+	StudyDate,patientID<br>
+	20150512,123421
 
 The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above. (patientID should be PatientID)
 
 #### Example 3 : 
 
-StudyDate,PatientID<br>
-20150512,*
+	StudyDate,PatientID<br>
+	20150512,*
 
 The query for this csv file will fail because querying with values * is not allowed.
 
 #### Example 4 : 
 
-StudyDate,PatientID<br>
-20150512-20150612,124588
+	StudyDate,PatientID<br>
+	20150512-20150612,124588
 
 Using this csv file, the query will retrieve images of the patient with patient ID 124588 and Study date between 12/05/2015 and 12/06/2015.
 
 #### Example 5
 
-ProtocolName,Modality,PatientBirthDate<br>
-BEAT_SelfNav\*,CT,19920611
+	ProtocolName,Modality,PatientBirthDate<br>
+	BEAT_SelfNav\*,CT,19920611
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
@@ -133,6 +133,6 @@ Runnning the command above will replace all the images within data folder with a
 
 ## Command line : 
 
-python converter.py path_to_data_folder 
+	python converter.py path_to_data_folder 
 
 path_to_data_folder is the path to the data to be converted to nifti format. The structure of the data should be exactly the same way as for the anonymization.
