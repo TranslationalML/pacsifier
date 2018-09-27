@@ -26,8 +26,8 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 ## Command line : 
 
  - Run the command : python pacsman.py --info info --save save --queryfile path_to_queryfile
- - The --info info option allows you to dump the information in the retrieved series into csv files.
- - The --save save option allows you to save the queryed dicom images.
+ - The --info info option allows you to dump the information in the retrieved series into csv files. XXX what does `info` as the argument to `--info` mean? isn't --info just a switch?
+ - The --save save option allows you to save the queryed dicom images. XXX same question here
  - The --queryfile path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
 
 Note : you can download the images without the --info option or only dump the info if --save option is not included.
@@ -38,7 +38,7 @@ o
 
 ## Query file: 
 
-The query file is a csv file that should include one or many of these column names : 
+The query file is a `.csv` file that should include one or many of these column names : 
 - StudyDate : The study dates of this column should be in the format YYYYMMDD (e.g 19900912 which indicates the 12th of September 1990). <br> Note : Querying on a date range is supported. (e.g 20150201-20160201 will query on studies between 01/02/2015 and 01/02/2016 ) 
 - StudyTime : The study time should be in the format HHMMSS (e.g 140500 which means 14:05:00)
 ⁻ SeriesDecription : The series description.
@@ -53,7 +53,10 @@ The query file is a csv file that should include one or many of these column nam
 Notes : 
 - The query file could include one or many of the columns mentioned above. 
 - If a line in a csv file contains an empty string on a particular columns, then, the query will not include the attribute corresponding to the column in question.
-- The querying does not accept * value on any attribute. 
+- The querying does not accept the value `*` alone on any attribute. However it can be used as a wildcard 
+if other characters are provided, e.g. `ProtocolName` could be set to `BEAT_SelfNav*`
+
+The query file can be built in Excel and exported to comma-separated values `.csv` format.
 
 ### Example : 
 
