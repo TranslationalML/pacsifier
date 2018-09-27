@@ -52,13 +52,15 @@ The query file is a `.csv` file that should include one or many of these column 
 - ImageType : The image type as stored in the pacs server. (Note : using this filter significantly slows down the querying process. Use it only if absolutely necessary.)
 - Modality : The modality.
 
+The query file can be built in Excel and exported to comma-separated values `.csv` format.
+
+
 Notes : 
 - The query file could include one or many of the columns mentioned above. 
 - If a line in a csv file contains an empty string on a particular columns, then, the query will not include the attribute corresponding to the column in question.
 - The querying does not accept the value `*` alone on any attribute. However it can be used as a wildcard 
 if other characters are provided, e.g. `ProtocolName` could be set to `BEAT_SelfNav*`
-
-The query file can be built in Excel and exported to comma-separated values `.csv` format.
+- the Series folders are named after the Series Description of its images. However, it may happen that a dicom image has no SeriesDescription stored. In that case, the image will be stored within a folder called No_series_description.
 
 ### Example : 
 
