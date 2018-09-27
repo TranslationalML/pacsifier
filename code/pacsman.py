@@ -29,7 +29,8 @@ tag_to_attribute = { # type : Dict[str,str]
 "(0010,0010)" : "PatientName",
 "(0010,0030)" : "PatientBirthDate",
 "(0018,1000)" : "DeviceSerialNumber", 
-"(0008,0022)" : "AcquisitionDate", 
+"(0008,0022)" : "AcquisitionDate",
+"(0008,0060)" : "Modality",
 "(0008,0008)" : "ImageType"}
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
@@ -77,6 +78,7 @@ def process_text_files(filename : str) -> list:
 		"PatientBirthDate" : "",
 		"SeriesInstanceUID" : "",
 		"DeviceSerialNumber" : "",
+		"Modality" : "",
 		"ImageType" : ""} 
 
 		if "------------" in line or "Releasing Association" in line : 
@@ -245,6 +247,7 @@ def main(argv):
 		PATIENTBIRTHDATE = tuple_ ["PatientBirthDate"]
 		DEVICESERIALNUMBER = tuple_["DeviceSerialNumber"]
 		IMAGETYPE = tuple_["ImageType"]
+		MODALITY = tuple_["Modality"]
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
@@ -288,6 +291,7 @@ def main(argv):
 			PATIENTNAME = PATIENTNAME,
 			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
 			DEVICESERIALNUMBER = DEVICESERIALNUMBER,
+			MODALITY = MODALITY,
 			IMAGETYPE = IMAGETYPE)
 
 		if os.path.isfile("current.txt") : 
