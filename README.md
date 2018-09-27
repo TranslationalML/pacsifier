@@ -64,10 +64,10 @@ The query file can be built in Excel and exported to comma-separated values `.cs
 
 #### Example 1 : 
 
-	StudyDate,PatientID<br>
-	20150512,123421<br>
-	,45322 <br>
-	20180102,<br>
+	StudyDate,PatientID
+	20150512,123421
+	,45322
+	20180102,
 
 A csv file like the one written above will retrieve:
 - Images correspoding to study done on 12/05/2015 and for patient with patientID 123421.
@@ -76,28 +76,28 @@ A csv file like the one written above will retrieve:
 
 #### Example 2 : 
 
-	StudyDate,patientID<br>
+	StudyDate,patientID
 	20150512,123421
 
 The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above. (patientID should be PatientID)
 
 #### Example 3 : 
 
-	StudyDate,PatientID<br>
+	StudyDate,PatientID
 	20150512,*
 
 The query for this csv file will fail because querying with values * is not allowed.
 
 #### Example 4 : 
 
-	StudyDate,PatientID<br>
+	StudyDate,PatientID
 	20150512-20150612,124588
 
 Using this csv file, the query will retrieve images of the patient with patient ID 124588 and Study date between 12/05/2015 and 12/06/2015.
 
 #### Example 5
 
-	ProtocolName,Modality,PatientBirthDate<br>
+	ProtocolName,Modality,PatientBirthDate
 	BEAT_SelfNav\*,CT,19920611
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
