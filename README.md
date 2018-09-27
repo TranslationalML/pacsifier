@@ -107,7 +107,7 @@ python anonymize.py files-directory anonymized-files-directory
  - files-directory is the path to the folder that contains all the dicom images.
  - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
 
- Important Notes : 
+## Important Notes : 
  - If the anonymized-files-directory is the same as the files-directory the raw dicom images will be deleted and replaced by the anonymized ones (This proved useful when there was no more storage space left for additional images ).
  - The files-directory must contain the following structure : 
  	- The files-directory must contain subject folders with names that start with sub- (e.g. sub-123456). In any other case, the script will run but won't affect the data in any way.
@@ -116,6 +116,22 @@ python anonymize.py files-directory anonymized-files-directory
 
  - The anonymized-files-directory must exist on the computer.
 
+## Example :
+
+### Example 1 :  
+ 	python anonymize.py ~/data ~/anonymized_data
+
+ 	Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
+
+### Example 2 : 
+	python anonimyze.py ~/data ~/data 
+
+	Runnning the command above will replace all the images within data folder with anonymized ones.
+
 # Converter : 
 
-!! Add description of how to convert dicom images to nifti here !!
+## Command line : 
+
+python converter.py path_to_data_folder 
+
+path_to_data_folder is the path to the data to be converted to nifti format. The structure of the data should be exactly the same way as for the anonymization.
