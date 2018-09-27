@@ -98,7 +98,7 @@ def anonymize_all(
 	output_folder : str = ".",
 	datapath : str  = os.path.join("..","data"),
 	subject_dicom_path : str = os.path.join("ses-*","*","*"),
-	new_ids = None, 
+	new_ids = None,
 	rename = True) -> Dict[str,str]:
 	"""
 	Anonymizes all dicom images located at the datapath in the structure specified by subject_dicom_path parameter.

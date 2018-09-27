@@ -49,6 +49,7 @@ The query file is a `.csv` file that should include one or many of these column 
 - PatientBirthDate : Similarily to the StudyDate the date should be in format YYYYMMDD. Querying on date range is not supported for patient birth date.
 - SeriesInstanceUID : The Series Instance UID
 - ImageType : The image type as stored in the pacs server. (Note : using this filter significantly slows down the querying process. Use it only if absolutely necessary.)
+- Modality : The modality.
 
 Notes : 
 - The query file could include one or many of the columns mentioned above. 
@@ -95,10 +96,25 @@ Using this csv file, the query will retrieve images of the patient with patient 
 
 #### Example 5
 
-XXX show an example with other fields than StudyDate or PatientID
+ProtocolName,Modality,PatientBirthDate
+BEAT_SelfNav\*,CT,19920611
+
+This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
 # Anonymization : 
-!! Add description of how to use anonymization here !!
+## Command line : 
+python anonymize.py files-directory anonymized-files-directory
+ - files-directory is the path to the folder that contains all the dicom images.
+ - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
+
+ Important Notes : 
+ - If the anonymized-files-directory is the same as the files-directory the raw dicom images will be deleted and replaced by the anonymized ones (This proved useful when there was no more storage space left for additional images ).
+ - The files-directory must contain the following structure : 
+ 	- The files-directory must contain subject folders with names that start with sub- (e.g. sub-123456). In any other case, the script will run but won't affect the data in any way.
+ 	- A subject folder must contain session folders with names that start with ses- (e.g. ses-20150423110533). In any other case, the script will run but won't have any effect on the dicom images.
+ 	- A session folder must contain other folders which contain only the dicom images to be anonymized. If the folders within the session folder contain another kind of file the program will crash. The session folder however, can contain any other files (not folders) and it won't affect the program.
+
+ - The anonymized-files-directory must exist on the computer.
 
 # Converter : 
 

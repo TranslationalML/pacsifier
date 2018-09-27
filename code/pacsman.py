@@ -225,7 +225,8 @@ def main(argv):
 	'SeriesDecription' 	: {'type' : 'string', 'maxlength' : 64},
 	'AcquisitionDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 },
-	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64}
+	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
+	"Modality"			: {'type' : 'string', 'maxlength' : 16}
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 
@@ -259,7 +260,8 @@ def main(argv):
 		'SeriesDecription'  : SERIESDESCRIPTION,
 		'AcquisitionDate' 	: ACQUISITIONDATE,
 		'PatientBirthDate' 	: PATIENTBIRTHDATE,
-		'DeviceSerialNumber': DEVICESERIALNUMBER
+		'DeviceSerialNumber': DEVICESERIALNUMBER,
+		'Modality' 			: MODALITY
 		#'ImageType' 		: IMAGETYPE
 		}
 		
@@ -323,7 +325,10 @@ def main(argv):
 			if not os.path.isdir(patient_study_output_dir):
 				os.mkdir(patient_study_output_dir)
 			
-			patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie["SeriesDecription"])
+			folder_name = serie["SeriesDecription"]
+
+			if folder_name == "" : folder_name = "No_series_description"
+			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name)
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir):
