@@ -25,7 +25,8 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 # Running queries 
 ## Command line : 
 
- - Run the command : python pacsman.py --info info --save save --queryfile path_to_queryfile
+ - Run the command : 
+	python pacsman.py --info info --save save --queryfile path_to_queryfile
  - The --info info option allows you to dump the information in the retrieved series into csv files. XXX what does `info` as the argument to `--info` mean? isn't --info just a switch?
  - The --save save option allows you to save the queryed dicom images. XXX same question here
  - The --queryfile path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
@@ -103,7 +104,7 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 # Anonymization : 
 ## Command line : 
-python anonymize.py files-directory anonymized-files-directory
+	python anonymize.py files-directory anonymized-files-directory
  - files-directory is the path to the folder that contains all the dicom images.
  - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
 
@@ -121,12 +122,12 @@ python anonymize.py files-directory anonymized-files-directory
 ### Example 1 :  
  	python anonymize.py ~/data ~/anonymized_data
 
- 	Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
+ Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
 
 ### Example 2 : 
 	python anonimyze.py ~/data ~/data 
 
-	Runnning the command above will replace all the images within data folder with anonymized ones.
+Runnning the command above will replace all the images within data folder with anonymized ones.
 
 # Converter : 
 
