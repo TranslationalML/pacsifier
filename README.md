@@ -97,7 +97,7 @@ Using this csv file, the query will retrieve images of the patient with patient 
 
 #### Example 5
 
-ProtocolName,Modality,PatientBirthDate
+ProtocolName,Modality,PatientBirthDate<br>
 BEAT_SelfNav\*,CT,19920611
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
