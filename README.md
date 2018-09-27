@@ -7,7 +7,7 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 1. Install dcmtk `sudo apt-get install -y dcmtk`
 2. Download and install miniconda: `wget -c http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh`, then `chmod +x Miniconda-latest-Linux-x86_64.sh`
 3. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
-4. Setup the environment and install heudiconv by running `bash create_miniconda3_environment.sh` and then `bash installation_python_modules.sh` .
+4. Setup the environment and install heudiconv by running `bash ./utils/create_miniconda3_environment.sh` and then `bash ./utils/installation_python_modules.sh` .
 5. Create the configuration file as described below.
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
