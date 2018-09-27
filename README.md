@@ -125,7 +125,7 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
 
 ### Example 2 : 
-	python anonimyze.py ~/data ~/data 
+	python anonymize.py ~/data ~/data 
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
 
