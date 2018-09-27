@@ -4,12 +4,12 @@ PACSMAN is a batch query/retrieve interface for the CareStream PACS at Lausanne 
 
 PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools.
 
-1. Install dcmtk `sudo apt-get install XXX CODE_HERE`
-2. Download and install miniconda: `wget ... http://XXX/XXX.sh`, then `chmod u+x XXX.sh; ./XXX.sh`
-3. XXX HOW TO OBTAIN THE CODE? GIT CLONE? XXX
-3. Create a new python 3.6 environment using the yml file provided `conda create XXX`
-4. Setup the configuration file (see below)
-5. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
+1. Install dcmtk `sudo apt-get install -y dcmtk`
+2. Download and install miniconda: `wget -c http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh`, then `chmod +x Miniconda-latest-Linux-x86_64.sh`
+3. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
+4. Setup the environment and install heudiconv by running `bash create_miniconda3_environment.sh` and then `bash installation_python_modules.sh` .
+5. Create the configuration file as described below.
+6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
 
 ## Config file : 
