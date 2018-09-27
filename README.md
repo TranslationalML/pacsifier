@@ -1,7 +1,28 @@
-This is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
+PACSMAN is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
+
+# Installation
+
+PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools.
+
+1. Install dcmtk `sudo apt-get install XXX CODE_HERE`
+2. Download and install miniconda: `wget ... http://XXX/XXX.sh`, then `chmod u+x XXX.sh; ./XXX.sh`
+3. XXX HOW TO OBTAIN THE CODE? GIT CLONE? XXX
+3. Create a new python 3.6 environment using the yml file provided `conda create XXX`
+4. Setup the configuration file (see below)
+5. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
 
-# Query/Retrieve : 
+## Config file : 
+
+The config file is a json file that should include keys
+- `server_ip` (the server IP)
+- `port` (the port)
+- `AET` (The current station's application entity title)
+- `server_AET` (The server's application entity title).
+
+The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
+
+# Running queries 
 ## Command line : 
 
  - Run the command : python pacsman.py --info info --save save --queryfile path_to_queryfile
@@ -69,9 +90,9 @@ StudyDate,PatientID<br>
 
 Using this csv file, the query will retrieve images of the patient with patient ID 124588 and Study date between 12/05/2015 and 12/06/2015.
 
-## Config file : 
+#### Example 5
 
-The config file is a json file that should include keys server_ip (the server ip), port (the port), AET (The current station's application entity title), server_AET (The server's application entity title).
+XXX show an example with other fields than StudyDate or PatientID
 
 # Anonymization : 
 !! Add description of how to use anonymization here !!
