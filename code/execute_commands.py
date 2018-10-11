@@ -83,9 +83,9 @@ def find(
 		MODALITY,
 		IMAGETYPE)
 	
-	f = open("../files/log.txt", "a")
-	f.write(str(command)+"\n")
-
+	"""f = open("../files/log.txt", "a")
+				f.write(str(command)+"\n")
+			"""
 	return run(command)
 
 def get(
@@ -135,10 +135,11 @@ def get(
 		check_filter(filter_)
 		command += " --key "+ filter_ + " "
 
-	f = open("../files/log.txt", "a")
-	f.write(str(command)+"\n")
-
-	return run(command)
+	"""f = open("../files/log.txt", "a")
+				f.write(str(command)+"\n")"""
+	run = run(command)
+	print(run)
+	return run
 	
 def write_file(results : str, file : str = "output.txt"): 
 	"""
