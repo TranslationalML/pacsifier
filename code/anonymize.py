@@ -38,7 +38,7 @@ def anonymize(
 	filename : str,
 	output_filename : str, 
 	PatientID : str = "test1",
-	PatientName : str = "test1"):
+	PatientName : str = "test1") -> None:
 	"""
 	Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
 	Args : 
