@@ -18,7 +18,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={}'
-move_command = 'movescu -ll trace {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
+move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
 ######################################################################################################################## 
 ########################################################FUNCTIONS#######################################################
@@ -86,6 +86,7 @@ def find(
 	"""f = open("../files/log.txt", "a")
 				f.write(str(command)+"\n")
 			"""
+
 	return run(command)
 
 def get(
@@ -137,9 +138,9 @@ def get(
 
 	"""f = open("../files/log.txt", "a")
 				f.write(str(command)+"\n")"""
-	run = run(command)
-	print(run)
-	return run
+	
+	
+	return run(command)
 	
 def write_file(results : str, file : str = "output.txt"): 
 	"""
