@@ -153,7 +153,7 @@ def process_names(name : str) -> str :
 		string : patient name in the format it will be used in the query.
 	"""
 	splitted_name = name.upper().split(" ")
-	new_name = "*"+ "^" +"*"+ splitted_name[-1]+"*"
+	new_name = "*"+ "^" +"*"+ splitted_name[-1]
 	return new_name
 
 ########################################################################################################################
@@ -206,6 +206,8 @@ def main(argv):
 	if args.info == "info" : info = True
 	if args.save == "save" : save = True
 	if args.out_directory != None : output_dir = args.out_directory
+
+	print(output_dir)
 
 	#Reading table.
 	table = read_csv(args.queryfile, dtype=str).fillna("")
@@ -328,7 +330,7 @@ def main(argv):
 			folder_name = serie["SeriesDecription"]
 
 			if folder_name == "" : folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name)
+			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/",""))
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir):
@@ -355,8 +357,8 @@ def main(argv):
 				    w.writeheader()
 				    w.writerow(serie)
 
-	if os.path.isfile("current.txt") : 
-		os.remove("current.txt")
+	"""if os.path.isfile("current.txt") : 
+					os.remove("current.txt")"""
 
 	
 	"""with open("../files/id_mapper.json","w") as fp: 
