@@ -18,13 +18,11 @@ RUN wget --no-check-certificate https://repo.continuum.io/miniconda/Miniconda3-l
 	echo "conda activate pacsman_minimal" >> ~/.bashrc
 ENV PATH /opt/conda/bin:$PATH
 
-# create conda env for pacsman
+# create conda env for pacsman - for some reason adding on same line with && causes setup failure - shell issue?
 ADD ./files/environment_minimal.yml /tmp/environment_minimal.yml
-RUN conda update conda && \
-	conda clean --all --yes && \
-	conda config --add channels conda-forge && \
-	conda env create -n pacsman_minimal -f /tmp/environment_minimal.yml && \
-	conda clean --all --yes
+RUN conda update conda
+RUN conda env create -n pacsman_minimal -f /tmp/environment_minimal.yml
+RUN conda clean --all --yes
 
 ENTRYPOINT ["python", "/app/code/pacsman.py"]
 
