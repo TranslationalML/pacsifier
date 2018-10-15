@@ -12,7 +12,7 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
 
-## Config file : 
+## Config file 
 
 The config file is a json file that should include the keys : 
 - `server_ip` (the server IP)
@@ -23,7 +23,8 @@ The config file is a json file that should include the keys :
 The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
 
 # Running queries 
-## Command line : 
+
+## Command line
 
 	python pacsman.py --info info --save save --queryfile path_to_queryfile
 
@@ -36,6 +37,12 @@ o
  - Running the command above will download the dicom images by default into data folder of the project folder. 
  - You can specify the output directory by adding the option --out_directory path_to_output_directory.
  - You can also specify a different config file by adding the option --config path_to_config_file.
+
+## Running from docker
+
+	docker run --net=host -it --rm -v  ~/.:/base pacsmanlite:latest --save save --info info --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+
+An image is also on the dockerhub at  `benothma/pacsman:latest`
 
 ## Query file: 
 
@@ -62,9 +69,9 @@ Notes :
 if other characters are provided, e.g. `ProtocolName` could be set to `BEAT_SelfNav*`
 - the Series folders are named after the Series Description of its images. However, it may happen that a dicom image has no SeriesDescription stored. In that case, the image will be stored within a folder called No_series_description.
 
-### Example : 
+### Examples
 
-#### Example 1 : 
+#### Example 1 
 
 	StudyDate,PatientID
 	20150512,123421
@@ -76,21 +83,21 @@ A csv file like the one written above will retrieve:
 - Images of patient with patient ID 45322.
 - Images of studies done the 02/01/2018.
 
-#### Example 2 : 
+#### Example 2 
 
 	StudyDate,patientID
 	20150512,123421
 
 The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above. (patientID should be PatientID)
 
-#### Example 3 : 
+#### Example 3 
 
 	StudyDate,PatientID
 	20150512,*
 
 The query for this csv file will fail because querying with values * is not allowed.
 
-#### Example 4 : 
+#### Example 4 
 
 	StudyDate,PatientID
 	20150512-20150612,124588
@@ -104,13 +111,13 @@ Using this csv file, the query will retrieve images of the patient with patient 
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
-# Anonymization : 
-## Command line : 
+# Anonymization 
+## Command line 
 	python anonymize.py files-directory anonymized-files-directory
  - files-directory is the path to the folder that contains all the dicom images.
  - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
 
-## Important Notes : 
+## Important Notes 
  - If the anonymized-files-directory is the same as the files-directory the raw dicom images will be deleted and replaced by the anonymized ones (This proved useful when there was no more storage space left for additional images ).
  - The files-directory must contain the following structure : 
  	- The files-directory must contain subject folders with names that start with sub- (e.g. sub-123456). In any other case, the script will run but won't affect the data in any way.
@@ -119,21 +126,21 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
  - The anonymized-files-directory must exist on the computer.
 
-## Example :
+## Examples
 
-### Example 1 :  
+### Example 1  
  	python anonymize.py ~/data ~/anonymized_data
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
 
-### Example 2 : 
+### Example 2 
 	python anonymize.py ~/data ~/data 
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
 
-# Converting to nifti : 
+# Converting to NIFTI 
 
-## Command line : 
+## Command line
 
 	python converter.py path_to_data_folder 
 
