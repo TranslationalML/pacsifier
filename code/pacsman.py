@@ -281,6 +281,13 @@ def main(argv):
 		if IMAGETYPE != "":
 			QUERYRETRIVELEVEL = "IMAGE"
 
+		# check if we can ping the PACS
+		echo_res =  echo(
+			server_ip = pacs_server,
+			port = port)
+		if not echo_res:
+			raise RuntimeError("Cannot associate with PACS server")
+
 		#Look for series of current patient and current study.
 		find_series_res = find(
 			called_aet,

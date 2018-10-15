@@ -1,12 +1,12 @@
 from datetime import datetime
 
-def check_ip(ip_address : str) : 
+def check_ip(ip_address : str) -> None: 
 	"""
   	Checks if an ip adress is valid. Raises a ValueError if not the case.
   	Args : 
 		ip_address (string) : ip_address
 	"""
-	message = "Invalid ip address"
+	message = "Invalid IP address"
 	if len(ip_address.split(".")) != 4 : 
 		raise ValueError(message)
 	ip_splitted = ip_address.split(".")
@@ -20,7 +20,7 @@ def check_ip(ip_address : str) :
 			raise ValueError(message)
 	return
 
-def check_port(port : int) : 
+def check_port(port : int) -> None : 
 	"""
   	Checks if a port value is valid. Raises a ValueError if not the case.
   	Args : 
@@ -32,7 +32,7 @@ def check_port(port : int) :
 		raise ValueError("Port number is smaller or equal to zero!")
 	return 
 
-def check_AET(AET : str, server = False) : 
+def check_AET(AET : str, server = False) -> None : 
 	"""
   	Checks the validity of an AE title. Raises an error if not the case and uses a boolean to print a relevant error message.
   	Args : 
@@ -51,7 +51,7 @@ def check_parameters_inputs(
 	AET : str,
 	server_ip : str,
 	server_AET : str,
-	port : int) : 
+	port : int) -> None : 
 	"""
   	Checks if the parameters are valid using helper functions. Raises a ValueError if at least one parameter is invalid.
   	Args : 
@@ -67,7 +67,7 @@ def check_parameters_inputs(
 
 	return
 
-def check_ids(UID : str, attribute : str = "Patient ID"):
+def check_ids(UID : str, attribute : str = "Patient ID") -> None:
 	"""
   	Checks if an id is valid. Raises ValueError if not the case and prints a relevant error message using the argument called attribute.
   	Args : 
@@ -79,7 +79,7 @@ def check_ids(UID : str, attribute : str = "Patient ID"):
 		raise ValueError(attribute + " is too long")
 	return 
 	
-def check_filter(filter_text : str) : 
+def check_filter(filter_text : str) -> None : 
 	"""
 	Checks if an additional input filter is valid. 
 	Args : 
@@ -87,7 +87,7 @@ def check_filter(filter_text : str) :
 	"""
 	if len(filter_text.split("=")) != 2 : raise ValueError("Invalid filter input.")
 
-def check_tuple(tuple_ : dict) : 
+def check_tuple(tuple_ : dict) -> None : 
 	"""
 	Checks that the table has an acceptable input parameters. 
 	Args : 
@@ -102,7 +102,7 @@ def check_tuple(tuple_ : dict) :
 
 	if empty : raise ValueError("Empty line in table ! ")
 
-def check_date_range(date : str):
+def check_date_range(date : str) -> None:
 	"""
 	Checks that a date (possibly a date range) is valid.
 	Args : 
@@ -119,7 +119,7 @@ def check_date_range(date : str):
 	else : check_date(date)
 	return
 
-def check_date(date : str):
+def check_date(date : str) -> None:
 	"""
 	Checks that a date is valid.
 	Args : 
