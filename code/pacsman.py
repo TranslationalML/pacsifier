@@ -187,8 +187,11 @@ def main(argv):
 
 	id_tuples = {}
 
+	# XXX VALIDATE INPUT PARAMETERS
+
 	pacs_server = parameters["server_ip"] 
 	port = int(parameters["port"])
+	move_port = int(parameters["move_port"])
 	called_aet = parameters["AET"] 
 	calling_aet = parameters["server_AET"]
 	output_dir = os.path.join("..","data")	
@@ -348,6 +351,7 @@ def main(argv):
 					PATIENTID = serie["PatientID"],
 					STUDYINSTANCEUID = serie["StudyInstanceUID"],
 					SERIESINSTANCEUID = serie["SeriesInstanceUID"],
+					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
 			if info : 
 			
