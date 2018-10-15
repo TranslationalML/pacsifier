@@ -2,7 +2,7 @@
 from datetime import date
 import os
 import warnings
-from sanity_checks import check_parameters_inputs, check_ids, check_port
+from sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port
 import shlex
 import subprocess
 from typing import List, Dict, Tuple
@@ -17,12 +17,41 @@ STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"1.2.276.0.7230010.3.1.4.20324036
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
+echo_command= 'echoscu -ll trace {} {}' # IP port
 find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={}'
 move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
 ######################################################################################################################## 
 ########################################################FUNCTIONS#######################################################
 ########################################################################################################################
+
+def echo(
+	server_ip : str = "88.202.185.144",
+	port : int = 104
+	) -> str : 
+	"""
+  	Checks that the PACS server can be reached and accepts associations
+  	Args : 
+		server_ip : PACS server IP address
+		port : PACS server port for incoming requests
+	Returns : 
+		string : The log lines.
+	"""
+	check_ip(server_ip)
+	check_port(port)
+	
+	command = echo_command.format(server_ip, port)
+	
+	# try:
+	# 	my_out=subprocess.check_output([command.split(' ')])
+	# 	print('* PACS responded to echoscu. Trying to find data.')
+	# 	print(my_out)
+	# except subprocess.CalledProcessError as e:
+	# 	print('* PACS did not respond to echoscu. Please check configuration file and connectivity.')
+	# 	print(e.returncode)
+	# 	print(e.output)
+
+	return run(command)
 
 def find(
 	AET : str,
@@ -141,7 +170,8 @@ def get(
 	
 	
 	return run(command)
-	
+
+
 def write_file(results : str, file : str = "output.txt"): 
 	"""
 	Writes results in file passed in parameters using the parameters passed as arguments.
@@ -151,9 +181,10 @@ def write_file(results : str, file : str = "output.txt"):
 	"""
 
 	if not os.path.exists(file):
-	    os.mknod(file)
-
-	f = open(file, "a")
+	    #os.mknod(file) # not cross-platform - unsupported on os X without root
+	    f = open(file, "w")
+	else: 
+		f = open(file, "a")
 	for line in results:
 		f.write(str(line) + "\n")
 	f.close()
@@ -196,8 +227,14 @@ def run(query : str) -> str:
     	cmd = shlex.split(query)
     except ValueError : exit()
     
-    completed = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    lines = completed.stderr.decode('latin1').splitlines()
-    lines = [line.replace('\x00', '') for line in lines]
+    try: 
+    	completed = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, check=True)
+    	lines = completed.stderr.decode('latin1').splitlines()
+    	lines = [line.replace('\x00', '') for line in lines]
+    except subprocess.CalledProcessError as e: 
+    	print('* Command did not succeed: {}'.format(query))
+    	print(e.returncode)
+    	print(e.output)
+    	lines=''
     
     return lines
