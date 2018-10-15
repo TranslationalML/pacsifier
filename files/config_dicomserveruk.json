@@ -1,1 +1,1 @@
-{"server_ip": "88.202.185.144", "port": "104", "AET": "PC_CIBM_RC", "server_AET": "dicomserver"}
+{"server_ip": "88.202.185.144", "port": "104", "server_AET": "dicomserver", "AET": "PC_CIBM_RC", "move_port": "104"}
