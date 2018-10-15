@@ -1,4 +1,4 @@
-name: dicom_minimal
+name: pacsman_minimal
 channels:
   - defaults
   - conda-forge
