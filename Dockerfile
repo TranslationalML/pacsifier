@@ -16,7 +16,8 @@ RUN wget --no-check-certificate https://repo.continuum.io/miniconda/Miniconda3-l
 	ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
 	echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
 	echo "conda activate pacsman_minimal" >> ~/.bashrc
-ENV PATH /opt/conda/bin:$PATH
+# add both conda env and base env
+ENV PATH /opt/conda/envs/pacsman_minimal/bin:/opt/conda/bin:$PATH
 
 # create conda env for pacsman - for some reason adding on same line with && causes setup failure - shell issue?
 ADD ./files/environment_minimal.yml /tmp/environment_minimal.yml
