@@ -23,7 +23,10 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 4. Download and install miniconda from <htttp://conda.io>
 5. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
 6. Setup the python environment by starting the `Anaconda Prompt` and using `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
-7. If you get a `NotWriteableError: The current user does not have write permissions to a required path`, do XXX.
+7. If you get a `NotWriteableError: The current user does not have write
+permissions to a required path`, run a command prompt as admin (start menu - 
+right click on Command Prompt - Run as administrator), then activate the 
+base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
 8. Create the configuration file as described below
 9. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
