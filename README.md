@@ -26,7 +26,7 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 7. If you get a `NotWriteableError: The current user does not have write
 permissions to a required path`, run a command prompt as admin (start menu - 
 right click on Command Prompt - Run as administrator), then activate the 
-base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
+base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`. Then create the environment as above.
 8. Create the configuration file as described below
 9. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
