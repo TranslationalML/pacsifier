@@ -34,6 +34,10 @@ base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\mi
 
     docker run --net=host -it --rm -v  ~/.:/base pacsmanlite:latest --save save --info info --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
+### Building the pacsman image
+
+    cd /path/to/PACSMAN/; docker build --network=host -t pacsmanlite .
+
 ### Deploying from a local image
 
 First load the docker image into the local docker install.
