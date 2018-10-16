@@ -1,8 +1,12 @@
 PACSMAN is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
 
-# Installation
+# Deployment
 
 PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools.
+
+## From source
+
+### Ubuntu linux
 
 1. Install dcmtk `sudo apt-get install -y dcmtk`
 2. Download and install miniconda: `wget -c http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh`, then `chmod +x Miniconda-latest-Linux-x86_64.sh`
@@ -11,6 +15,37 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 5. Create the configuration file as described below.
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
+### Windows 7 
+
+1. Downlaod and install the chocolatey package manager <https://chocolatey.org/>
+2. Take a new command prompt and install dcmtk: `choco install dcmtk`
+3. Check installation succeeded by taking a new command prompt and typing `echoscu`
+4. Download and install miniconda from <htttp://conda.io>
+5. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
+6. Setup the python environment by starting the `Anaconda Prompt` and using `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
+7. If you get a `NotWriteableError: The current user does not have write permissions to a required path`, do XXX.
+8. Create the configuration file as described below
+9. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
+
+## Using Docker
+
+    docker run --net=host -it --rm -v  ~/.:/base pacsmanlite:latest --save save --info info --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+
+### Deploying from a local image
+
+First load the docker image into the local docker install.
+
+#### Linux
+
+    docker load -i /path/to/image/pacsmanlite.tar
+
+#### Windows 7
+
+Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsmanlite.tar`
+
+### Deploying from dockerhub
+
+An image is also on the dockerhub at  `benothma/pacsman:latest`
 
 ## Config file 
 
@@ -38,11 +73,6 @@ o
  - You can specify the output directory by adding the option --out_directory path_to_output_directory.
  - You can also specify a different config file by adding the option --config path_to_config_file.
 
-## Running from docker
-
-	docker run --net=host -it --rm -v  ~/.:/base pacsmanlite:latest --save save --info info --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
-
-An image is also on the dockerhub at  `benothma/pacsman:latest`
 
 ## Query file: 
 
