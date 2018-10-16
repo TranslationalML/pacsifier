@@ -18,10 +18,10 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 ### Windows 7 (nightmare)
 
 Requirements: 
-	- git <https://git-scm.com/download/win>
-	- Chocolatey <https://chocolatey.org/>
-	- Miniconda <https://conda.io>
-	- Powershell (installed by default since win7 SP1)
+- git <https://git-scm.com/download/win>
+- Chocolatey <https://chocolatey.org/>
+- Miniconda <https://conda.io>
+- Powershell (installed by default since win7 SP1)
 
 1. Download and install the chocolatey package manager <https://chocolatey.org/>
 2. Take a new command prompt and install dcmtk: `choco install dcmtk`
