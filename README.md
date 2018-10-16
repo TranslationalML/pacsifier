@@ -17,18 +17,23 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 
 ### Windows 7 
 
-1. Downlaod and install the chocolatey package manager <https://chocolatey.org/>
+1. Download and install the chocolatey package manager <https://chocolatey.org/>
 2. Take a new command prompt and install dcmtk: `choco install dcmtk`
 3. Check installation succeeded by taking a new command prompt and typing `echoscu`
 4. Download and install miniconda from <htttp://conda.io>
 5. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
-6. Setup the python environment by starting the `Anaconda Prompt` and using `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
-7. If you get a `NotWriteableError: The current user does not have write
-permissions to a required path`, run a command prompt as admin (start menu - 
-right click on Command Prompt - Run as administrator), then activate the 
-base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`. Then create the environment as above.
-8. Create the configuration file as described below
-9. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
+6. Setup the python environment: 
+	- Run a command prompt as admin (start menu - right click on Command Prompt - Run as administrator)
+	- Activate the base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
+	- Create the environment: `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
+	- Note: This is messy but using `Anaconda Prompt` may get you a `NotWriteableError: The current user does not have write
+permissions to a required path`,
+7. Now we need to be able to run conda in PowerShell, because that's where chocolatey makes dcmtk available. To this end, install conda support in powershell one of these ways (all untested for now):
+	- <https://github.com/BCSharp/PSCondaEnvs>
+	- <https://github.com/pldmgg/misc-powershell/tree/master/MyModules/AnacondaEnv> and <https://gist.github.com/pldmgg/c84e802bcecd6e4c962f65be5b5d316d>
+	- <https://github.com/Liquidmantis/PSCondaEnvs>
+7. Create the PACS client/server configuration file as described below
+8. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
 ## Using Docker
 
