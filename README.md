@@ -15,21 +15,23 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 5. Create the configuration file as described below.
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
-### Windows 7 
+### Windows 7 (nightmare)
 
 1. Download and install the chocolatey package manager <https://chocolatey.org/>
 2. Take a new command prompt and install dcmtk: `choco install dcmtk`
 3. Check installation succeeded by taking a new command prompt and typing `echoscu`
 4. Download and install miniconda from <htttp://conda.io>
 5. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
-6. Setup the python environment: 
+6. Setup the python environment from basic `Command prompt`: 
 	- Run a command prompt as admin (start menu - right click on Command Prompt - Run as administrator)
-	- Activate the base conda environment: `d:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
+	- Activate the base conda environment: `D:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
 	- Create the environment: `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
 	- Note: This is messy but using `Anaconda Prompt` may get you a `NotWriteableError: The current user does not have write
 permissions to a required path`,
-7. Now we need to be able to run conda in PowerShell, because that's where chocolatey makes dcmtk available. To this end, install conda support in powershell one of these ways (all untested for now):
-	- <https://github.com/BCSharp/PSCondaEnvs>
+7. Now we need to be able to run conda in PowerShell, because that's where chocolatey makes dcmtk available. To this end:
+	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
+	- Install conda support in powershell by running `Anaconda Prompt` (<https://github.com/BCSharp/PSCondaEnvs>): `conda install -n root -c pscondaenvs pscondaenvs`. this will create scripts `activate.ps1` and `deactivate.ps1` in `D:\path\to\miniconda\Scripts\`
+	- in `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`
 	- <https://github.com/pldmgg/misc-powershell/tree/master/MyModules/AnacondaEnv> and <https://gist.github.com/pldmgg/c84e802bcecd6e4c962f65be5b5d316d>
 	- <https://github.com/Liquidmantis/PSCondaEnvs>
 7. Create the PACS client/server configuration file as described below
