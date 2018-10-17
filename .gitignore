@@ -2,6 +2,8 @@
 /files/patients.txt
 /files/protocol.txt
 /files/config.json
+/files/config_CHUV_TRM.json
+/files/config_CHUV_RC7.json
 /code/TODO.txt
 /code/special_queries.py
 /code/fuzz.py
