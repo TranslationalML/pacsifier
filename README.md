@@ -28,7 +28,7 @@ Requirements:
 3. Check installation succeeded by taking a new command prompt and typing `echoscu`
 4. Download and install miniconda from <https://conda.io>
 5. Download the pacsman code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
-6. Using `cmd.exe` (basic command prompt): Setup the python environment 
+6. Using `cmd.exe` in admin mode: Setup the python environment 
 	- Run a command prompt as admin (start menu - right click on Command Prompt - Run as administrator)
 	- Activate the base conda environment: `D:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
 	- Create the environment: `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
@@ -39,10 +39,10 @@ permissions to a required path`,
 	- There are other options which we have not tested, see e.g. 
 		- <https://github.com/pldmgg/misc-powershell/tree/master/MyModules/AnacondaEnv> and <https://gist.github.com/pldmgg/c84e802bcecd6e4c962f65be5b5d316d>
 		- <https://github.com/Liquidmantis/PSCondaEnvs>
-8. Using `Powershell admin mode` we enable these cmdlets:
+8. Using `Powershell` in admin mode we enable these cmdlets:
 	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
-9. Using `Powershell` we can now run pacsman
-	- in `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
+9. Using `Powershell` in normal mode we can now run pacsman
+	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
 10. Create the PACS client/server configuration file as described below
 11. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
