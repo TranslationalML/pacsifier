@@ -6,7 +6,7 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 
 ## From source
 
-### Ubuntu linux
+### Ubuntu Linux
 
 1. Install dcmtk `sudo apt-get install -y dcmtk`
 2. Download and install miniconda: `wget -c http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh`, then `chmod +x Miniconda-latest-Linux-x86_64.sh`
@@ -15,13 +15,15 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 5. Create the configuration file as described below.
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
-### Windows 7 (nightmare)
+### Windows 7
 
 Requirements: 
 - git <https://git-scm.com/download/win>
 - Chocolatey <https://chocolatey.org/>
 - Miniconda <https://conda.io>
 - Powershell (installed by default since win7 SP1)
+
+This is more annoying than the Linux install.
 
 1. Download and install the chocolatey package manager <https://chocolatey.org/>
 2. Take a new command prompt and install dcmtk: `choco install dcmtk`
