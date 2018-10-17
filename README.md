@@ -75,10 +75,11 @@ An image is also on the dockerhub at  `benothma/pacsman:latest`
 ## Config file 
 
 The config file is a json file that should include the keys : 
-- `server_ip` (the server IP)
-- `port` (the port)
-- `AET` (The current station's application entity title)
-- `server_AET` (The server's application entity title).
+- `server_ip`: PACS server IP address
+- `port`: PACS server port number 
+- `server_AET`: PACS server application entity title
+- `AET`: current station application entity title
+- `move_port`: port number to use on the current station to receive images (C-MOVE destination)
 
 The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
 
