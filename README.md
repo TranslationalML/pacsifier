@@ -26,7 +26,7 @@ Requirements:
 This is more annoying than the Linux install.
 
 1. Download and install the chocolatey package manager <https://chocolatey.org/>
-2. Take a new command prompt and install dcmtk: `choco install dcmtk`
+2. Take a new `command prompt` in admin mode and install dcmtk: `choco install dcmtk`
 3. Check installation succeeded by taking a new command prompt and typing `echoscu`
 4. Download and install miniconda from <https://conda.io>
 5. Download the pacsman code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
