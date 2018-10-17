@@ -192,8 +192,8 @@ def main(argv):
 	pacs_server = parameters["server_ip"] 
 	port = int(parameters["port"])
 	move_port = int(parameters["move_port"])
-	called_aet = parameters["AET"] 
-	calling_aet = parameters["server_AET"]
+	client_AET = parameters["AET"]		
+	server_AET = parameters["server_AET"]
 	output_dir = os.path.join("..","data")	
 
 	#processing command line inputs
@@ -284,15 +284,16 @@ def main(argv):
 		# check if we can ping the PACS
 		echo_res =  echo(
 			server_ip = pacs_server,
-			port = port)
+			port = port,
+			server_AET = server_AET)
 		if not echo_res:
 			raise RuntimeError("Cannot associate with PACS server")
 
 		#Look for series of current patient and current study.
 		find_series_res = find(
-			called_aet,
+			client_AET,
 			server_ip = pacs_server,
-			server_AET = calling_aet,
+			server_AET = server_AET,
 			port = port,
 			QUERYRETRIVELEVEL = QUERYRETRIVELEVEL,
 			PATIENTID = PATIENTID,
@@ -349,11 +350,11 @@ def main(argv):
 			#Retrieving files of current patient, study and serie.
 			if save :
 				get_res = get(
-					called_aet,
+					client_AET,
 					serie["StudyDate"],
 					additional,
 					server_ip = pacs_server,
-					server_AET = calling_aet,
+					server_AET = server_AET,
 					port = port,
 					PATIENTID = serie["PatientID"],
 					STUDYINSTANCEUID = serie["StudyInstanceUID"],
