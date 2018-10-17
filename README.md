@@ -47,6 +47,7 @@ permissions to a required path`,
 	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
 9. Create the PACS client/server configuration file as described below
 
+
 #### Usage
 
 1. Using `Powershell` in normal mode we can now run pacsman
