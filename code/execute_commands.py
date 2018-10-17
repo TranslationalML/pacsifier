@@ -41,7 +41,7 @@ def echo(
 	"""
 	check_ip(server_ip)
 	check_port(port)
-	check_AET(server_AET, server=TRUE)
+	check_AET(server_AET, server=True)
 	
 	command = echo_command.format(server_AET, server_ip, port)
 	
