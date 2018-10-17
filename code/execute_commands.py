@@ -2,7 +2,7 @@
 from datetime import date
 import os
 import warnings
-from sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port
+from sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET
 import shlex
 import subprocess
 from typing import List, Dict, Tuple
@@ -17,7 +17,7 @@ STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = '"1.2.276.0.7230010.3.1.4.20324036
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
-echo_command= 'echoscu -ll trace {} {}' # IP port
+echo_command= 'echoscu -ll trace -aec {} {} {}' # server_AET IP port
 find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={}'
 move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
@@ -27,20 +27,23 @@ move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --
 
 def echo(
 	server_ip : str = "88.202.185.144",
-	port : int = 104
+	port : int = 104,
+	server_AET : str = "theServerAET"
 	) -> str : 
 	"""
   	Checks that the PACS server can be reached and accepts associations
   	Args : 
 		server_ip : PACS server IP address
 		port : PACS server port for incoming requests
+		server_AET: PACS server AET
 	Returns : 
 		string : The log lines.
 	"""
 	check_ip(server_ip)
 	check_port(port)
+	check_AET(server_AET, server=TRUE)
 	
-	command = echo_command.format(server_ip, port)
+	command = echo_command.format(server_AET, server_ip, port)
 	
 	# try:
 	# 	my_out=subprocess.check_output([command.split(' ')])
