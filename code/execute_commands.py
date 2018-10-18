@@ -7,6 +7,7 @@ import shlex
 import subprocess
 from typing import List, Dict, Tuple
 from sanity_checks import check_filter
+import platform
 
 warnings.filterwarnings("ignore")
 
@@ -231,15 +232,19 @@ def run(query : str) -> str:
 	try :
 		#The replace in the line below is necessary for the windows deployment.
 		cmd = shlex.split(query.replace("\\","\\\\"))
-		
 		with open("log.txt","a") as f: 
 			f.write(query + "\n")
 
 	except ValueError : 
 		exit()
 	try:
-		completed = subprocess.check_output(cmd, stderr = subprocess.PIPE)
-		lines = completed.decode('latin1').splitlines()
+		if 'Linux' in platform.platform() : 
+			completed = subprocess.run(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE, check=True)
+			lines = completed.stderr.decode('latin1').splitlines()
+
+		else : 
+			completed = subprocess.check_output(cmd, stderr = subprocess.PIPE)
+			lines = completed.decode('latin1').splitlines()
 		lines = [line.replace('\x00', '') for line in lines]
 		
 	except subprocess.CalledProcessError as e: 

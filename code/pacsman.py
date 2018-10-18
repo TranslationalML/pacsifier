@@ -280,12 +280,12 @@ def main(argv):
 			QUERYRETRIVELEVEL = "IMAGE"
 
 		# check if we can ping the PACS
-		echo_res =  echo(
-			server_ip = pacs_server,
-			port = port,
-			client_AET = client_AET)
-		if not echo_res:
-			raise RuntimeError("Cannot associate with PACS server")
+		"""echo_res =  echo(
+									server_ip = pacs_server,
+									port = port,
+									client_AET = client_AET)
+								if not echo_res:
+									raise RuntimeError("Cannot associate with PACS server")"""
 
 		#Look for series of current patient and current study.
 		find_series_res = find(
@@ -368,8 +368,8 @@ def main(argv):
 				    w.writeheader()
 				    w.writerow(serie)
 
-	"""if os.path.isfile("current.txt") : 
-					os.remove("current.txt")"""
+	if os.path.isfile("current.txt") : 
+		os.remove("current.txt")
 
 	
 	"""with open("../files/id_mapper.json","w") as fp: 
