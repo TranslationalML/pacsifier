@@ -28,7 +28,7 @@ move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --
 def echo(
 	server_ip : str = "88.202.185.144",
 	port : int = 104,
-	server_AET : str = "theServerAET"
+	client_AET : str = "theClientAET"
 	) -> str : 
 	"""
   	Checks that the PACS server can be reached and accepts associations
@@ -41,9 +41,9 @@ def echo(
 	"""
 	check_ip(server_ip)
 	check_port(port)
-	check_AET(server_AET, server=True)
+	check_AET(client_AET, server=False)
 	
-	command = echo_command.format(server_AET, server_ip, port)
+	command = echo_command.format(client_AET, server_ip, port)
 	
 	# try:
 	# 	my_out=subprocess.check_output([command.split(' ')])
@@ -53,7 +53,10 @@ def echo(
 	# 	print('* PACS did not respond to echoscu. Please check configuration file and connectivity.')
 	# 	print(e.returncode)
 	# 	print(e.output)
-
+	
+	"""command_1 = "echo windows sucks"
+				temp = run(command_1)
+				print([c+"\n" for c in temp])"""
 	return run(command)
 
 def find(
@@ -171,7 +174,6 @@ def get(
 	"""f = open("../files/log.txt", "a")
 				f.write(str(command)+"\n")"""
 	
-	
 	return run(command)
 
 
@@ -219,25 +221,31 @@ def replace_default_params(
 		"MY_AET",AET)
 
 def run(query : str) -> str:
-    """
-    Runs a the command passed as parameter. 
-    Args:
-    	query (string) : query command line to be executed.
-    Returns : 
-    	string : The log lines.
-    """
-    try : 
-    	cmd = shlex.split(query)
-    except ValueError : exit()
-    
-    try: 
-    	completed = subprocess.run(cmd, stdout = subprocess.PIPE, stderr = subprocess.PIPE, check=True)
-    	lines = completed.stderr.decode('latin1').splitlines()
-    	lines = [line.replace('\x00', '') for line in lines]
-    except subprocess.CalledProcessError as e: 
-    	print('* Command did not succeed: {}'.format(query))
-    	print(e.returncode)
-    	print(e.output)
-    	lines=''
-    
-    return lines
+	"""
+	Runs a the command passed as parameter. 
+	Args:
+		query (string) : query command line to be executed.
+	Returns : 
+		string : The log lines.
+	"""
+	try :
+		#The replace in the line below is necessary for the windows deployment.
+		cmd = shlex.split(query.replace("\\","\\\\"))
+		
+		with open("log.txt","a") as f: 
+			f.write(query + "\n")
+
+	except ValueError : 
+		exit()
+	try:
+		completed = subprocess.check_output(cmd, stderr = subprocess.PIPE)
+		lines = completed.decode('latin1').splitlines()
+		lines = [line.replace('\x00', '') for line in lines]
+		
+	except subprocess.CalledProcessError as e: 
+		print('* Command did not succeed: {}'.format(' '.join(cmd)))
+		print(e.returncode)
+		print(e.output)
+		lines=''
+
+	return lines

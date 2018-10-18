@@ -210,8 +210,6 @@ def main(argv):
 	if args.save == "save" : save = True
 	if args.out_directory != None : output_dir = args.out_directory
 
-	print(output_dir)
-
 	#Reading table.
 	table = read_csv(args.queryfile, dtype=str).fillna("")
 	
@@ -285,7 +283,7 @@ def main(argv):
 		echo_res =  echo(
 			server_ip = pacs_server,
 			port = port,
-			server_AET = server_AET)
+			client_AET = client_AET)
 		if not echo_res:
 			raise RuntimeError("Cannot associate with PACS server")
 
@@ -324,6 +322,7 @@ def main(argv):
 			counter+=1
 			if counter % 50 == 0 : 
 				time.sleep(60)
+
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 			
 			"""if study_counter == 0 : 
