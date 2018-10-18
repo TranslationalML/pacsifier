@@ -17,6 +17,8 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 
 ### Windows 7
 
+#### Installation
+
 Requirements: 
 - git <https://git-scm.com/download/win>
 - Chocolatey <https://chocolatey.org/>
@@ -26,7 +28,7 @@ Requirements:
 This is more annoying than the Linux install.
 
 1. Download and install the chocolatey package manager <https://chocolatey.org/>
-2. Take a new `command prompt` in admin mode and install dcmtk: `choco install dcmtk`
+2. Take a new `command prompt in admin mode and install dcmtk: `choco install dcmtk`
 3. Check installation succeeded by taking a new command prompt and typing `echoscu`
 4. Download and install miniconda from <https://conda.io>
 5. Download the pacsman code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
@@ -43,10 +45,14 @@ permissions to a required path`,
 		- <https://github.com/Liquidmantis/PSCondaEnvs>
 8. Using `Powershell` in admin mode we enable these cmdlets:
 	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
-9. Using `Powershell` in normal mode we can now run pacsman
+9. Create the PACS client/server configuration file as described below
+
+
+#### Usage
+
+1. Using `Powershell` in normal mode we can now run pacsman
 	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
-10. Create the PACS client/server configuration file as described below
-11. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
+2. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
 ## Using Docker
 
