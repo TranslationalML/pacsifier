@@ -31,7 +31,8 @@ tag_to_attribute = { # type : Dict[str,str]
 "(0018,1000)" : "DeviceSerialNumber", 
 "(0008,0022)" : "AcquisitionDate",
 "(0008,0060)" : "Modality",
-"(0008,0008)" : "ImageType"}
+"(0008,0008)" : "ImageType",
+"(0020,0011)" : "SeriesNumber"}
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
 
@@ -79,7 +80,8 @@ def process_text_files(filename : str) -> list:
 		"SeriesInstanceUID" : "",
 		"DeviceSerialNumber" : "",
 		"Modality" : "",
-		"ImageType" : ""} 
+		"ImageType" : "",
+		"SeriesNumber" : ""} 
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)
@@ -152,6 +154,7 @@ def process_names(name : str) -> str :
 	Returns : 
 		string : patient name in the format it will be used in the query.
 	"""
+	if name == "" : return ""
 	splitted_name = name.upper().split(" ")
 	new_name = "*"+ "^" +"*"+ splitted_name[-1]
 	return new_name
@@ -229,7 +232,9 @@ def main(argv):
 	'AcquisitionDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
-	"Modality"			: {'type' : 'string', 'maxlength' : 16}
+	"Modality"			: {'type' : 'string', 'maxlength' : 16},
+	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12}
+
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 
@@ -252,6 +257,7 @@ def main(argv):
 		DEVICESERIALNUMBER = tuple_["DeviceSerialNumber"]
 		IMAGETYPE = tuple_["ImageType"]
 		MODALITY = tuple_["Modality"]
+		SERIESNUMBER = tuple_["SeriesNumber"]
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
@@ -264,7 +270,8 @@ def main(argv):
 		'AcquisitionDate' 	: ACQUISITIONDATE,
 		'PatientBirthDate' 	: PATIENTBIRTHDATE,
 		'DeviceSerialNumber': DEVICESERIALNUMBER,
-		'Modality' 			: MODALITY
+		'Modality' 			: MODALITY,
+		'SeriesNumber'		: SERIESNUMBER
 		#'ImageType' 		: IMAGETYPE
 		}
 		
@@ -340,7 +347,7 @@ def main(argv):
 			folder_name = serie["SeriesDecription"]
 
 			if folder_name == "" : folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/",""))
+			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/","")+"_"+serie["SeriesNumber"])
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir):
