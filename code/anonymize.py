@@ -70,11 +70,12 @@ def anonymize(
 		return
 	try : 
 		age = dataset.PatientAge
-		if int(age[:3]) > 89 : 
+		if age != '' :
+			if int(age[:3]) > 89 : 
 
-			ninety_plus = True
-			dataset.PatientAge = "90+Y"
-			dataset.PatientBirthDate = "19010101"
+				ninety_plus = True
+				dataset.PatientAge = "90+Y"
+				dataset.PatientBirthDate = "19010101"
 	except AttributeError : 
 		pass
 
@@ -113,8 +114,9 @@ def anonymize_all(
 	#Listing patient files.
 	patients_folders = next(os.walk(datapath))[1]
 	if new_ids == None : 
-		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
-	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i].replace("sub-","")] for i in range(len(patients_folders))}
+		new_ids = {patients_folders[i] : str(i+61).zfill(6) for i in range(len(patients_folders))}
+
+	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i]] for i in range(len(patients_folders))}
 
 	for patient in tqdm(patients_folders) : 
 		current_path = os.path.join(datapath, patient, subject_dicom_path)
