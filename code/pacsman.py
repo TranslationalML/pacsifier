@@ -170,7 +170,7 @@ def process_person_names(name : str) -> str :
 def main(argv):
 	additional = []
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--config', help='configuration file path')
+	parser.add_argument('--config', help='configuration file path', default=os.path.join("..","files","config.json"))
 	parser.add_argument('--save', action='store_true')
 	parser.add_argument('--info', action ='store_true')
 	parser.add_argument("--queryfile", help = 'database')
@@ -179,7 +179,7 @@ def main(argv):
 	
 
 	config_path = args.config
-	if config_path == None : config_path = "../files/config.json"
+	
 	#Reading config file.
 	with open(config_path) as f:
 		parameters = json.load(f)
