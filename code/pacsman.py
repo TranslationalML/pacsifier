@@ -112,7 +112,7 @@ def parse_findscu_dump_file(filename : str) -> list:
 		
 	return id_table
 
-def check_query_table_allowed_filters(table, allowed_filters : list = ALLOWED_FILTERS) : 
+def check_query_table_allowed_filters(table, allowed_filters : list = ALLOWED_FILTERS) -> None : 
 	"""
 	Checks if the csv table passed as input has only attributes that are allowed.
 	Args : 

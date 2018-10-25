@@ -46,18 +46,6 @@ def echo(
 	
 	command = echo_command.format(client_AET, server_ip, port)
 	
-	# try:
-	# 	my_out=subprocess.check_output([command.split(' ')])
-	# 	print('* PACS responded to echoscu. Trying to find data.')
-	# 	print(my_out)
-	# except subprocess.CalledProcessError as e:
-	# 	print('* PACS did not respond to echoscu. Please check configuration file and connectivity.')
-	# 	print(e.returncode)
-	# 	print(e.output)
-	
-	"""command_1 = "echo windows sucks"
-				temp = run(command_1)
-				print([c+"\n" for c in temp])"""
 	return run(command)
 
 def find(
@@ -93,9 +81,14 @@ def find(
 		SERIESDESCRIPTION (string) : Series Description.
 		PROTOCOLNAME (string) : protocol name.
 		ACQUISITIONDATE (string) : Acquisition Date.
+		PATIENTNAME (string) : The patient's name.
+		PATIENTBIRTHDATE (string) : The patient's birth date.
 		STUDYDATE (string) : Study Date.
 		DEVICESERIALNUMBER (string) : MRI device serial number.
+		MODALITY (string) : The Modality.
 		IMAGETYPE (string) : Image Type.
+		STUDYDESCRIPTION (string): The study description,
+		ACCESSIONNUMBER : (string) : The accession number. 
 	Returns : 
 		string : The log lines.
 	"""
@@ -122,15 +115,12 @@ def find(
 		IMAGETYPE,
 		STUDYDESCRIPTION,
 		ACCESSIONNUMBER)
-	
-	"""f = open("../files/log.txt", "a")
-				f.write(str(command)+"\n")
-			"""
+
 	return run(command)
 
 def get(
 	AET : str,
-	date : str,
+	STUDYDATE : str,
 	additional_filters : list = [],
 	server_ip : str = "88.202.185.144",
 	server_AET : str = "theServerAET",
@@ -144,12 +134,15 @@ def get(
 	Builds a query for movescu.
 	Args : 
 		AET (string) : Called AET
+		STUDYDATE (string) : the study date.
+		additional_filters (list) : list of additional filters to be added to the query.
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
 		port (int) : port 
 		PATIENTID (string) : patient id 
 		STUDYINSTANCEUID (string) : Study instance unique idetifier.
 		SERIESINSTANCEUID (string) : Series instance unique identifier
+		move_port (int) : the port used for movescu command.
 		OUTDIR (string) : directory of output files
 	Returns : 
 		string : The log lines.
@@ -167,21 +160,18 @@ def get(
 		PATIENTID,
 		STUDYINSTANCEUID,
 		SERIESINSTANCEUID,
-		date,
+		STUDYDATE,
 		move_port,
 		OUTDIR)
 	
 	for filter_ in additional_filters : 
 		check_filter(filter_)
 		command += " --key "+ filter_ + " "
-
-	"""f = open("../files/log.txt", "a")
-				f.write(str(command)+"\n")"""
 	
 	return run(command)
 
 
-def write_file(results : str, file : str = "output.txt"): 
+def write_file(results : str, file : str = "output.txt") -> None: 
 	"""
 	Writes results in file passed in parameters using the parameters passed as arguments.
 	Args : 
