@@ -173,7 +173,7 @@ def main(argv):
 	parser.add_argument('--config', help='configuration file path', default=os.path.join("..","files","config.json"))
 	parser.add_argument('--save', action='store_true', help = "The images will be stored")
 	parser.add_argument('--info', action ='store_true', help = "The info csv files will be stored")
-	parser.add_argument("--queryfile", help = 'database')
+	parser.add_argument("--queryfile", help = 'path to database')
 	parser.add_argument("--out_directory", help = 'Output directory where images will be saved', default = os.path.join("..","data"))
 	args = parser.parse_args()
 	
@@ -211,6 +211,7 @@ def main(argv):
 	"""
 
 	if args.queryfile == None : 
+		print("Missing mandatory option --queryfile!")
 		parser.print_help()
 		sys.exit()
 	#Reading table.
