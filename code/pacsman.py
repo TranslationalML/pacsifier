@@ -329,13 +329,13 @@ def main(argv):
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 
 			#Make the patient folder.
-			if not os.path.isdir(patient_dir):
+			if not os.path.isdir(patient_dir) and (args.save or args.info):
 				os.mkdir(patient_dir)
 
 			patient_study_output_dir = os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
 
 			#Make the Study folder.
-			if not os.path.isdir(patient_study_output_dir):
+			if not os.path.isdir(patient_study_output_dir) and (args.save or args.info):
 				os.mkdir(patient_study_output_dir)
 
 			#Name the series folder after the SeriesDescription.
@@ -346,7 +346,7 @@ def main(argv):
 			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/","")+"-"+serie["SeriesNumber"])
 
 			#Store all later retrieved files of current patient within the serie_id directory.
-			if not os.path.isdir(patient_serie_output_dir):
+			if not os.path.isdir(patient_serie_output_dir) and (args.save or args.info):
 				os.mkdir(patient_serie_output_dir)
 
 			#Retrieving files of current patient, study and serie.
@@ -362,6 +362,7 @@ def main(argv):
 					SERIESINSTANCEUID = serie["SeriesInstanceUID"],
 					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
+
 			if args.info : 
 
 				#Writing series info to csv file.
