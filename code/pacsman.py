@@ -171,14 +171,12 @@ def main(argv):
 	additional = []
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--config', help='configuration file path')
-	parser.add_argument('--save', help='save images')
-	parser.add_argument('--info', help ='save images info')
+	parser.add_argument('--save', action='store_true')
+	parser.add_argument('--info', action ='store_true')
 	parser.add_argument("--queryfile", help = 'database')
 	parser.add_argument("--out_directory", help = 'Output directory where images will be saved')
 	args = parser.parse_args()
-
-
-
+	
 
 	config_path = args.config
 	if config_path == None : config_path = "../files/config.json"
@@ -212,11 +210,6 @@ def main(argv):
 	options = [opt for opt in argv[1:] if opt[0] == '-']
 	"""
 
-	info = False
-	save = False
-
-	if args.info == "info" : info = True
-	if args.save == "save" : save = True
 	if args.out_directory != None : output_dir = args.out_directory
 
 	#Reading table.
@@ -368,7 +361,7 @@ def main(argv):
 				os.mkdir(patient_serie_output_dir)
 		 
 			#Retrieving files of current patient, study and serie.
-			if save :
+			if args.save :
 				get_res = get(
 					client_AET,
 					serie["StudyDate"],
@@ -381,7 +374,7 @@ def main(argv):
 					SERIESINSTANCEUID = serie["SeriesInstanceUID"],
 					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
-			if info : 
+			if args.info : 
 			
 				#Writing series info to csv file.
 				with open(patient_serie_output_dir+'.csv', 'w') as f: 
