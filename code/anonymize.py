@@ -34,7 +34,7 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 	del date_time
 	return str_date
 
-def anonymize(
+def anonymize_dicom_file(
 	filename : str,
 	output_filename : str, 
 	PatientID : str = "test1",
@@ -95,7 +95,7 @@ def anonymize(
 	# write the 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 
-def anonymize_all(
+def anonymize_all_dicoms_within_folder(
 	output_folder : str = ".",
 	datapath : str  = os.path.join("..","data"),
 	subject_dicom_path : str = os.path.join("ses-*","*","*"),
@@ -126,7 +126,7 @@ def anonymize_all(
 
 		for file in files:
 			
-			anonymize(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
+			anonymize_dicom_file(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
 		
 		if rename :
 			try:
@@ -148,7 +148,7 @@ def main(argv):
 	print("Anonymizing ...")
 
 	#Anonymizing all files.
-	mapper = anonymize_all(output_folder = data_path, datapath = data_path)
+	mapper = anonymize_all_dicoms_within_folder(output_folder = data_path, datapath = data_path)
 
 	#dumping new ids to a json file.
 	with open(os.path.join(json_path,'mapper.json'), 'w') as fp:
