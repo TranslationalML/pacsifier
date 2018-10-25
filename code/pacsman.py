@@ -7,7 +7,7 @@ import os
 import warnings
 from pandas import read_csv
 import json
-from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple
+from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
 from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
@@ -33,7 +33,8 @@ tag_to_attribute = { # type : Dict[str,str]
 "(0008,0060)" : "Modality",
 "(0008,0008)" : "ImageType",
 "(0020,0011)" : "SeriesNumber",
-"(0008,1030)" : "StudyDescription"}
+"(0008,1030)" : "StudyDescription",
+"(0008,0050)" : "AccessionNumber"}
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
 
@@ -83,7 +84,8 @@ def process_text_files(filename : str) -> list:
 		"Modality" : "",
 		"ImageType" : "",
 		"SeriesNumber" : "",
-		"StudyDescription" : ""} 
+		"StudyDescription" : "",
+		"AccessionNumber" : ""} 
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)
@@ -238,7 +240,8 @@ def main(argv):
 	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
 	"Modality"			: {'type' : 'string', 'maxlength' : 16},
 	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12},
-	"StudyDescription" 	: {'type' : 'string', 'maxlength' : 64}
+	"StudyDescription" 	: {'type' : 'string', 'maxlength' : 64},
+	"AccessionNumber"	: {'type' : 'string', 'maxlength' : 16}
 
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
@@ -264,6 +267,7 @@ def main(argv):
 		MODALITY = tuple_["Modality"]
 		SERIESNUMBER = tuple_["SeriesNumber"]
 		STUDYDESCRIPTION = tuple_["StudyDescription"]
+		ACCESSIONNUMBER = tuple_["AccessionNumber"]
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
@@ -278,7 +282,8 @@ def main(argv):
 		'DeviceSerialNumber': DEVICESERIALNUMBER,
 		'Modality' 			: MODALITY,
 		'SeriesNumber'		: SERIESNUMBER,
-		'StudyDescription'	: STUDYDESCRIPTION
+		'StudyDescription'	: STUDYDESCRIPTION,
+		'AccessionNumber'	: ACCESSIONNUMBER
 		#'ImageType' 		: IMAGETYPE
 		}
 		
@@ -320,7 +325,8 @@ def main(argv):
 			DEVICESERIALNUMBER = DEVICESERIALNUMBER,
 			MODALITY = MODALITY,
 			IMAGETYPE = IMAGETYPE,
-			STUDYDESCRIPTION = STUDYDESCRIPTION)
+			STUDYDESCRIPTION = STUDYDESCRIPTION,
+			ACCESSIONNUMBER = ACCESSIONNUMBER)
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")
