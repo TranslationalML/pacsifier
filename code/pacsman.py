@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore")
 tag_to_attribute = { # type : Dict[str,str]
 "(0008,0020)" : "StudyDate",
 "(0008,0030)" : "StudyTime",
-"(0008,103e)" : "SeriesDecription",
+"(0008,103e)" : "SeriesDescription",
 "(0010,0020)" : "PatientID",
 "(0018,1030)" : "ProtocolName",
 "(0020,000d)" : "StudyInstanceUID",
@@ -71,7 +71,7 @@ def process_text_files(filename : str) -> list:
 		sample_dict = { # type : Dict[str,str]
 		"StudyDate" : "",
 		"StudyTime" : "",
-		"SeriesDecription" : "",
+		"SeriesDescription" : "",
 		"PatientID" : "",
 		"ProtocolName": "",
 		"StudyInstanceUID" : "",
@@ -228,7 +228,7 @@ def main(argv):
 	'SeriesInstanceUID' : {'type' : 'string', 'maxlength' : 64},
 	'ProtocolName' 		: {'type' : 'string', 'maxlength' : 64},
 	'PatientName'		: {'type' : 'string', 'maxlength' : 64},
-	'SeriesDecription' 	: {'type' : 'string', 'maxlength' : 64},
+	'SeriesDescription' : {'type' : 'string', 'maxlength' : 64},
 	'AcquisitionDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
@@ -248,7 +248,7 @@ def main(argv):
 		PATIENTID = tuple_["PatientID"]
 		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
-		SERIESDESCRIPTION = tuple_["SeriesDecription"] 
+		SERIESDESCRIPTION = tuple_["SeriesDescription"] 
 		PROTOCOLNAME = tuple_["ProtocolName"]
 		ACQUISITIONDATE = tuple_["AcquisitionDate"]
 		STUDYDATE = tuple_["StudyDate"]
@@ -266,7 +266,7 @@ def main(argv):
 		'SeriesInstanceUID' : SERIESINSTANCEUID,
 		'ProtocolName' 		: PROTOCOLNAME,
 		'PatientName'		: PATIENTNAME,
-		'SeriesDecription'  : SERIESDESCRIPTION,
+		'SeriesDescription'  : SERIESDESCRIPTION,
 		'AcquisitionDate' 	: ACQUISITIONDATE,
 		'PatientBirthDate' 	: PATIENTBIRTHDATE,
 		'DeviceSerialNumber': DEVICESERIALNUMBER,
@@ -344,7 +344,7 @@ def main(argv):
 			if not os.path.isdir(patient_study_output_dir):
 				os.mkdir(patient_study_output_dir)
 			
-			folder_name = serie["SeriesDecription"]
+			folder_name = serie["SeriesDescription"]
 
 			if folder_name == "" : folder_name = "No_series_description"
 			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/","")+"_"+serie["SeriesNumber"])

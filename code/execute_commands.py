@@ -122,7 +122,6 @@ def find(
 	"""f = open("../files/log.txt", "a")
 				f.write(str(command)+"\n")
 			"""
-
 	return run(command)
 
 def get(
