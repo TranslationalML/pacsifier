@@ -19,7 +19,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 echo_command= 'echoscu -ll trace -aec {} {} {}' # server_AET IP port
-find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={} --key 8,1030={}'
+find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={} --key 8,1030={} --key 8,50={}'
 move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
 ######################################################################################################################## 
@@ -78,7 +78,8 @@ def find(
 	DEVICESERIALNUMBER : str = "",
 	MODALITY : str = "",
 	IMAGETYPE : str = "",
-	STUDYDESCRIPTION : str = "") -> str : 
+	STUDYDESCRIPTION : str = "",
+	ACCESSIONNUMBER : str = "") -> str : 
 	"""
   	Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
@@ -119,7 +120,8 @@ def find(
 		DEVICESERIALNUMBER,
 		MODALITY,
 		IMAGETYPE,
-		STUDYDESCRIPTION)
+		STUDYDESCRIPTION,
+		ACCESSIONNUMBER)
 	
 	"""f = open("../files/log.txt", "a")
 				f.write(str(command)+"\n")

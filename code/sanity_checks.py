@@ -144,7 +144,7 @@ def check_date(date : str) -> None:
 	return
 
 
-def check_config_file(dict : config_file) -> None : 
+def check_config_file(config_file : dict) -> None : 
 	"""
 	Checks that the config file passed as a parameter is valid or not.
 	Args: 
