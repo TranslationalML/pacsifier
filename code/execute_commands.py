@@ -121,7 +121,6 @@ def find(
 def get(
 	AET : str,
 	STUDYDATE : str,
-	additional_filters : list = [],
 	server_ip : str = "88.202.185.144",
 	server_AET : str = "theServerAET",
 	port : int = 104, 
@@ -135,7 +134,6 @@ def get(
 	Args : 
 		AET (string) : Called AET
 		STUDYDATE (string) : the study date.
-		additional_filters (list) : list of additional filters to be added to the query.
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
 		port (int) : port 
@@ -163,10 +161,6 @@ def get(
 		STUDYDATE,
 		move_port,
 		OUTDIR)
-	
-	for filter_ in additional_filters : 
-		check_filter(filter_)
-		command += " --key "+ filter_ + " "
 	
 	return run(command)
 
