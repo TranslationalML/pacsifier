@@ -142,3 +142,14 @@ def check_date(date : str) -> None:
 	if day not in range(1,32) : 
 		raise ValueError("Invalid day value!")
 	return
+
+
+def check_config_file(dict : config_file) -> None : 
+	"""
+	Checks that the config file passed as a parameter is valid or not.
+	Args: 
+		dict : dictionary loaded from the config json file.
+	"""
+	items = set(config_file.keys())
+	if items != set(["server_ip","port","server_AET","AET","move_port"]) : 
+		raise ValueError("Invalid config file!")

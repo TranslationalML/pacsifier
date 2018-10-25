@@ -184,6 +184,8 @@ def main(argv):
 	with open(config_path) as f:
 		parameters = json.load(f)
 
+	check_config_file(parameters)
+
 	"""with open("../files/new_ids.csv") as f: 
 					reader = csv.reader(f)
 					new_ids = list(reader)"""
