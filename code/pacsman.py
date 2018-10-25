@@ -233,9 +233,10 @@ def main(argv):
 	counter = 0 
 	for i, tuple_ in enumerate(attributes_list):
 		
-		print("Retrieving images for study number ", i)
+		print("Retrieving images for element number ", i)
 		
 		check_tuple(tuple_)
+
 		PATIENTID = tuple_["PatientID"]
 		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
@@ -343,7 +344,7 @@ def main(argv):
 
 			#If the StudyDescription is an empty string name the folder No_series_description.
 			if folder_name == "" : folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/","")+"-"+serie["SeriesNumber"])
+			patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie["SeriesNumber"].zfill(4)+"-"+folder_name.replace("<","").replace(">","").replace(":","").replace("/",""))
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir) and (args.save or args.info):

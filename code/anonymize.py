@@ -92,6 +92,7 @@ def anonymize_dicom_file(
 				try : 
 					dataset.PatientAge = str(new_age).zfill(3) + "Y"
 				except AttributeError : pass
+	
 	# write the 'anonymized' DICOM out under the new filename
 	dataset.save_as(output_filename)
 
