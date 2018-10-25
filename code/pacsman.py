@@ -32,7 +32,8 @@ tag_to_attribute = { # type : Dict[str,str]
 "(0008,0022)" : "AcquisitionDate",
 "(0008,0060)" : "Modality",
 "(0008,0008)" : "ImageType",
-"(0020,0011)" : "SeriesNumber"}
+"(0020,0011)" : "SeriesNumber",
+"(0008,1030)" : "StudyDescription"}
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
 
@@ -81,7 +82,8 @@ def process_text_files(filename : str) -> list:
 		"DeviceSerialNumber" : "",
 		"Modality" : "",
 		"ImageType" : "",
-		"SeriesNumber" : ""} 
+		"SeriesNumber" : "",
+		"StudyDescription" : ""} 
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)
@@ -233,7 +235,8 @@ def main(argv):
 	'PatientBirthDate' 	: {'type' : 'string', 'maxlength' : 8 },
 	"DeviceSerialNumber": {'type' : 'string', 'maxlength' : 64},
 	"Modality"			: {'type' : 'string', 'maxlength' : 16},
-	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12}
+	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12},
+	"StudyDescription" 	: {'type' : 'string', 'maxlength' : 64}
 
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
@@ -258,6 +261,7 @@ def main(argv):
 		IMAGETYPE = tuple_["ImageType"]
 		MODALITY = tuple_["Modality"]
 		SERIESNUMBER = tuple_["SeriesNumber"]
+		STUDYDESCRIPTION = tuple_["StudyDescription"]
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
@@ -271,7 +275,8 @@ def main(argv):
 		'PatientBirthDate' 	: PATIENTBIRTHDATE,
 		'DeviceSerialNumber': DEVICESERIALNUMBER,
 		'Modality' 			: MODALITY,
-		'SeriesNumber'		: SERIESNUMBER
+		'SeriesNumber'		: SERIESNUMBER,
+		'StudyDescription'	: STUDYDESCRIPTION
 		#'ImageType' 		: IMAGETYPE
 		}
 		
@@ -312,7 +317,8 @@ def main(argv):
 			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
 			DEVICESERIALNUMBER = DEVICESERIALNUMBER,
 			MODALITY = MODALITY,
-			IMAGETYPE = IMAGETYPE)
+			IMAGETYPE = IMAGETYPE,
+			STUDYDESCRIPTION = STUDYDESCRIPTION)
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")

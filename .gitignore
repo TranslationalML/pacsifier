@@ -47,4 +47,5 @@ files/yasser.csv
 /files/valentin.csv
 /files/checks
 /files/last_hope.csv
-/code/logs.txt
+/code/log.txt
+/code/check_institution_name.py
