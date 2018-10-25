@@ -5,7 +5,7 @@ import sys
 from tqdm import tqdm, trange
 import os 
 import warnings
-from pandas import read_csv
+from pandas import read_csv, DataFrame
 import json
 from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
 from datetime import datetime
@@ -15,6 +15,7 @@ import csv
 from typing import Dict, Any,Type
 import time
 import argparse
+
 
 warnings.filterwarnings("ignore")
 
@@ -112,7 +113,7 @@ def parse_findscu_dump_file(filename : str) -> list:
 		
 	return id_table
 
-def check_query_table_allowed_filters(table, allowed_filters : list = ALLOWED_FILTERS) -> None : 
+def check_query_table_allowed_filters(table : DataFrame, allowed_filters : list = ALLOWED_FILTERS) -> None : 
 	"""
 	Checks if the csv table passed as input has only attributes that are allowed.
 	Args : 
@@ -127,7 +128,7 @@ def check_query_table_allowed_filters(table, allowed_filters : list = ALLOWED_FI
 	return 
 
 
-def parse_query_table(table , allowed_filters : list = ALLOWED_FILTERS) -> list :
+def parse_query_table(table : DataFrame , allowed_filters : list = ALLOWED_FILTERS) -> list :
 	"""
 	Takes the table passed as script input and parse it using its attributes in the query/retrieve command.
 	Args : 
@@ -168,16 +169,17 @@ def process_person_names(name : str) -> str :
 ########################################################################################################################
 
 def main(argv):
-	additional = []
+	
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--config', help='configuration file path', default=os.path.join("..","files","config.json"))
+	
+	parser.add_argument('--config', help='Configuration file path', default=os.path.join("..","files","config.json"))
 	parser.add_argument('--save', action='store_true', help = "The images will be stored")
 	parser.add_argument('--info', action ='store_true', help = "The info csv files will be stored")
-	parser.add_argument("--queryfile", help = 'path to database')
+	parser.add_argument("--queryfile", help = 'Path to database')
 	parser.add_argument("--out_directory", help = 'Output directory where images will be saved', default = os.path.join("..","data"))
+	
 	args = parser.parse_args()
 	
-
 	config_path = args.config
 	
 	#Reading config file.
@@ -186,15 +188,7 @@ def main(argv):
 
 	check_config_file(parameters)
 
-	"""with open("../files/new_ids.csv") as f: 
-					reader = csv.reader(f)
-					new_ids = list(reader)"""
-	
-	#new_ids = [id_[0].replace(" ","") for id_ in new_ids]
-
 	id_tuples = {}
-
-	# XXX VALIDATE INPUT PARAMETERS
 
 	pacs_server = parameters["server_ip"] 
 	port = int(parameters["port"])
@@ -203,17 +197,12 @@ def main(argv):
 	server_AET = parameters["server_AET"]
 	output_dir = os.path.join("..","data")	
 
-	#processing command line inputs
-	
-	"""	additional = argv[1:]
-	additional = [add for add in additional if add[0] != '-']
-	options = [opt for opt in argv[1:] if opt[0] == '-']
-	"""
-
+	#Check the case where the queryfile option is missing. If it is the case print help.
 	if args.queryfile == None : 
 		print("Missing mandatory option --queryfile!")
 		parser.print_help()
 		sys.exit()
+
 	#Reading table.
 	table = read_csv(args.queryfile, dtype=str).fillna("")
 	
@@ -237,12 +226,11 @@ def main(argv):
 	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12},
 	"StudyDescription" 	: {'type' : 'string', 'maxlength' : 64},
 	"AccessionNumber"	: {'type' : 'string', 'maxlength' : 16}
-
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 
 	validator = Validator(schema)
-
+	counter = 0 
 	for i, tuple_ in enumerate(attributes_list):
 		
 		print("Retrieving images for study number ", i)
@@ -330,44 +318,42 @@ def main(argv):
 
 		#Extract all series ids.
 		series = parse_findscu_dump_file("current.txt")
-		counter = 0 
-		
+
 		#loop over series
 		for serie in tqdm(series) :
-			#study_counter = 0 
+			
 			counter+=1
-			if counter % 50 == 0 : 
+			if counter % 50 == 0 and counter != 0: 
 				time.sleep(60)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
-			
-			"""if study_counter == 0 : 
-													id_tuples[serie["PatientID"]] = new_ids[i]
-													study_counter += 1
-									"""
+
+			#Make the patient folder.
 			if not os.path.isdir(patient_dir):
 				os.mkdir(patient_dir)
 
 			patient_study_output_dir = os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
 
+			#Make the Study folder.
 			if not os.path.isdir(patient_study_output_dir):
 				os.mkdir(patient_study_output_dir)
-			
+
+			#Name the series folder after the SeriesDescription.
 			folder_name = serie["SeriesDescription"]
 
+			#If the StudyDescription is an empty string name the folder No_series_description.
 			if folder_name == "" : folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/","")+"_"+serie["SeriesNumber"])
+			patient_serie_output_dir = os.path.join(patient_study_output_dir ,folder_name.replace("<","").replace(">","").replace(":","").replace("/","")+"-"+serie["SeriesNumber"])
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir):
 				os.mkdir(patient_serie_output_dir)
-		 
+
 			#Retrieving files of current patient, study and serie.
 			if args.save :
 				get_res = get(
 					client_AET,
 					serie["StudyDate"],
-					additional,
 					server_ip = pacs_server,
 					server_AET = server_AET,
 					port = port,
@@ -377,19 +363,19 @@ def main(argv):
 					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
 			if args.info : 
-			
+
 				#Writing series info to csv file.
 				with open(patient_serie_output_dir+'.csv', 'w') as f: 
-				    w = csv.DictWriter(f, serie.keys())
-				    w.writeheader()
-				    w.writerow(serie)
+					w = csv.DictWriter(f, serie.keys())
+					w.writeheader()
+					w.writerow(serie)
 
-	if os.path.isfile("current.txt") : 
-		os.remove("current.txt")
+			if os.path.isfile("current.txt"): 
+				os.remove("current.txt")
 
-	
-	"""with open("../files/id_mapper.json","w") as fp: 
-					json.dump(id_tuples,fp)"""
+		
+		"""with open("../files/id_mapper.json","w") as fp: 
+						json.dump(id_tuples,fp)"""
 
 if __name__ == "__main__" :
 	main(sys.argv[1:])
