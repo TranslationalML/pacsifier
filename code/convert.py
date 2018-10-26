@@ -42,21 +42,17 @@ def convert_to_nifti(subject : str, session : str , base : str) -> None:
 	#Get the directory where this file is (PACSMANS/code)
 	dirname = os.path.dirname(__file__)
 
-	base_command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c {} {} --overwrite"
-	
-	#Creating the commands.
-	command = base_command.format(
+	#Creating the command.
+	command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c dcm2niix -b --overwrite".format(
 		base,
 		"{subject}",
 		"{session}",
 		os.path.join(base,"Nifti"),
 		os.path.join(dirname,"heuristic.py"),
 		subject,
-		session,
-		"dcm2niix",
-		"-b")
+		session)
 	
-	#Running the commands.
+	#Running the command.
 	run(command)
 
 def convert_all(base : str) -> None:
