@@ -23,10 +23,14 @@ def process_list(paths : list) -> list:
 	Returns :
 		list : list of tuples like (subject, session).
 	"""
-	tuples = [(path.split("/")[-2].split("-")[-1], path.split("/")[-1].split("-")[-1]) for path in paths]
+	tuples = []
+	for l in paths : 
+		path = os.path.normpath(l)
+		path = path.split(os.sep)
+	tuples.append((path[-2].split("-")[-1], path[-1].split("-")[-1]))
 	return tuples
 
-def convert(subject : str, session : str , base : str) :
+def convert(subject : str, session : str , base : str) -> None:
 	"""
 	Converts the subject and session in base directory corresponding dicom files to nifti.
 	Args :
@@ -38,35 +42,36 @@ def convert(subject : str, session : str , base : str) :
 	#Get the directory where this file is (PACSMANS/code)
 	dirname = os.path.dirname(__file__)
 
-	command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c none --overwrite".format(
+	base_command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c {} {} --overwrite"
+	
+	#Creating the commands.
+	first_command = base_command.format(
 		base,
 		"{subject}",
 		"{session}",
 		os.path.join(base,"Nifti"),
 		os.path.join(dirname,"convertall.py"),
 		subject,
-		session)
-
-	global_path = os.path.join(base, "sub-*","ses-*","*","*")
+		session,
+		"none",
+		"")
 	
-	run(command)
-	
-	command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c dcm2niix -b --overwrite".format(
+	second_command = base_command.format(
 		base,
 		"{subject}",
 		"{session}",
 		os.path.join(base,"Nifti"),
 		os.path.join(dirname,"heuristic.py"),
 		subject,
-		session)
-
-	global_path = os.path.join(base, "sub-*","ses-*","*","*")
+		session,
+		"dcm2niix",
+		"-b")
 	
-	run(command)
+	#Running the commands.
+	run(first_command)
+	run(second_command)
 
-	paths = glob(global_path)
-
-def convert_all(base : str) :
+def convert_all(base : str) -> None:
 	"""
 	Converts all dicom files within base directory to nifti files
 	Args :

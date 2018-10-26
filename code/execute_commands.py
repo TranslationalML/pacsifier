@@ -2,7 +2,7 @@
 from datetime import date
 import os
 import warnings
-from sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET
+from sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET, check_query_retrieval_level
 import shlex
 import subprocess
 from typing import List, Dict, Tuple
@@ -74,7 +74,8 @@ def find(
 		AET (string) : Called AET
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
-		port (int) : port 
+		port (int) : port
+		QUERYRETRIVELEVEL (string) : The query retrieval level. Can only take values in {SERIES, STRUDY, PATIENT, IMAGE}
 		PATIENTID (string) : patient id 
 		STUDYUID (string) : Study unique idetifier.
 		SERIESINSTANCEUID (string) : Series Instance UID.
@@ -92,10 +93,12 @@ def find(
 	Returns : 
 		string : The log lines.
 	"""
+
 	check_ids(PATIENTID)
 	check_ids(STUDYUID , attribute = "Study instance UID")
 	check_ids(SERIESINSTANCEUID, attribute = "Series instance UID")
 	check_port(port)
+	check_query_retrieval_level(QUERYRETRIVELEVEL)
 	
 	modified_params = replace_default_params(PARAMETERS, AET, server_ip , server_AET , port)
 	command = find_command.format(
@@ -192,6 +195,7 @@ def replace_default_params(
 	Helper function to replace default parameters in queries by new parameters.
 
 	Args : 
+		PARAMETERS (string) : The string containing default parameters for dicomserver. 
 		AET (string) : Called AET
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
@@ -225,7 +229,8 @@ def run(query : str) -> str:
 	except ValueError : 
 		exit()
 	try:
-		if 'Linux' in platform.platform() : 
+		if 'Linux' in platform.platform(): 
+			
 			completed = subprocess.run(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE, check=True)
 			lines = completed.stderr.decode('latin1').splitlines()
 
