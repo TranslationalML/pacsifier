@@ -51,6 +51,7 @@ def anonymize_dicom_file(
 	# Load the current dicom file to 'anonymize'
 	dataset = pydicom.read_file(filename)
 	ninety_plus = False
+
 	#Update attributes to make it anonymous.
 	try : 
 		old_id = dataset.PatientID
@@ -63,6 +64,7 @@ def anonymize_dicom_file(
 		dataset.PersonTelephoneNumbers = ""
 		dataset.OrderCallbackPhoneNumber = ""
 
+	#Keep track of failures in a text file.
 	except AttributeError : 
 		text_file = open("fails.txt", "a")
 
@@ -71,6 +73,8 @@ def anonymize_dicom_file(
 		return
 	try : 
 		age = dataset.PatientAge
+
+		#If age attribute is an empty string, skip this step all together
 		if age != '' :
 			if int(age[:3]) > 89 : 
 
@@ -80,15 +84,20 @@ def anonymize_dicom_file(
 	except AttributeError : 
 		pass
 
+	#The StudyInstanceUID contains the old id. therefore, the old id should be replaced by the new anonymous one.
 	studyUID = dataset.StudyInstanceUID
 	dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
 
 
 	for name in ['PatientBirthDate']:
 		if name in dataset:
+
+			#Assign a new fuzzed birth date.
 			new_date = fuzz_date(dataset.data_element(name).value)
 			dataset.data_element(name).value = new_date
 			if not ninety_plus : 
+
+				#Change the age of the patient according to the new fuzzed birth date.
 				new_age = str(int((datetime.strptime(dataset.StudyDate, "%Y%m%d") - datetime.strptime(new_date, "%Y%m%d")).days / 365))
 				try : 
 					dataset.PatientAge = str(new_age).zfill(3) + "Y"
@@ -120,23 +129,30 @@ def anonymize_all_dicoms_within_folder(
 	if new_ids == None : 
 		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
 
+	#Keep a mapping from old to new ids in a dictionary.
 	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i]] for i in range(len(patients_folders))}
 
+	#Loop over patients...
 	for patient in tqdm(patients_folders) : 
 		current_path = os.path.join(datapath, patient, subject_dicom_path)
+
+		#List all files within patient folder...
 		files = glob(current_path)
 
+		#Loop over all dicom files within a patient directory and anonymize them.
 		for file in files:
 			
 			anonymize_dicom_file(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
 		
+		#If the patient folders are to be renamed.
 		if rename :
 			try:
 				os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]))
 			except OSError : os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]+"_2"))
 	
-	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 
+	#return a mapping from new ids to old ids as a dictionary.
+	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 	return new2old_idx
 
 def main(argv):
@@ -147,7 +163,7 @@ def main(argv):
 	with open('../files/id_mapper.json') as f:
 		new_ids = json.load(f)
 
-	print("Anonymizing ...")
+	print("Anonymizing dicom files within path {}".format(os.path.abspath(data_path)))
 
 	#Anonymizing all files.
 	mapper = anonymize_all_dicoms_within_folder(output_folder = data_path, datapath = data_path)
