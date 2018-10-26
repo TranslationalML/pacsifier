@@ -26,7 +26,6 @@ def infotodict(seqinfo):
     mt_off = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_acq-mtoff_run-00{item:01d}_mt')
 
     other = create_key('sub-{subject}/{session}/other/sub-{subject}_{session}_run-00{item:01d}_other')
-    # ADD FLAIR
 
 
     info = {t1w: [], func: [],  t1_map : [], t2_map : [] , fmap: [], dwi_dti: [], dwi_dsi: [], hardi : [] , mt_on : [], mt_off:[], other : []}

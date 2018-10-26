@@ -155,13 +155,13 @@ def process_person_names(name : str) -> str :
 	"""
 	Processing name to be the input of the query. 
 	Args : 
-		name (string) : patient name. 
+		name (string) : patient's name. 
 	Returns : 
 		string : patient name in the format it will be used in the query.
 	"""
 	if name == "" : return ""
 	splitted_name = name.upper().split(" ")
-	new_name = "*"+ "^" +"*"+ splitted_name[-1]
+	new_name = "*"+ splitted_name[-1]
 	return new_name
 
 ########################################################################################################################
@@ -288,8 +288,8 @@ def main(argv):
 									port = port,
 									client_AET = client_AET)
 								if not echo_res:
-									raise RuntimeError("Cannot associate with PACS server")"""
-
+									raise RuntimeError("Cannot associate with PACS server")
+						"""
 		#Look for series of current patient and current study.
 		find_series_res = find(
 			client_AET,
@@ -324,7 +324,7 @@ def main(argv):
 		for serie in tqdm(series) :
 			
 			counter+=1
-			if counter % 50 == 0 and counter != 0: 
+			if counter % 50 == 0: 
 				time.sleep(60)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])

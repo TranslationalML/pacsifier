@@ -4,7 +4,7 @@ def check_ip(ip_address : str) -> None:
 	"""
   	Checks if an ip adress is valid. Raises a ValueError if not the case.
   	Args : 
-		ip_address (string) : ip_address
+		ip_address (string) : IP address
 	"""
 	message = "Invalid IP address"
 	if len(ip_address.split(".")) != 4 : 
@@ -153,3 +153,8 @@ def check_config_file(config_file : dict) -> None :
 	items = set(config_file.keys())
 	if items != set(["server_ip","port","server_AET","AET","move_port"]) : 
 		raise ValueError("Invalid config file!")
+
+def check_query_retrieval_level(query_retrieval_level : str) -> None : 
+	valid_levels = ["SERIES","PATIENT","IMAGE","STUDY"]
+	if query_retrieval_level not in valid_levels : 
+		raise ValueError("Invalid query retrieval level ! ")
