@@ -13,7 +13,7 @@ def infotodict(seqinfo):
     """
     t1w = create_key('sub-{subject}/{session}/anat/sub-{subject}_{session}_run-00{item:01d}_T1w') # MPRAGE
     func = create_key('sub-{subject}/{session}/func/sub-{subject}_{session}_run-00{item:01d}_task-rest_bold')
-    fmap = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_fmap')
+    fmap = create_key('sub-{subject}/{session}/fmap/sub-{subject}_{session}_run-00{item:01d}_fmap')
 
     dwi_dti = create_key('sub-{subject}/{session}/dwi/sub-{subject}_{session}_acq-DTI_run-00{item:01d}_dwi') # diffusion weighted imaging == DTI == HARDI == DSI
     dwi_dsi = create_key('sub-{subject}/{session}/dwi/sub-{subject}_{session}_acq-DSI_run-00{item:01d}_dwi')

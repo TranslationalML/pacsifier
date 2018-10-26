@@ -30,7 +30,7 @@ def process_list(paths : list) -> list:
 	tuples.append((path[-2].split("-")[-1], path[-1].split("-")[-1]))
 	return tuples
 
-def convert(subject : str, session : str , base : str) -> None:
+def convert_to_nifti(subject : str, session : str , base : str) -> None:
 	"""
 	Converts the subject and session in base directory corresponding dicom files to nifti.
 	Args :
@@ -45,18 +45,7 @@ def convert(subject : str, session : str , base : str) -> None:
 	base_command = "heudiconv -d  {}/sub-{}/ses-{}/*/* -o {} -f {} -s {} -ss {} -c {} {} --overwrite"
 	
 	#Creating the commands.
-	first_command = base_command.format(
-		base,
-		"{subject}",
-		"{session}",
-		os.path.join(base,"Nifti"),
-		os.path.join(dirname,"convertall.py"),
-		subject,
-		session,
-		"none",
-		"")
-	
-	second_command = base_command.format(
+	command = base_command.format(
 		base,
 		"{subject}",
 		"{session}",
@@ -68,8 +57,7 @@ def convert(subject : str, session : str , base : str) -> None:
 		"-b")
 	
 	#Running the commands.
-	run(first_command)
-	run(second_command)
+	run(command)
 
 def convert_all(base : str) -> None:
 	"""
@@ -87,7 +75,7 @@ def convert_all(base : str) -> None:
 
 	print("Converting dicom files to nifti")
 	for tuple_ in tqdm(tuples) :
-		convert(tuple_[0], tuple_[1], abs_path)
+		convert_to_nifti(tuple_[0], tuple_[1], abs_path)
 
 
 def main(argv) :
