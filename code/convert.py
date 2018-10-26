@@ -5,16 +5,6 @@ from tqdm import tqdm
 import sys
 import nipype
 
-def list_files(path : str) -> list :
-	"""
-	returns a list of all files within path passed as parameter.
-	Args :
-		path (string) :directory path
-	Returns :
-		list : list of paths.
-	"""
-	return glob(path)
-
 def process_list(paths : list) -> list:
 	"""
 	Extracts subject and session identifiers as stored in data folder.
@@ -27,7 +17,7 @@ def process_list(paths : list) -> list:
 	for l in paths : 
 		path = os.path.normpath(l)
 		path = path.split(os.sep)
-	tuples.append((path[-2].split("-")[-1], path[-1].split("-")[-1]))
+		tuples.append((path[-2].split("-")[-1], path[-1].split("-")[-1]))
 	return tuples
 
 def convert_to_nifti(subject : str, session : str , base : str) -> None:
@@ -57,19 +47,19 @@ def convert_to_nifti(subject : str, session : str , base : str) -> None:
 
 def convert_all(base : str) -> None:
 	"""
-	Converts all dicom files within base directory to nifti files
+	Converts all dicom files within base directory to nifti files.
 	Args :
 		base (string) : base directory path.
 	"""
 
 	global_path = os.path.join(base, "sub-*","*")
 
-	paths = list_files(global_path )
+	paths = glob(global_path )
 	tuples = process_list(paths)
 
 	abs_path = os.path.abspath(base)
 
-	print("Converting dicom files to nifti")
+	print("Converting dicom files within path " + abs_path + " to nifti ..." )
 	for tuple_ in tqdm(tuples) :
 		convert_to_nifti(tuple_[0], tuple_[1], abs_path)
 

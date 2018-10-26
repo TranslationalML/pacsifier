@@ -62,6 +62,7 @@ def anonymize_dicom_file(
 		dataset.PatientTelephoneNumbers = ""
 		dataset.PersonTelephoneNumbers = ""
 		dataset.OrderCallbackPhoneNumber = ""
+
 	except AttributeError : 
 		text_file = open("fails.txt", "a")
 
@@ -117,7 +118,7 @@ def anonymize_all_dicoms_within_folder(
 	#Listing patient files.
 	patients_folders = next(os.walk(datapath))[1]
 	if new_ids == None : 
-		new_ids = {patients_folders[i] : str(i+61).zfill(6) for i in range(len(patients_folders))}
+		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
 
 	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i]] for i in range(len(patients_folders))}
 
