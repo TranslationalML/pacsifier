@@ -187,7 +187,6 @@ def main(argv):
 		with open(config_path) as f:
 			parameters = json.load(f)
 		check_config_file(parameters)
-		id_tuples = {}
 
 		pacs_server = parameters["server_ip"] 
 		port = int(parameters["port"])
@@ -205,7 +204,7 @@ def main(argv):
 	
 	#Check the case where the queryfile option is missing. If it is the case print help.
 	if args.queryfile == None or args.config == None: 
-		print("Missing mandatory parameter --queryfile!")
+		print("Missing mandatory parameter --queryfile or --config!")
 		parser.print_help()
 		sys.exit()
 
@@ -380,10 +379,6 @@ def main(argv):
 
 			if os.path.isfile("current.txt"): 
 				os.remove("current.txt")
-
-		
-		"""with open("../files/id_mapper.json","w") as fp: 
-						json.dump(id_tuples,fp)"""
-
+				
 if __name__ == "__main__" :
 	main(sys.argv[1:])
