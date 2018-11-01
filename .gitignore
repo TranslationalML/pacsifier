@@ -53,3 +53,4 @@ files/yasser.csv
 /files/missing.csv
 /files/new_ids.csv
 /code/example_heuristic.py
+/code/dicomdir_reader.py

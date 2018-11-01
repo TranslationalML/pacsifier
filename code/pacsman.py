@@ -183,23 +183,28 @@ def main(argv):
 	config_path = args.config
 	
 	#Reading config file.
-	with open(config_path) as f:
-		parameters = json.load(f)
+	try:
+		with open(config_path) as f:
+			parameters = json.load(f)
+		check_config_file(parameters)
+		id_tuples = {}
 
-	check_config_file(parameters)
+		pacs_server = parameters["server_ip"] 
+		port = int(parameters["port"])
+		move_port = int(parameters["move_port"])
+		client_AET = parameters["AET"]		
+		server_AET = parameters["server_AET"]	
+	except FileNotFoundError: 		
+		args.config = None
+		pass
+	
 
-	id_tuples = {}
-
-	pacs_server = parameters["server_ip"] 
-	port = int(parameters["port"])
-	move_port = int(parameters["move_port"])
-	client_AET = parameters["AET"]		
-	server_AET = parameters["server_AET"]
+	
 		
 	output_dir = args.out_directory
 	
 	#Check the case where the queryfile option is missing. If it is the case print help.
-	if args.queryfile == None : 
+	if args.queryfile == None or args.config == None: 
 		print("Missing mandatory parameter --queryfile!")
 		parser.print_help()
 		sys.exit()
@@ -288,9 +293,9 @@ def main(argv):
 		server_ip = pacs_server,
 		port = port,
 		client_AET = server_AET)
-		if not echo_res:
+		if not echo_res :
 			raise RuntimeError("Cannot associate with PACS server")
-			
+
 		#Look for series of current patient and current study.
 		find_series_res = find(
 			client_AET,

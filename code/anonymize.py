@@ -141,7 +141,6 @@ def anonymize_all_dicoms_within_folder(
 
 		#Loop over all dicom files within a patient directory and anonymize them.
 		for file in files:
-			
 			anonymize_dicom_file(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
 		
 		#If the patient folders are to be renamed.
