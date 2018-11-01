@@ -47,8 +47,7 @@ permissions to a required path`,
 	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
 9. Create the PACS client/server configuration file as described below
 
-
-#### Usage
+##### Usage
 
 1. Using `Powershell` in normal mode we can now run pacsman
 	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
@@ -100,7 +99,7 @@ The AET and corresponding IP of the workstation should be declared on Carestream
  - The --queryfile path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
 
 Note : you can download the images without the --info option or only dump the info if --save option is not included.
-o
+
  - Running the command above will download the dicom images by default into data folder of the project folder. 
  - You can specify the output directory by adding the option --out_directory path_to_output_directory.
  - You can also specify a different config file by adding the option --config path_to_config_file.
