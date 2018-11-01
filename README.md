@@ -95,8 +95,8 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 
 	python pacsman.py --info --save --queryfile path_to_queryfile
 
- - The --info option allows you to dump the information in the retrieved series into csv files. XXX what does `info` as the argument to `--info` mean? isn't --info just a switch?
- - The --save option allows you to save the queryed dicom images. XXX same question here
+ - The --info option allows you to dump the information in the retrieved series into csv files.
+ - The --save option allows you to save the queryed dicom images.
  - The --queryfile path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
 
 Note : you can download the images without the --info option or only dump the info if --save option is not included.

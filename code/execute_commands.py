@@ -164,7 +164,6 @@ def get(
 		STUDYDATE,
 		move_port,
 		OUTDIR)
-	
 	return run(command)
 
 
@@ -200,7 +199,6 @@ def replace_default_params(
 		server_ip (string) : server ip
 		server_AET (string) : server_AET
 		port (int) : port 
-
 	Returns : 
 		string : modified parameters with input values.
 	"""
