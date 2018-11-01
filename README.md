@@ -45,9 +45,9 @@ permissions to a required path`,
 		- <https://github.com/Liquidmantis/PSCondaEnvs>
 8. Using `Powershell` in admin mode we enable these cmdlets:
 	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
-9. Create the PACS client/server configuration file as described below
+9. Create the PACS client/server configuration file as described below  
 
-##### Usage
+#### Usage
 
 1. Using `Powershell` in normal mode we can now run pacsman
 	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
