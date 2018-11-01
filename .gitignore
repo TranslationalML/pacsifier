@@ -54,3 +54,5 @@ files/yasser.csv
 /files/new_ids.csv
 /code/example_heuristic.py
 /code/dicomdir_reader.py
+/files/query_patric.csv
+/files/query_patric_labeled.csv
