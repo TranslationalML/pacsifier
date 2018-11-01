@@ -45,7 +45,8 @@ permissions to a required path`,
 		- <https://github.com/Liquidmantis/PSCondaEnvs>
 8. Using `Powershell` in admin mode we enable these cmdlets:
 	- Run `Powershell` as admin (right-click - run as admin) and `Set-ExecutionPolicy RemoteSigned`
-9. Create the PACS client/server configuration file as described below  
+9. Create the PACS client/server configuration file as described below.  
+
 
 #### Usage
 
