@@ -445,8 +445,7 @@ def test_anonymize():
 
 	dataset.PatientAge = "091"
 	dataset.save_as("output_sample_image")
-
-
+	
 	anonymize("output_sample_image","output_sample_image",PatientID = "000420", PatientName = "Hello")
 	dataset = pydicom.read_file("output_sample_image")
 	assert dataset.PatientAge == "90+Y"

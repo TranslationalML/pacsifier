@@ -1,0 +1,2 @@
+import code.pacsman
+from .code.anonymize_Dicom import anonymize_all_dicoms_within_folder, anonymize_dicom_file
