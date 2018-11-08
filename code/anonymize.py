@@ -134,19 +134,23 @@ def anonymize_all_dicoms_within_folder(
 
 	#Loop over patients...
 	for patient in tqdm(patients_folders) : 
+		new_id = old2new_idx[patient]
 		current_path = os.path.join(datapath, patient, subject_dicom_path)
-
+		
+		if os.path.isfile(os.path.join(datapath,patient,"new_id.txt")) : 
+			new_id  = open(os.path.join(datapath,patient,"new_id.txt")).read().splitlines()[0].zfill(6)
+			
 		#List all files within patient folder...
 		files = glob(current_path)
 
 		#Loop over all dicom files within a patient directory and anonymize them.
 		for file in files:
-			anonymize_dicom_file(file,os.path.join(output_folder,file), PatientID = old2new_idx[patient], PatientName = "Obi Ben Kanobi")
+			anonymize_dicom_file(file,os.path.join(output_folder,file), PatientID = new_id, PatientName = "Obi Ben Kanobi")
 		
 		#If the patient folders are to be renamed.
 		if rename :
 			try:
-				os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]))
+				os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+new_id))
 			except OSError : os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]+"_2"))
 	
 
