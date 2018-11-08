@@ -139,6 +139,7 @@ def anonymize_all_dicoms_within_folder(
 		
 		if os.path.isfile(os.path.join(datapath,patient,"new_id.txt")) : 
 			new_id  = open(os.path.join(datapath,patient,"new_id.txt")).read().splitlines()[0].zfill(6)
+			os.remove(os.path.join(datapath,patient,"new_id.txt"))
 			
 		#List all files within patient folder...
 		files = glob(current_path)
