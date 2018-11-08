@@ -175,6 +175,7 @@ def main(argv):
 	parser.add_argument('--config', help='Configuration file path', default=os.path.join("..","files","config.json"))
 	parser.add_argument('--save', action='store_true', help = "The images will be stored")
 	parser.add_argument('--info', action ='store_true', help = "The info csv files will be stored")
+	parser.add_argument('--batch', action='store_true', help = "Wait 60 seconds after every 50 series retrieved")
 	parser.add_argument("--queryfile", help = 'Path to query file')
 	parser.add_argument("--out_directory", help = 'Output directory where images will be saved', default = os.path.join("..","data"))
 	
@@ -255,6 +256,7 @@ def main(argv):
 		STUDYDESCRIPTION = tuple_["StudyDescription"]
 		ACCESSIONNUMBER = tuple_["AccessionNumber"]
 		NEW_ID = tuple_["new_ids"]
+
 		inputs = {
 		'PatientID' 		: PATIENTID, 
 		'StudyDate' 		: STUDYDATE,
@@ -262,7 +264,7 @@ def main(argv):
 		'SeriesInstanceUID' : SERIESINSTANCEUID,
 		'ProtocolName' 		: PROTOCOLNAME,
 		'PatientName'		: PATIENTNAME,
-		'SeriesDescription'  : SERIESDESCRIPTION,
+		'SeriesDescription' : SERIESDESCRIPTION,
 		'AcquisitionDate' 	: ACQUISITIONDATE,
 		'PatientBirthDate' 	: PATIENTBIRTHDATE,
 		'DeviceSerialNumber': DEVICESERIALNUMBER,
@@ -327,7 +329,7 @@ def main(argv):
 		for serie in tqdm(series) :
 			
 			counter+=1
-			if counter % 50 == 0: 
+			if counter % 50 == 0 and args.batch: 
 				time.sleep(60)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
