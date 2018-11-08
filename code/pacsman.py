@@ -38,7 +38,7 @@ tag_to_attribute = { # type : Dict[str,str]
 "(0008,0050)" : "AccessionNumber"}
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
-
+ALLOWED_FILTERS.append("new_ids")
 ########################################################################################################################
 ########################################################FUNCTIONS#######################################################
 ########################################################################################################################
@@ -122,11 +122,11 @@ def check_query_table_allowed_filters(table : DataFrame, allowed_filters : list 
 	"""
 	cols = table.columns
 	for col in cols : 
+
 		if col not in allowed_filters : 
 			raise ValueError("Attribute "+ col +" not allowed! Please check the input table's column names.")
 
-	return 
-
+	return
 
 def parse_query_table(table : DataFrame , allowed_filters : list = ALLOWED_FILTERS) -> list :
 	"""
@@ -175,7 +175,7 @@ def main(argv):
 	parser.add_argument('--config', help='Configuration file path', default=os.path.join("..","files","config.json"))
 	parser.add_argument('--save', action='store_true', help = "The images will be stored")
 	parser.add_argument('--info', action ='store_true', help = "The info csv files will be stored")
-	parser.add_argument("--queryfile", help = 'Path to database')
+	parser.add_argument("--queryfile", help = 'Path to query file')
 	parser.add_argument("--out_directory", help = 'Output directory where images will be saved', default = os.path.join("..","data"))
 	
 	args = parser.parse_args()
@@ -196,9 +196,6 @@ def main(argv):
 	except FileNotFoundError: 		
 		args.config = None
 		pass
-	
-
-	
 		
 	output_dir = args.out_directory
 	
@@ -257,7 +254,7 @@ def main(argv):
 		SERIESNUMBER = tuple_["SeriesNumber"]
 		STUDYDESCRIPTION = tuple_["StudyDescription"]
 		ACCESSIONNUMBER = tuple_["AccessionNumber"]
-
+		NEW_ID = tuple_["new_ids"]
 		inputs = {
 		'PatientID' 		: PATIENTID, 
 		'StudyDate' 		: STUDYDATE,
@@ -291,7 +288,7 @@ def main(argv):
 		echo_res =  echo(
 		server_ip = pacs_server,
 		port = port,
-		client_AET = server_AET)
+		server_AET = server_AET)
 		if not echo_res :
 			raise RuntimeError("Cannot associate with PACS server")
 
@@ -325,6 +322,7 @@ def main(argv):
 		#Extract all series ids.
 		series = parse_findscu_dump_file("current.txt")
 
+		
 		#loop over series
 		for serie in tqdm(series) :
 			
@@ -333,10 +331,15 @@ def main(argv):
 				time.sleep(60)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
-
+			
 			#Make the patient folder.
 			if not os.path.isdir(patient_dir) and (args.save or args.info):
 				os.mkdir(patient_dir)
+
+			if NEW_ID != "" : 
+				file = open(os.path.join(patient_dir,"new_id.txt"), "w") 
+				file.write(str(NEW_ID)) 
+				file.close() 
 
 			patient_study_output_dir = os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
 
@@ -376,7 +379,7 @@ def main(argv):
 					w = csv.DictWriter(f, serie.keys())
 					w.writeheader()
 					w.writerow(serie)
-
+			
 			if os.path.isfile("current.txt"): 
 				os.remove("current.txt")
 				
