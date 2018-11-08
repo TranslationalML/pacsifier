@@ -26,22 +26,14 @@ def main(**extra_args):
           """One can also anonymize the retrieved date using pacsman""" + \
           """Also, convert to bids format ...""",
           author= 'CHUV',
-          author_email='info@connectomics.org',
-          url='http://www.connectomics.org/',
+          author_email='',
+          url='',
           scripts = glob('./code/*.py'),
           license='',
           packages = packages,
-        classifiers = [c.strip() for c in """\
-            Development Status :: 3 - Beta
-            Intended Audience :: Developers
-            Intended Audience :: Science/Research
-            Operating System :: OS Independent
-            Programming Language :: Python
-            Topic :: Scientific/Engineering
-            Topic :: Software Development
-            """.splitlines() if len(c.split()) > 0],
+        classifiers = [],
           maintainer = '',
-          maintainer_email = 'info@connectomics.org',
+          maintainer_email = '',
           package_data = {},
           requires=["pydicom"],
           **extra_args
