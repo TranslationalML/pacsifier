@@ -51,18 +51,100 @@ def anonymize_dicom_file(
 	# Load the current dicom file to 'anonymize'
 	dataset = pydicom.read_file(filename)
 	ninety_plus = False
+	attributes = dataset.dir("")
 
 	#Update attributes to make it anonymous.
 	try : 
-		old_id = dataset.PatientID
+		if "PatientID" in attributes : 
+			old_id = dataset.PatientID
+			dataset.PatientID = PatientID
 
-		dataset.PatientID = PatientID
-		dataset.PatientName = PatientName
-		dataset.InstitutionAddress = "Address"
-		dataset.ReferringPhysicianTelephoneNumbers = ""
-		dataset.PatientTelephoneNumbers = ""
-		dataset.PersonTelephoneNumbers = ""
-		dataset.OrderCallbackPhoneNumber = ""
+		if "PatientName" in attributes : 
+			dataset.PatientName = PatientName
+
+		if "InstitutionAddress" in attributes: 
+			dataset.InstitutionAddress = "Address"
+		
+		if "ReferringPhysicianTelephoneNumbers" in attributes : 
+			dataset.ReferringPhysicianTelephoneNumbers = ""
+		
+		if "PatientTelephoneNumbers" in attributes : 
+			dataset.PatientTelephoneNumbers = ""
+		
+		if "PersonTelephoneNumbers" in attributes : 
+			dataset.PersonTelephoneNumbers = ""
+		
+		if "OrderCallbackPhoneNumber" in attributes : 
+			dataset.OrderCallbackPhoneNumber = ""
+
+		if "ReferringPhysiciansName" in attributes : 
+			dataset.ReferringPhysiciansName = ""
+
+		if "ReferringPhysiciansAddress" in attributes : 
+			dataset.ReferringPhysiciansAddress = ""
+
+		if "ReferringPhysiciansTelephoneNumber" in attributes : 
+			dataset.ReferringPhysiciansTelephoneNumber = ""
+
+		if "ReferringPhysicianIDSequence" in attributes : 
+			dataset.ReferringPhysicianIDSequence = ""
+
+		if "InstitutionalDepartmentName" in attributes : 
+			dataset.InstitutionalDepartmentName = ""
+
+		if "PhysicianOfRecord" in attributes : 
+			dataset.PhysicianOfRecord = ""
+
+		if "PerformingPhysiciansName" in attributes : 
+			dataset.PerformingPhysiciansName = ""
+
+		if "PerformingPhysicianIDSequence" in attributes : 
+			dataset.PerformingPhysicianIDSequence = ""
+
+		if "NameOfPhysicianReadingStudy" in attributes : 
+			dataset.NameOfPhysicianReadingStudy = ""
+
+		if "PhysicianReadingStudyIDSequence" in attributes : 
+			dataset.PhysicianReadingStudyIDSequence = ""
+
+		if "OperatorsName" in attributes : 
+			dataset.OperatorsName = ""
+
+		if "IssuerOfPatientID" in attributes : 
+			dataset.IssuerOfPatientID = ""
+
+		if "PatientsBirthTime" in attributes : 
+			dataset.PatientsBirthTime = ""
+
+		if "OtherPatientIDs" in attributes : 
+			dataset.OtherPatientIDs = ""
+
+		if "OtherPatientNames" in attributes : 
+			dataset.OtherPatientNames = ""
+
+		if "PatientBirthName" in attributes : 
+			dataset.PatientBirthName = ""
+
+		if "PersonAddress" in attributes : 
+			dataset.PersonAddress = ""
+
+		if "PatientMotherBirthName" in attributes : 
+			dataset.PatientMotherBirthName = ""
+
+		if "CountryOfResidence" in attributes : 
+			dataset.CountryOfResidence = ""
+
+		if "RegionOfResidence" in attributes : 
+			dataset.RegionOfResidence = ""
+
+		if "CurrentPatientLocation" in attributes : 
+			dataset.CurrentPatientLocation = ""
+
+		if "PatientInstitutionResidence" in attributes : 
+			dataset.PatientsInstitutionResidence = ""
+
+		if "PersonName" in attributes : 
+			dataset.PersonName = ""
 
 	#Keep track of failures in a text file.
 	except AttributeError : 
@@ -81,6 +163,7 @@ def anonymize_dicom_file(
 				ninety_plus = True
 				dataset.PatientAge = "90+Y"
 				dataset.PatientBirthDate = "19010101"
+				
 	except AttributeError : 
 		pass
 
@@ -157,24 +240,22 @@ def anonymize_all_dicoms_within_folder(
 
 	#return a mapping from new ids to old ids as a dictionary.
 	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
+
+	#dumping new ids to a json file.
+	with open(os.path.join(datapath,'mapper.json'), 'w') as fp:
+		json.dump(new2old_idx, fp)
+
 	return new2old_idx
 
 def main(argv):
 	
-	json_path = argv[0]
-	data_path = argv[1]
-
-	with open('../files/id_mapper.json') as f:
-		new_ids = json.load(f)
-
+	data_path = argv[0]
+	output_folder = argv[1]
+	
 	print("Anonymizing dicom files within path {}".format(os.path.abspath(data_path)))
 
 	#Anonymizing all files.
-	mapper = anonymize_all_dicoms_within_folder(output_folder = data_path, datapath = data_path)
-
-	#dumping new ids to a json file.
-	with open(os.path.join(json_path,'mapper.json'), 'w') as fp:
-		json.dump(mapper, fp)
+	mapper = anonymize_all_dicoms_within_folder(output_folder = output_folder, datapath = data_path)
 
 if __name__ == "__main__" : 
 	main(sys.argv[1:])
