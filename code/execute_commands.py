@@ -2,11 +2,10 @@
 from datetime import date
 import os
 import warnings
-from sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET, check_query_retrieval_level
+from PACSMAN.code.sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET, check_query_retrieval_level, check_filter
 import shlex
 import subprocess
 from typing import List, Dict, Tuple
-from sanity_checks import check_filter
 import platform
 
 warnings.filterwarnings("ignore")
@@ -239,6 +238,10 @@ def run(query : str) -> str:
 		
 	except subprocess.CalledProcessError as e: 
 		print('* Command did not succeed: {}'.format(' '.join(cmd)))
+
+		with open("fails.txt","a") as f: 
+			f.write(query + "\n")
+
 		print(e.returncode)
 		print(e.output)
 		lines=''

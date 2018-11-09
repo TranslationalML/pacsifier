@@ -1,5 +1,5 @@
 #Imports.
-from execute_commands import *
+from PACSMAN.code.execute_commands import *
 from numpy import unique
 import sys
 from tqdm import tqdm, trange
@@ -7,7 +7,7 @@ import os
 import warnings
 from pandas import read_csv, DataFrame
 import json
-from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
+from PACSMAN.code.sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
 from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
@@ -86,7 +86,7 @@ def parse_findscu_dump_file(filename : str) -> list:
 		"ImageType" : "",
 		"SeriesNumber" : "",
 		"StudyDescription" : "",
-		"AccessionNumber" : ""} 
+		"AccessionNumber" : ""}
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)

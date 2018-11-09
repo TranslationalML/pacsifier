@@ -1,5 +1,5 @@
 from glob import glob
-from execute_commands import run
+from PACSMAN.code.execute_commands import run
 import os
 from tqdm import tqdm
 import sys

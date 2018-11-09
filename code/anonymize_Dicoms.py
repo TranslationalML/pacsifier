@@ -146,6 +146,7 @@ def anonymize_dicom_file(
 		if "PersonName" in attributes : 
 			dataset.PersonName = ""
 
+		
 	#Keep track of failures in a text file.
 	except AttributeError : 
 		text_file = open("fails.txt", "a")
@@ -214,7 +215,7 @@ def anonymize_all_dicoms_within_folder(
 
 	#Keep a mapping from old to new ids in a dictionary.
 	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i]] for i in range(len(patients_folders))}
-
+	old2set_idx = {}
 	#Loop over patients...
 	for patient in tqdm(patients_folders) : 
 		new_id = old2new_idx[patient]
@@ -222,6 +223,7 @@ def anonymize_all_dicoms_within_folder(
 		
 		if os.path.isfile(os.path.join(datapath,patient,"new_id.txt")) : 
 			new_id  = open(os.path.join(datapath,patient,"new_id.txt")).read().splitlines()[0].zfill(6)
+			old2set_idx[new_id] = patient.split("-")[-1]
 			os.remove(os.path.join(datapath,patient,"new_id.txt"))
 			
 		#List all files within patient folder...
@@ -243,7 +245,9 @@ def anonymize_all_dicoms_within_folder(
 
 	#dumping new ids to a json file.
 	with open(os.path.join(datapath,'mapper.json'), 'w') as fp:
-		json.dump(new2old_idx, fp)
+		if len(old2set_idx.keys()) == 0 : 
+			json.dump(new2old_idx, fp)
+		else : json.dump(old2set_idx, fp)
 
 	return new2old_idx
 

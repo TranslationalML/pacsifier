@@ -22,13 +22,13 @@ def main(**extra_args):
     from distutils.core import setup
     setup(name='PACSMAN',
           description='Connectome Mapper',
-          long_description="""An package for retrieving dicom images from CHUV pacs sever""" + \
+          long_description="""A package for retrieving dicom images from CHUV pacs sever""" + \
           """One can also anonymize the retrieved date using pacsman""" + \
           """Also, convert to bids format ...""",
           author= 'CHUV',
           author_email='',
           url='',
-          scripts = glob('./code/*.py'),
+          scripts = glob("code/*.py"),
           license='',
           packages = packages,
         classifiers = [],
