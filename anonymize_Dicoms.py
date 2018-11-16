@@ -253,9 +253,15 @@ def anonymize_all_dicoms_within_folder(
 	return new2old_idx
 
 def main(argv):
+	parser = argparse.ArgumentParser()
 	
-	data_path = argv[0]
-	output_folder = argv[1]
+	parser.add_argument("--in_folder",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join("..","data"))
+	parser.add_argument("--out_folder",	help = "Output directory where the anonymized dicoms will be saved.",	default = os.path.join("..","data"))
+	args = parser.parse_args()
+
+
+	data_path = args.in_folder
+	output_folder = args.out_folder
 	
 	print("Anonymizing dicom files within path {}".format(os.path.abspath(data_path)))
 
