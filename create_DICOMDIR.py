@@ -8,20 +8,17 @@ from PACSMAN.code.execute_commands import run
 from glob import glob
 import shutil
 from pydicom.filereader import read_dicomdir
-
 warnings.filterwarnings("ignore")
 
 numbers = [str(i) for i in range(10)]
-alpha_numeric = np.append(list(string.ascii_uppercase), numbers)
 command = "dcmmkdir --recurse {}"
 names = []
 
-def generate_new_folder_name(names : list = [], characters : list = alpha_numeric) -> str:
+def generate_new_folder_name(names : list = []) -> str:
 	"""
 	Generates a folder/file name having between 4 and 8 characters of capital letters and digits.
 	Args : 
 		names (list) : new names already generated for other folders.
-		characters (list) : The path to the dicom images.
 	Returns : 
 		str : Generated folder/file name.
 	"""
