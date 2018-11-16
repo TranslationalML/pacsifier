@@ -7,7 +7,7 @@ import os
 import warnings
 from pandas import read_csv, DataFrame
 import json
-from PACSMAN.code.sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
+from PACSMAN.sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
 from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
@@ -175,7 +175,6 @@ def main(argv):
 	parser.add_argument('--config', help='Configuration file path', default=os.path.join("..","files","config.json"))
 	parser.add_argument('--save', action='store_true', help = "The images will be stored")
 	parser.add_argument('--info', action ='store_true', help = "The info csv files will be stored")
-	parser.add_argument('--batch', action='store_true', help = "Wait 60 seconds after every 50 series retrieved")
 	parser.add_argument("--queryfile", help = 'Path to query file')
 	parser.add_argument("--out_directory", help = 'Output directory where images will be saved', default = os.path.join("..","data"))
 	
@@ -194,6 +193,8 @@ def main(argv):
 		move_port = int(parameters["move_port"])
 		client_AET = parameters["AET"]		
 		server_AET = parameters["server_AET"]	
+		batch_wait_time = int(parameters["batch_wait_time"])
+		batch_size = int(parameters["batch_size"])
 	except FileNotFoundError: 		
 		args.config = None
 		pass
@@ -329,8 +330,8 @@ def main(argv):
 		for serie in tqdm(series) :
 			
 			counter+=1
-			if counter % 50 == 0 and args.batch: 
-				time.sleep(60)
+			if counter % batch_size == 0: 
+				time.sleep(batch_wait_time)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 			
