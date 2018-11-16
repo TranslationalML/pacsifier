@@ -151,10 +151,11 @@ def check_config_file(config_file : dict) -> None :
 		dict : dictionary loaded from the config json file.
 	"""
 	items = set(config_file.keys())
-	if items != set(["server_ip","port","server_AET","AET","move_port"]) : 
+	if items != set(["server_ip","port","server_AET","AET","move_port","batch_size","batch_wait_time"]) : 
 		raise ValueError("Invalid config file!")
 
 def check_query_retrieval_level(query_retrieval_level : str) -> None : 
+
 	valid_levels = ["SERIES","PATIENT","IMAGE","STUDY"]
 	if query_retrieval_level not in valid_levels : 
 		raise ValueError("Invalid query retrieval level ! ")
