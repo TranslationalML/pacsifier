@@ -2,7 +2,7 @@
 from datetime import date
 import os
 import warnings
-from PACSMAN.code.sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET, check_query_retrieval_level, check_filter
+from PACSMAN.sanity_checks import check_parameters_inputs, check_ids, check_ip, check_port, check_AET, check_query_retrieval_level, check_filter
 import shlex
 import subprocess
 from typing import List, Dict, Tuple

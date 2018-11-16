@@ -7,6 +7,7 @@ from tqdm import tqdm
 import random
 import json
 from typing import Dict
+import argparse
 
 def fuzz_date(date : str, fuzz_parameter : int = 60) -> str: 
 	"""
@@ -95,8 +96,8 @@ def anonymize_dicom_file(
 		if "PhysicianOfRecord" in attributes : 
 			dataset.PhysicianOfRecord = ""
 
-		if "PerformingPhysiciansName" in attributes : 
-			dataset.PerformingPhysiciansName = ""
+		if "PerformingPhysicianName" in attributes : 
+			dataset.PerformingPhysicianName = ""
 
 		if "PerformingPhysicianIDSequence" in attributes : 
 			dataset.PerformingPhysicianIDSequence = ""
@@ -146,7 +147,7 @@ def anonymize_dicom_file(
 		if "PersonName" in attributes : 
 			dataset.PersonName = ""
 
-		
+
 	#Keep track of failures in a text file.
 	except AttributeError : 
 		text_file = open("fails.txt", "a")
@@ -222,7 +223,7 @@ def anonymize_all_dicoms_within_folder(
 		current_path = os.path.join(datapath, patient, subject_dicom_path)
 		
 		if os.path.isfile(os.path.join(datapath,patient,"new_id.txt")) : 
-			new_id  = open(os.path.join(datapath,patient,"new_id.txt")).read().splitlines()[0].zfill(6)
+			new_id  = open(os.path.join(datapath,patient,"new_id.txt")).read().splitlines()[0]
 			old2set_idx[new_id] = patient.split("-")[-1]
 			os.remove(os.path.join(datapath,patient,"new_id.txt"))
 			
