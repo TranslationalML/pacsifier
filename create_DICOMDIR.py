@@ -1,8 +1,6 @@
 import sys
 import os
 import warnings
-import pydicom
-from itertools import product as prod
 import string 
 import numpy as np
 import random
