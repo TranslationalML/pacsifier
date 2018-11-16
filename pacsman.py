@@ -7,7 +7,7 @@ import os
 import warnings
 from pandas import read_csv, DataFrame
 import json
-from PACSMAN.sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
+from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, check_config_file
 from datetime import datetime
 from typing import Iterator
 from cerberus import Validator
