@@ -6,7 +6,7 @@ from itertools import product as prod
 import string 
 import numpy as np
 import random
-from execute_commands import run
+from PACSMAN.code.execute_commands import run
 from glob import glob
 import shutil
 from pydicom.filereader import read_dicomdir
@@ -28,7 +28,18 @@ def generate_new_folder_name(names = [], characters = alpha_numeric):
 		generated = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 	return generated
+def add_or_retrieve_name(current_folder, old_2_new): 
+	folder_name = None 
 
+	if current_folder not in old_2_new.keys():
+		folder_name = generate_new_folder_name()
+		old_2_new[current_folder] = folder_name
+		names.append(folder_name)
+		
+	else : 
+		folder_name = old_2_new[current_folder]
+
+	return folder_name, old_2_new
 def move_and_rename_files(dicom_path, output_path) : 
 
 	ls = glob(os.path.join(dicom_path,"sub-*","ses-*","*","*"))
@@ -43,13 +54,7 @@ def move_and_rename_files(dicom_path, output_path) :
 
 		current_folder = path[-4]
 
-		if current_folder not in old_2_new.keys():
-			folder_name = generate_new_folder_name()
-			old_2_new[current_folder] = folder_name
-			names.append(folder_name)
-			
-		else : 
-			folder_name = old_2_new[current_folder]
+		folder_name, old_2_new = add_or_retrieve_name(current_folder, old_2_new)
 
 		subfolder = os.path.join(dir_, folder_name)
 
@@ -58,13 +63,7 @@ def move_and_rename_files(dicom_path, output_path) :
 
 		current_folder = path[-3]
 
-		if current_folder not in old_2_new.keys():
-			folder_name = generate_new_folder_name(names = names)
-			old_2_new[current_folder] = folder_name
-			names.append(folder_name)
-
-		else : 
-			folder_name = old_2_new[current_folder]
+		folder_name, old_2_new = add_or_retrieve_name(current_folder, old_2_new)
 
 		subsubfolder = os.path.join(subfolder, folder_name)
 
@@ -73,13 +72,7 @@ def move_and_rename_files(dicom_path, output_path) :
 
 		current_folder = path[-2]
 
-		if current_folder not in old_2_new.keys():
-			folder_name = generate_new_folder_name(names = names)
-			old_2_new[current_folder] = folder_name
-			names.append(folder_name)
-
-		else : 
-			folder_name = old_2_new[current_folder]
+		folder_name, old_2_new = add_or_retrieve_name(current_folder, old_2_new)
 
 		subsubsubfolder = os.path.join(subsubfolder, folder_name)
 		
