@@ -13,8 +13,8 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 	"""
 	Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
 	Args : 
-		date (string) : date.
-		fuzz_parameter (int) : the parameter by which the date will be fuzzed.
+		date: date in YYYYMMDD format.
+		fuzz_parameter: the number of days by which the date will be fuzzed (+/- this number of days).
 	Returns : 
 		string : new fuzzed date.
 	"""
