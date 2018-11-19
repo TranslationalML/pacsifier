@@ -14,7 +14,7 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 	Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
 	Args : 
 		date: date in YYYYMMDD format.
-		fuzz_parameter: the number of days by which the date will be fuzzed (+/- this number of days).
+		fuzz_parameter: the number of days by which the date will be fuzzed.
 	Returns : 
 		string : new fuzzed date.
 	"""
@@ -43,10 +43,10 @@ def anonymize_dicom_file(
 	"""
 	Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
 	Args : 
-		filename (string) : path to dicom image.
-		output_filename (string) : output path of anonymized image. 
-		PatientID (string) : the new patientID after anonymization.
-		PatientName (string) : The new PatientName after anonymization.
+		filename: path to dicom image.
+		output_filename: output path of anonymized image. 
+		PatientID: the new patientID after anonymization.
+		PatientName: The new PatientName after anonymization.
 	"""
 
 	# Load the current dicom file to 'anonymize'
@@ -195,14 +195,14 @@ def anonymize_all_dicoms_within_folder(
 	output_folder : str = ".",
 	datapath : str  = os.path.join("..","data"),
 	subject_dicom_path : str = os.path.join("ses-*","*","*"),
-	new_ids = None,
-	rename = True) -> Dict[str,str]:
+	new_ids : str = None,
+	rename : bool = True) -> Dict[str,str]:
 	"""
 	Anonymizes all dicom images located at the datapath in the structure specified by subject_dicom_path parameter.
 	Args : 
-		output_folder (string) : path where anonymized images will be located.
-		datapath (string) : The path to the dicom images.
-		subject_dicom_path (string) : the (generic) path to the dicom images starting from the patient folder.
+		output_folder: path where anonymized images will be located.
+		datapath: The path to the dicom images.
+		subject_dicom_path: the (generic) path to the dicom images starting from the patient folder.
 		new_ids (string) : The anonymous ids to be set after anonymizing the original ids. 
 		rename (boolean) : A boolean to determine if the folder name which is named after the old ids would be renamed into the anonymized ids.
 	Returns : 
