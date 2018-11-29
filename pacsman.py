@@ -172,11 +172,11 @@ def main(argv):
 	
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument('--config', help='Configuration file path', default=os.path.join("..","files","config.json"))
-	parser.add_argument('--save', action='store_true', help = "The images will be stored")
-	parser.add_argument('--info', action ='store_true', help = "The info csv files will be stored")
-	parser.add_argument("--queryfile", help = 'Path to query file')
-	parser.add_argument("--out_directory", help = 'Output directory where images will be saved', default = os.path.join("..","data"))
+	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join("..","files","config.json"))
+	parser.add_argument('--save', "-s", action='store_true', help = "The images will be stored")
+	parser.add_argument('--info', "-i", action ='store_true', help = "The info csv files will be stored")
+	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
+	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join("..","data"))
 	
 	args = parser.parse_args()
 	
