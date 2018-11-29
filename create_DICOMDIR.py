@@ -10,7 +10,7 @@ import shutil
 from pydicom.filereader import read_dicomdir
 warnings.filterwarnings("ignore")
 
-command = "dcmmkdir --recurse {}"
+command = "dcmmkdir --recurse --pattern {}"
 names = []
 
 def generate_new_folder_name(names : list = []) -> str:
@@ -108,9 +108,14 @@ def create_dicomdir(out_path : str) -> None :
 	run(command.format("./"))
 
 def main(argv):
+	parser = argparse.ArgumentParser()
 	
-	in_path = argv[0]
-	out_path = argv[1]
+	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files.",				default = os.path.join("..","data"))
+	parser.add_argument("--out_folder", "-o",	help = "Output directory where the dicoms and DICOMDIR will be saved.",	default = os.path.join("..","data"))
+	args = parser.parse_args()
+
+	in_path = args.in_folder
+	out_path = args.out_folder
 
 	move_and_rename_files(in_path, out_path)
 	create_dicomdir(out_path)
