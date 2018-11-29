@@ -55,106 +55,102 @@ def anonymize_dicom_file(
 	attributes = dataset.dir("")
 
 	#Update attributes to make it anonymous.
-	try : 
-		if "PatientID" in attributes : 
-			old_id = dataset.PatientID
-			dataset.PatientID = PatientID
+	if "PatientID" in attributes : 
+		old_id = dataset.PatientID
+		dataset.PatientID = PatientID
 
-		if "PatientName" in attributes : 
-			dataset.PatientName = PatientName
+	if "PatientName" in attributes : 
+		dataset.PatientName = PatientName
 
-		if "InstitutionAddress" in attributes: 
-			dataset.InstitutionAddress = "Address"
-		
-		if "ReferringPhysicianTelephoneNumbers" in attributes : 
-			dataset.ReferringPhysicianTelephoneNumbers = ""
-		
-		if "PatientTelephoneNumbers" in attributes : 
-			dataset.PatientTelephoneNumbers = ""
-		
-		if "PersonTelephoneNumbers" in attributes : 
-			dataset.PersonTelephoneNumbers = ""
-		
-		if "OrderCallbackPhoneNumber" in attributes : 
-			dataset.OrderCallbackPhoneNumber = ""
+	if "InstitutionAddress" in attributes: 
+		dataset.InstitutionAddress = "Address"
 
-		if "ReferringPhysiciansName" in attributes : 
-			dataset.ReferringPhysiciansName = ""
+	if "InstitutionName" in attributes: 
+		dataset.InstitutionName = ""
+		#/home/localadmin/Bureau/trippin/sub-124568/ses-20180108152705/0001-Scano2.0/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515392849.707206
+	
+	if "ReferringPhysicianTelephoneNumbers" in attributes : 
+		dataset.ReferringPhysicianTelephoneNumbers = ""
+	
+	if "PatientTelephoneNumbers" in attributes : 
+		dataset.PatientTelephoneNumbers = ""
+	
+	if "PersonTelephoneNumbers" in attributes : 
+		dataset.PersonTelephoneNumbers = ""
+	
+	if "OrderCallbackPhoneNumber" in attributes : 
+		dataset.OrderCallbackPhoneNumber = ""
 
-		if "ReferringPhysiciansAddress" in attributes : 
-			dataset.ReferringPhysiciansAddress = ""
+	if "ReferringPhysiciansName" in attributes : 
+		dataset.ReferringPhysiciansName = ""
 
-		if "ReferringPhysiciansTelephoneNumber" in attributes : 
-			dataset.ReferringPhysiciansTelephoneNumber = ""
+	if "ReferringPhysiciansAddress" in attributes : 
+		dataset.ReferringPhysiciansAddress = ""
 
-		if "ReferringPhysicianIDSequence" in attributes : 
-			dataset.ReferringPhysicianIDSequence = ""
+	if "ReferringPhysiciansTelephoneNumber" in attributes : 
+		dataset.ReferringPhysiciansTelephoneNumber = ""
 
-		if "InstitutionalDepartmentName" in attributes : 
-			dataset.InstitutionalDepartmentName = ""
+	if "ReferringPhysicianIDSequence" in attributes : 
+		dataset.ReferringPhysicianIDSequence = ""
 
-		if "PhysicianOfRecord" in attributes : 
-			dataset.PhysicianOfRecord = ""
+	if "InstitutionalDepartmentName" in attributes : 
+		dataset.InstitutionalDepartmentName = ""
 
-		if "PerformingPhysicianName" in attributes : 
-			dataset.PerformingPhysicianName = ""
+	if "PhysicianOfRecord" in attributes : 
+		dataset.PhysicianOfRecord = ""
 
-		if "PerformingPhysicianIDSequence" in attributes : 
-			dataset.PerformingPhysicianIDSequence = ""
+	if "PerformingPhysicianName" in attributes : 
+		dataset.PerformingPhysicianName = ""
 
-		if "NameOfPhysicianReadingStudy" in attributes : 
-			dataset.NameOfPhysicianReadingStudy = ""
+	if "PerformingPhysicianIDSequence" in attributes : 
+		dataset.PerformingPhysicianIDSequence = ""
 
-		if "PhysicianReadingStudyIDSequence" in attributes : 
-			dataset.PhysicianReadingStudyIDSequence = ""
+	if "NameOfPhysicianReadingStudy" in attributes : 
+		dataset.NameOfPhysicianReadingStudy = ""
 
-		if "OperatorsName" in attributes : 
-			dataset.OperatorsName = ""
+	if "PhysicianReadingStudyIDSequence" in attributes : 
+		dataset.PhysicianReadingStudyIDSequence = ""
 
-		if "IssuerOfPatientID" in attributes : 
-			dataset.IssuerOfPatientID = ""
+	if "OperatorsName" in attributes : 
+		dataset.OperatorsName = ""
 
-		if "PatientsBirthTime" in attributes : 
-			dataset.PatientsBirthTime = ""
+	if "IssuerOfPatientID" in attributes : 
+		dataset.IssuerOfPatientID = ""
 
-		if "OtherPatientIDs" in attributes : 
-			dataset.OtherPatientIDs = ""
+	if "PatientsBirthTime" in attributes : 
+		dataset.PatientsBirthTime = ""
 
-		if "OtherPatientNames" in attributes : 
-			dataset.OtherPatientNames = ""
+	if "OtherPatientIDs" in attributes : 
+		dataset.OtherPatientIDs = ""
 
-		if "PatientBirthName" in attributes : 
-			dataset.PatientBirthName = ""
+	if "OtherPatientNames" in attributes : 
+		dataset.OtherPatientNames = ""
 
-		if "PersonAddress" in attributes : 
-			dataset.PersonAddress = ""
+	if "PatientBirthName" in attributes : 
+		dataset.PatientBirthName = ""
 
-		if "PatientMotherBirthName" in attributes : 
-			dataset.PatientMotherBirthName = ""
+	if "PersonAddress" in attributes : 
+		dataset.PersonAddress = ""
 
-		if "CountryOfResidence" in attributes : 
-			dataset.CountryOfResidence = ""
+	if "PatientMotherBirthName" in attributes : 
+		dataset.PatientMotherBirthName = ""
 
-		if "RegionOfResidence" in attributes : 
-			dataset.RegionOfResidence = ""
+	if "CountryOfResidence" in attributes : 
+		dataset.CountryOfResidence = ""
 
-		if "CurrentPatientLocation" in attributes : 
-			dataset.CurrentPatientLocation = ""
+	if "RegionOfResidence" in attributes : 
+		dataset.RegionOfResidence = ""
 
-		if "PatientInstitutionResidence" in attributes : 
-			dataset.PatientsInstitutionResidence = ""
+	if "CurrentPatientLocation" in attributes : 
+		dataset.CurrentPatientLocation = ""
 
-		if "PersonName" in attributes : 
-			dataset.PersonName = ""
+	if "PatientInstitutionResidence" in attributes : 
+		dataset.PatientsInstitutionResidence = ""
 
+	if "PersonName" in attributes : 
+		dataset.PersonName = ""
 
-	#Keep track of failures in a text file.
-	except AttributeError : 
-		text_file = open("fails.txt", "a")
-
-		text_file.write(filename + "\n")
-		text_file.close()
-		return
+	
 	try : 
 		age = dataset.PatientAge
 
@@ -170,9 +166,9 @@ def anonymize_dicom_file(
 		pass
 
 	#The StudyInstanceUID contains the old id. therefore, the old id should be replaced by the new anonymous one.
-	studyUID = dataset.StudyInstanceUID
-	dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
-
+	if "StudyInstanceUID" in attributes : 
+		studyUID = dataset.StudyInstanceUID
+		dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
 
 	for name in ['PatientBirthDate']:
 		if name in dataset:
@@ -215,6 +211,7 @@ def anonymize_all_dicoms_within_folder(
 		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
 
 	#Keep a mapping from old to new ids in a dictionary.
+	
 	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i]] for i in range(len(patients_folders))}
 	old2set_idx = {}
 	#Loop over patients...
@@ -255,8 +252,9 @@ def anonymize_all_dicoms_within_folder(
 def main(argv):
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument("--in_folder",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join("..","data"))
-	parser.add_argument("--out_folder",	help = "Output directory where the anonymized dicoms will be saved.",	default = os.path.join("..","data"))
+	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join("..","data"))
+	parser.add_argument("--out_folder", "-o",	help = "Output directory where the anonymized dicoms will be saved.",	default = os.path.join("..","data"))
+	parser.add_argument("--new_ids", 	"-n", 	help = "List of new ids.")
 	args = parser.parse_args()
 
 
@@ -266,7 +264,10 @@ def main(argv):
 	print("Anonymizing dicom files within path {}".format(os.path.abspath(data_path)))
 
 	#Anonymizing all files.
-	mapper = anonymize_all_dicoms_within_folder(output_folder = output_folder, datapath = data_path)
+	new_ids = args.new_ids
+	if args.new_ids :
+		new_ids = json.load(open(args.new_ids, "r"))
+	mapper = anonymize_all_dicoms_within_folder(output_folder = output_folder, datapath = data_path, new_ids = new_ids)
 
 if __name__ == "__main__" : 
 	main(sys.argv[1:])

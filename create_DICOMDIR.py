@@ -10,7 +10,6 @@ import shutil
 from pydicom.filereader import read_dicomdir
 warnings.filterwarnings("ignore")
 
-numbers = [str(i) for i in range(10)]
 command = "dcmmkdir --recurse {}"
 names = []
 
@@ -39,8 +38,10 @@ def add_or_retrieve_name(current_folder : str, old_2_new : dict) -> tuple:
 	Returns : 
 		tuple : tuple containing the new name and the updated mapping between old and new name.
 	"""
+	
 	folder_name = None 
 
+	#
 	if current_folder not in old_2_new.keys():
 		folder_name = generate_new_folder_name()
 		old_2_new[current_folder] = folder_name
