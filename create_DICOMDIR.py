@@ -10,7 +10,7 @@ import shutil
 from pydicom.filereader import read_dicomdir
 warnings.filterwarnings("ignore")
 
-command = "dcmmkdir --recurse --pattern {}"
+command = "dcmmkdir --recurse {}"
 names = []
 
 def generate_new_folder_name(names : list = []) -> str:
@@ -104,8 +104,15 @@ def create_dicomdir(out_path : str) -> None :
 	Args : 
 		out_path (str) : Path of dicoms
 	"""
+	dir_path = os.path.dirname(os.path.realpath(__file__))
+	
 	os.chdir(os.path.abspath(out_path))
 	run(command.format("./"))
+
+	if os.path.isfile("log.txt"): 
+		os.remove("log.txt")
+	
+	os.chdir(os.path.abspath(dir_path))
 
 def main(argv):
 	parser = argparse.ArgumentParser()

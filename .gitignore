@@ -35,7 +35,6 @@ protocol.csv
 /files/id_mapper.json
 /files/complete_schizo.csv
 /files/log.txt
-/code/move_dumps.py
 /code/tests/test_set
 /files/girardet.csv
 /files/new_girardet.csv

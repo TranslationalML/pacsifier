@@ -71,6 +71,9 @@ def anonymize_dicom_file(
 	
 	if "ReferringPhysicianTelephoneNumbers" in attributes : 
 		dataset.ReferringPhysicianTelephoneNumbers = ""
+
+	if "ReferringPhysicianName" in attributes : 
+		dataset.ReferringPhysicianName = ""
 	
 	if "PatientTelephoneNumbers" in attributes : 
 		dataset.PatientTelephoneNumbers = ""
