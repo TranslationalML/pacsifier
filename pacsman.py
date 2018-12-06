@@ -323,8 +323,8 @@ def main(argv):
 			ACCESSIONNUMBER = ACCESSIONNUMBER,
 			SEQUENCENAME = SEQUENCENAME) 
 
-		#if os.path.isfile("current.txt") : 
-		#	os.remove("current.txt")
+		if os.path.isfile("current.txt") : 
+			os.remove("current.txt")
 
 		write_file(find_series_res, file = "current.txt")
 
@@ -389,8 +389,8 @@ def main(argv):
 					w.writeheader()
 					w.writerow(serie)
 			
-			#if os.path.isfile("current.txt"): 
-			#	os.remove("current.txt")
+			if os.path.isfile("current.txt"): 
+				os.remove("current.txt")
 				
 if __name__ == "__main__" :
 	main(sys.argv[1:])
