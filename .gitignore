@@ -80,3 +80,6 @@ files/yasser.csv
 /files/mussard.csv
 /code/tests/mapper.json
 /code/tests/log.txt
+/execute_commands.py
+/current.txt
+/SequenceName
