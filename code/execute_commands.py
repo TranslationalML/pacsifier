@@ -18,7 +18,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 #Query squeletons.
 echo_command= 'echoscu -ll trace -aec {} {} {}' # server_AET IP port
-find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={} --key 8,1030={} --key 8,50={}'
+find_command= 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={} --key 8,1030={} --key 8,50={} --key 18,24={}'
 move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
 
 ######################################################################################################################## 
@@ -66,7 +66,8 @@ def find(
 	MODALITY : str = "",
 	IMAGETYPE : str = "",
 	STUDYDESCRIPTION : str = "",
-	ACCESSIONNUMBER : str = "") -> str : 
+	ACCESSIONNUMBER : str = "",
+	SEQUENCENAME : str = "") -> str : 
 	"""
   	Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
@@ -116,7 +117,8 @@ def find(
 		MODALITY,
 		IMAGETYPE,
 		STUDYDESCRIPTION,
-		ACCESSIONNUMBER)
+		ACCESSIONNUMBER,
+		SEQUENCENAME)
 
 	return run(command)
 
@@ -225,27 +227,26 @@ def run(query : str) -> str:
 
 	except ValueError : 
 		exit()
-	#try:
-	if 'Linux' in platform.platform(): 
-		
-		completed = subprocess.run(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE, check=True)
-		lines = completed.stderr.decode('latin1').splitlines()
-		
+	try:
+		if 'Linux' in platform.platform(): 
+			
+			completed = subprocess.run(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE, check=True)
+			lines = completed.stderr.decode('latin1').splitlines()
+			
 
-	else : 
-		completed = subprocess.check_output(cmd, stderr = subprocess.PIPE)
-		lines = completed.decode('latin1').splitlines()
-	lines = [line.replace('\x00', '') for line in lines]
-	print(lines)
+		else : 
+			completed = subprocess.check_output(cmd, stderr = subprocess.PIPE)
+			lines = completed.decode('latin1').splitlines()
+		lines = [line.replace('\x00', '') for line in lines]
 	
-	"""except subprocess.CalledProcessError as e: 
-					print('* Command did not succeed: {}'.format(' '.join(cmd)))
-			
-					with open("fails.txt","a") as f: 
-						f.write(query + "\n")
-			
-					print(e.returncode)
-					print(e.output)
-					lines=''"""
+	except subprocess.CalledProcessError as e: 
+		print('* Command did not succeed: {}'.format(' '.join(cmd)))
+
+		with open("fails.txt","a") as f: 
+			f.write(query + "\n")
+
+		print(e.returncode)
+		print(e.output)
+		lines=''
 
 	return lines

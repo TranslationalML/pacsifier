@@ -1,5 +1,5 @@
 #Imports.
-from PACSMAN.code.execute_commands import *
+from execute_commands import *
 from numpy import unique
 import sys
 from tqdm import tqdm, trange
@@ -35,7 +35,8 @@ tag_to_attribute = { # type : Dict[str,str]
 "(0008,0008)" : "ImageType",
 "(0020,0011)" : "SeriesNumber",
 "(0008,1030)" : "StudyDescription",
-"(0008,0050)" : "AccessionNumber"}
+"(0008,0050)" : "AccessionNumber",
+"(0018,0024)" : "SequenceName"}
 
 ALLOWED_FILTERS = list(tag_to_attribute.values())
 ALLOWED_FILTERS.append("new_ids")
@@ -86,7 +87,8 @@ def parse_findscu_dump_file(filename : str) -> list:
 		"ImageType" : "",
 		"SeriesNumber" : "",
 		"StudyDescription" : "",
-		"AccessionNumber" : ""}
+		"AccessionNumber" : "",
+		"SequenceName" : ""}
 
 		if "------------" in line or "Releasing Association" in line : 
 			if start : id_table.append(output_dict)
@@ -229,7 +231,8 @@ def main(argv):
 	"Modality"			: {'type' : 'string', 'maxlength' : 16},
 	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12},
 	"StudyDescription" 	: {'type' : 'string', 'maxlength' : 64},
-	"AccessionNumber"	: {'type' : 'string', 'maxlength' : 16}
+	"AccessionNumber"	: {'type' : 'string', 'maxlength' : 16}, 
+	"SequenceName"		: {'type' : 'string', 'maxlength' : 64}	
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 
@@ -257,6 +260,7 @@ def main(argv):
 		STUDYDESCRIPTION = tuple_["StudyDescription"]
 		ACCESSIONNUMBER = tuple_["AccessionNumber"]
 		NEW_ID = tuple_["new_ids"]
+		SEQUENCENAME = tuple_["SequenceName"]
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
@@ -272,7 +276,8 @@ def main(argv):
 		'Modality' 			: MODALITY,
 		'SeriesNumber'		: SERIESNUMBER,
 		'StudyDescription'	: STUDYDESCRIPTION,
-		'AccessionNumber'	: ACCESSIONNUMBER
+		'AccessionNumber'	: ACCESSIONNUMBER,
+		'SequenceName'		: SEQUENCENAME
 		#'ImageType' 		: IMAGETYPE
 		}
 		
@@ -284,7 +289,7 @@ def main(argv):
 		check_date(PATIENTBIRTHDATE)
 
 		QUERYRETRIVELEVEL = "SERIES"
-		if IMAGETYPE != "":
+		if IMAGETYPE != "" or SEQUENCENAME == "":
 			QUERYRETRIVELEVEL = "IMAGE"
 
 		# check if we can ping the PACS
@@ -294,7 +299,7 @@ def main(argv):
 		server_AET = server_AET)
 		if not echo_res :
 			raise RuntimeError("Cannot associate with PACS server")
-
+		
 		#Look for series of current patient and current study.
 		find_series_res = find(
 			client_AET,
@@ -315,10 +320,11 @@ def main(argv):
 			MODALITY = MODALITY,
 			IMAGETYPE = IMAGETYPE,
 			STUDYDESCRIPTION = STUDYDESCRIPTION,
-			ACCESSIONNUMBER = ACCESSIONNUMBER)
+			ACCESSIONNUMBER = ACCESSIONNUMBER,
+			SEQUENCENAME = SEQUENCENAME) 
 
-		if os.path.isfile("current.txt") : 
-			os.remove("current.txt")
+		#if os.path.isfile("current.txt") : 
+		#	os.remove("current.txt")
 
 		write_file(find_series_res, file = "current.txt")
 
@@ -383,8 +389,8 @@ def main(argv):
 					w.writeheader()
 					w.writerow(serie)
 			
-			if os.path.isfile("current.txt"): 
-				os.remove("current.txt")
+			#if os.path.isfile("current.txt"): 
+			#	os.remove("current.txt")
 				
 if __name__ == "__main__" :
 	main(sys.argv[1:])

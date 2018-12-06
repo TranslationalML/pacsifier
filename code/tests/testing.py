@@ -570,17 +570,18 @@ def test_move_and_rename():
 		shutil.rmtree("./dicomdir")
 
 def test_move_dumps():
+
 	if os.path.isdir("./dicomdir") : 
 		shutil.rmtree("./dicomdir")
 
 	os.mkdir("./dicomdir")
 	n_csv_files = len(glob("./test_set/sub-*/ses-*/*.csv"))
-	move_dumps.main(["./test_set", "./dicomdir"])
+	move_dumps.move("./test_set","./dicomdir")
 
 	assert glob("./test_set/sub-*/ses-*/*.csv") == []
 	assert len(glob("./dicomdir/sub-*/ses-*/*.csv")) == n_csv_files
 	
-	move_dumps.main(["./dicomdir", "./test_set"])
+	move_dumps.move("./dicomdir","./test_set")
 
 	assert len(glob("./test_set/sub-*/ses-*/*.csv")) == n_csv_files
 	assert glob("./dicomdir/sub-*/ses-*/*.csv") == []
