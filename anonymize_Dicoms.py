@@ -249,7 +249,7 @@ def anonymize_all_dicoms_within_folder(
 			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-2]))):
 				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-2])))
 
-			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-2]))):
+			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-1]))):
 				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-1])))
 
 			anonymize_dicom_file(file,os.path.join(output_folder,os.path.join(*path[-4:])), PatientID = new_id, PatientName = "Obi Ben Kanobi")
@@ -257,9 +257,9 @@ def anonymize_all_dicoms_within_folder(
 		#If the patient folders are to be renamed.
 		if rename :
 			try:
-				print(os.path.join(output_folder , patient))
 				os.rename(os.path.join(output_folder , patient), os.path.join(output_folder,"sub-"+new_id))
-			except OSError : os.rename(os.path.join(output_folder , patient), os.path.join(output_folder,"sub-"+old2new_idx[patient]+"_2"))
+			except OSError :
+				os.rename(os.path.join(output_folder , patient), os.path.join(output_folder,"sub-"+new_id+"_2"))
 	
 
 	#return a mapping from new ids to old ids as a dictionary.
