@@ -50,7 +50,12 @@ def anonymize_dicom_file(
 	"""
 
 	# Load the current dicom file to 'anonymize'
-	dataset = pydicom.read_file(filename)
+	try:
+		dataset = pydicom.read_file(filename)
+	except pydicom.errors.InvalidDicomError: 
+		print("Error at file at path :  " + filename)
+		pass
+	
 	ninety_plus = False
 	attributes = dataset.dir("")
 
@@ -188,11 +193,12 @@ def anonymize_dicom_file(
 				except AttributeError : pass
 	
 	# write the 'anonymized' DICOM out under the new filename
+
 	dataset.save_as(output_filename)
 
 def anonymize_all_dicoms_within_folder(
 	output_folder : str = ".",
-	datapath : str  = os.path.join("..","data"),
+	datapath : str  = os.path.join(".","data"),
 	subject_dicom_path : str = os.path.join("ses-*","*","*"),
 	new_ids : str = None,
 	rename : bool = True) -> Dict[str,str]:
@@ -209,6 +215,7 @@ def anonymize_all_dicoms_within_folder(
 	"""
 
 	#Listing patient files.
+	
 	patients_folders = next(os.walk(datapath))[1]
 	if new_ids == None : 
 		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
@@ -232,20 +239,34 @@ def anonymize_all_dicoms_within_folder(
 
 		#Loop over all dicom files within a patient directory and anonymize them.
 		for file in files:
-			anonymize_dicom_file(file,os.path.join(output_folder,file), PatientID = new_id, PatientName = "Obi Ben Kanobi")
+			
+			path = os.path.normpath(file)
+			path = path.split(os.sep)
+			
+			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-3]))):
+				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-3])))
+
+			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-2]))):
+				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-2])))
+
+			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-2]))):
+				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-1])))
+
+			anonymize_dicom_file(file,os.path.join(output_folder,os.path.join(*path[-4:])), PatientID = new_id, PatientName = "Obi Ben Kanobi")
 		
 		#If the patient folders are to be renamed.
 		if rename :
 			try:
-				os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+new_id))
-			except OSError : os.rename(os.path.join(datapath , patient), os.path.join(datapath,"sub-"+old2new_idx[patient]+"_2"))
+				print(os.path.join(output_folder , patient))
+				os.rename(os.path.join(output_folder , patient), os.path.join(output_folder,"sub-"+new_id))
+			except OSError : os.rename(os.path.join(output_folder , patient), os.path.join(output_folder,"sub-"+old2new_idx[patient]+"_2"))
 	
 
 	#return a mapping from new ids to old ids as a dictionary.
 	new2old_idx = {new : old.replace("sub-","") for old, new in old2new_idx.items()}
 
 	#dumping new ids to a json file.
-	with open(os.path.join(datapath,'mapper.json'), 'w') as fp:
+	with open(os.path.join(output_folder,'mapper.json'), 'w') as fp:
 		if len(old2set_idx.keys()) == 0 : 
 			json.dump(new2old_idx, fp)
 		else : json.dump(old2set_idx, fp)
@@ -270,6 +291,7 @@ def main(argv):
 	new_ids = args.new_ids
 	if args.new_ids :
 		new_ids = json.load(open(args.new_ids, "r"))
+
 	mapper = anonymize_all_dicoms_within_folder(output_folder = output_folder, datapath = data_path, new_ids = new_ids)
 
 if __name__ == "__main__" : 

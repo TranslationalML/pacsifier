@@ -289,7 +289,7 @@ def main(argv):
 		check_date(PATIENTBIRTHDATE)
 
 		QUERYRETRIVELEVEL = "SERIES"
-		if IMAGETYPE != "" or SEQUENCENAME == "":
+		if IMAGETYPE != "":
 			QUERYRETRIVELEVEL = "IMAGE"
 
 		# check if we can ping the PACS
