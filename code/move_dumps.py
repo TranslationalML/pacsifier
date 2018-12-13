@@ -4,8 +4,13 @@ import os
 import sys
 import argparse 
 
-def move(dicom_path, output_path):
-
+def move(dicom_path : str, output_path : str) -> None:
+	"""
+	Moves all csv info files within a dicom directory into a new directory.
+	Args : 
+		dicom_path: path to the folder containing dicoms.
+		output_path: The path where the csv files within the dicom path will be moved.
+	"""
 
 	#List all csv files within the folder containing the dicom images.
 	ls = glob(os.path.join(dicom_path,"sub-*","ses-*","*.csv"))
@@ -30,6 +35,7 @@ def move(dicom_path, output_path):
 		shutil.move(l, os.path.join(subsubfolder, path[-1]))
 
 def main(argv) : 
+
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument('--data_folder', "-d", help = "Path to the dicom folder")
@@ -37,6 +43,7 @@ def main(argv) :
 
 	args = parser.parse_args()
 	
+	#If there are missing arguments print help.
 	if not args.data_folder or not args.info_folder : 
 		parser.print_help()
 		sys.exit()
@@ -44,6 +51,7 @@ def main(argv) :
 	dicom_path = args.data_folder
 	output_path = args.info_folder
 	
+	#Move csv files within dicom_path within output_path
 	move(dicom_path, output_path)
 
 if __name__ == "__main__" : 

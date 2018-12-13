@@ -231,8 +231,8 @@ def main(argv):
 	"Modality"			: {'type' : 'string', 'maxlength' : 16},
 	"SeriesNumber"		: {'type' : 'string', 'maxlength' : 12},
 	"StudyDescription" 	: {'type' : 'string', 'maxlength' : 64},
-	"AccessionNumber"	: {'type' : 'string', 'maxlength' : 16}, 
-	"SequenceName"		: {'type' : 'string', 'maxlength' : 64}	
+	"AccessionNumber"	: {'type' : 'string', 'maxlength' : 16},
+	"SequenceName"		: {'type' : 'string', 'maxlength' : 64}
 	#"ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 

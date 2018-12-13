@@ -538,6 +538,7 @@ def test_read_line_by_line():
 
 def test_process_name():
 	assert process_person_names("Obi-Wan Kenobi") == "*KENOBI"
+	assert process_person_names("") == ""
 
 def test_run():
 	assert [] == run("echo Shrek is love, shrek is life.")
@@ -587,6 +588,8 @@ def test_move_dumps():
 	assert glob("./dicomdir/sub-*/ses-*/*.csv") == []
 
 	shutil.rmtree("./dicomdir")
+
+
 
 @given(s = text())
 @example(s = 'Obi-Wan Kenobi')
