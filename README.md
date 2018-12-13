@@ -95,15 +95,15 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 
 	python pacsman.py --info --save --queryfile path_to_queryfile
 
- - The --info option allows you to dump the information in the retrieved series into csv files.
- - The --save option allows you to save the queryed dicom images.
- - The --queryfile path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
+ - The --info or -i option allows you to dump the information in the retrieved series into csv files.
+ - The --save or -s option allows you to save the queryed dicom images.
+ - The --queryfile or -q path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
 
 Note : you can download the images without the --info option or only dump the info if --save option is not included.
 
  - Running the command above will download the dicom images by default into data folder of the project folder. 
- - You can specify the output directory by adding the option --out_directory path_to_output_directory.
- - You can also specify a different config file by adding the option --config path_to_config_file.
+ - You can specify the output directory by adding the option --out_directory or -d path_to_output_directory.
+ - You can also specify a different config file by adding the option --config or -c path_to_config_file.
 
 
 ## Query file: 
@@ -175,7 +175,7 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 # Anonymization 
 ## Command line 
-	python anonymize.py files-directory anonymized-files-directory
+	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory
  - files-directory is the path to the folder that contains all the dicom images.
  - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
 
@@ -190,13 +190,13 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 ## Examples
 
-### Example 1  
- 	python anonymize.py ~/data ~/anonymized_data
+### Example 1 
+	python anonymize.py --in_folder ~/data --out_folder ~/anonymized_data
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
 
 ### Example 2 
-	python anonymize.py ~/data ~/data 
+	python anonymize.py --in_folder ~/data --out_folder ~/data 
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
 
@@ -204,6 +204,32 @@ Runnning the command above will replace all the images within data folder with a
 
 ## Command line
 
-	python converter.py path_to_data_folder 
+	python convert.py path_to_data_folder 
 
 path_to_data_folder is the path to the data to be converted to nifti format. The structure of the data should be exactly the same way as for the anonymization.
+
+
+# Move dumps 
+
+If pacsman is called with the option --info or -i it will store csv files containing information about each series. <br> Move dumps is useful for moving these csv files into a new folder for complete anonymization of the data folder content.
+
+## Command line
+
+	python move_dumps.py --data_folder ~/path-to-folder-containing-dicom-files --info_folder ~/path-to-new-folder
+
+## Notes : 
+ - The path passed to --info_folder must exist, otherwise the program will crash.
+ - If the csv files are not at the same level as the series folders, the script won't have any effect.
+
+
+# Create DICOMDIR 
+
+The create_DICOMDIR script creates a copy of the dicom directory passed as parameter changing the names of folders and images to 8 character alpha numeric names and creates a DICOMDIR file of this newly created directory.
+
+## Command line
+
+	python create_DICOMDIR.py --in_folder ~/path-to-dicom-folder --out_folder ~/out-path
+
+## Notes: 
+- The path passed to out_folder must exist.
+- Make sure to have enough storage space for the new dicom directory.
