@@ -174,7 +174,7 @@ Using this csv file, the query will retrieve images of the patient with patient 
 #### Example 5
 
 	ProtocolName,Modality,PatientBirthDate
-	BEAT_SelfNav\*,CT,19920611
+	BEAT_SelfNav*,CT,19920611
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
@@ -222,6 +222,8 @@ If pacsman is called with the option --info or -i it will store csv files contai
 
 	python move_dumps.py --data_folder ~/path-to-folder-containing-dicom-files --info_folder ~/path-to-new-folder
 
+- data_folder takes the path to the dicom folder. 
+- info_folder takes the path to the folder where the csv files will be moved.
 ## Notes : 
  - The path passed to --info_folder must exist, otherwise the program will crash.
  - If the csv files are not at the same level as the series folders, the script won't have any effect.
@@ -234,6 +236,9 @@ The create_DICOMDIR script creates a copy of the dicom directory passed as param
 ## Command line
 
 	python create_DICOMDIR.py --in_folder ~/path-to-dicom-folder --out_folder ~/out-path
+
+- in_folder takes the path to the dicom folder.
+- out_folder takes the path where the renamed dicoms and the DICOMDIR will be stored.
 
 ## Notes: 
 - The path passed to out_folder must exist.
