@@ -95,13 +95,16 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 
 ## Command line
 
-	python pacsman.py --info --save --queryfile path_to_queryfile --config path_to_config_file
+	python pacsman.py --info --save --queryfile path_to_queryfile --config path_to_config_file --out_directory path_to_out_directory
 
  - The --info or -i option allows you to dump the information in the retrieved series into csv files.
  - The --save or -s option allows you to save the queryed dicom images.
  - The --queryfile or -q path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
  - The --config or -c path_to_config_file option is mandatory and specifies the config file to use for the query/retrieve.
+ - The --out_directory or -d path_to_out_directory is optional and specifies the path to the folder where the info dumps and the dicom images will be stored.
+
 Note : you can download the images without the --info option or only dump the info if --save option is not included.
+
 
  - Running the command above will download the dicom images by default into data folder of the project folder. 
  - You can specify the output directory by adding the option --out_directory or -d path_to_output_directory.
