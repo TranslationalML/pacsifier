@@ -4,7 +4,7 @@ def check_ip(ip_address : str) -> None:
 	"""
   	Checks if an ip adress is valid. Raises a ValueError if not the case.
   	Args : 
-		ip_address (string) : IP address
+		ip_address : IP address
 	"""
 	message = "Invalid IP address"
 	if len(ip_address.split(".")) != 4 : 
@@ -24,7 +24,7 @@ def check_port(port : int) -> None :
 	"""
   	Checks if a port value is valid. Raises a ValueError if not the case.
   	Args : 
-		port (int) : port number.
+		port : port number.
 	"""
 	if port > 65535 : 
 		raise ValueError("Port number is too big!")
@@ -36,8 +36,8 @@ def check_AET(AET : str, server = False) -> None :
 	"""
   	Checks the validity of an AE title. Raises an error if not the case and uses a boolean to print a relevant error message.
   	Args : 
-		AET (string) : AE title
-		server (boolean) : boolean indicating if it is a AE title of a server or not.
+		AET: AE title
+		server : boolean indicating if it is a AE title of a server or not.
 	"""
 	add = ""
 	if server : add = "Server"
@@ -55,10 +55,10 @@ def check_parameters_inputs(
 	"""
   	Checks if the parameters are valid using helper functions. Raises a ValueError if at least one parameter is invalid.
   	Args : 
-		AET (string) : Called AET
-		server_ip (string) : server ip
-		server_AET (string) : server_AET
-		port (int) : port 
+		AET : Called AET
+		server_ip : server ip
+		server_AET : server_AET
+		port : port 
 	"""
 	check_AET(AET)
 	check_AET(server_AET, server = True)
@@ -71,8 +71,8 @@ def check_ids(UID : str, attribute : str = "Patient ID") -> None:
 	"""
   	Checks if an id is valid. Raises ValueError if not the case and prints a relevant error message using the argument called attribute.
   	Args : 
-		UID (string) : Unique identifier.
-		attribute (string) : The attribute name.
+		UID : Unique identifier.
+		attribute : The attribute name.
 	"""
 	
 	if len(UID) > 64 : 
@@ -83,7 +83,7 @@ def check_filter(filter_text : str) -> None :
 	"""
 	Checks if an additional input filter is valid. 
 	Args : 
-		filter_text (string) : 
+		filter_text : additional attribute to the query command.
 	"""
 	if len(filter_text.split("=")) != 2 : raise ValueError("Invalid filter input.")
 

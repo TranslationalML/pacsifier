@@ -208,8 +208,8 @@ def anonymize_all_dicoms_within_folder(
 		output_folder: path where anonymized images will be located.
 		datapath: The path to the dicom images.
 		subject_dicom_path: the (generic) path to the dicom images starting from the patient folder.
-		new_ids (string) : The anonymous ids to be set after anonymizing the original ids. 
-		rename (boolean) : A boolean to determine if the folder name which is named after the old ids would be renamed into the anonymized ids.
+		new_ids : The anonymous ids to be set after anonymizing the original ids. 
+		rename : A boolean to determine if the folder name which is named after the old ids would be renamed into the anonymized ids.
 	Returns : 
 		dict : Dictionary keeping track of the new patientIDs and old patientIDs mappings.
 	"""

@@ -111,7 +111,7 @@ Note : you can download the images without the --info option or only dump the in
  - You can also specify a different config file by adding the option --config or -c path_to_config_file.
 
 
-## Query file: 
+## Query file
 
 The query file is a `.csv` file that should include one or many of these column names : 
 - StudyDate : The study dates of this column should be in the format YYYYMMDD (e.g 19900912 which indicates the 12th of September 1990). <br> Note : Querying on a date range is supported. (e.g 20150201-20160201 will query on studies between 01/02/2015 and 01/02/2016 ) 
@@ -123,7 +123,11 @@ The query file is a `.csv` file that should include one or many of these column 
 - PatientName : The patient name. (It is not recommanded to use this filter since there is no clear norm on how the patient names were stored on the pacs server)
 - PatientBirthDate : Similarily to the StudyDate the date should be in format YYYYMMDD. Querying on date range is not supported for patient birth date.
 - SeriesInstanceUID : The Series Instance UID
-- ImageType : The image type as stored in the pacs server. (Note : using this filter significantly slows down the querying process. Use it only if absolutely necessary.)
+- ImageType : The image type as stored in the pacs server. (Note : using this filter significantly slows down the querying process. Use it only if absolutely necessary.) 
+- AcquisitionDate : The acquisition date.
+- SeriesNumber : The series number.
+- StudyDescription : The study description.
+- AccessionNumber : The Accession number.
 - Modality : The modality.
 
 The query file can be built in Excel and exported to comma-separated values `.csv` format.
@@ -132,8 +136,7 @@ The query file can be built in Excel and exported to comma-separated values `.cs
 Notes : 
 - The query file could include one or many of the columns mentioned above. 
 - If a line in a csv file contains an empty string on a particular columns, then, the query will not include the attribute corresponding to the column in question.
-- The querying does not accept the value `*` alone on any attribute. However it can be used as a wildcard 
-if other characters are provided, e.g. `ProtocolName` could be set to `BEAT_SelfNav*`
+- The querying does not accept the value `*` alone on any attribute. However it can be used as a wildcard if other characters are provided, e.g. `ProtocolName` could be set to `BEAT_SelfNav*`
 - the Series folders are named after the Series Description of its images. However, it may happen that a dicom image has no SeriesDescription stored. In that case, the image will be stored within a folder called No_series_description.
 
 ### Examples
@@ -181,6 +184,7 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 # Anonymization 
 ## Command line 
 	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory
+ 
  - files-directory is the path to the folder that contains all the dicom images.
  - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
 
@@ -240,6 +244,7 @@ The create_DICOMDIR script creates a copy of the dicom directory passed as param
 - in_folder takes the path to the dicom folder.
 - out_folder takes the path where the renamed dicoms and the DICOMDIR will be stored.
 
-## Notes: 
+## Notes 
+
 - The path passed to out_folder must exist.
 - Make sure to have enough storage space for the new dicom directory.
