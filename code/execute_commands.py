@@ -71,25 +71,25 @@ def find(
 	"""
   	Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
   	Args : 
-		AET (string) : Called AET
-		server_ip (string) : server ip
-		server_AET (string) : server_AET
-		port (int) : port
-		QUERYRETRIVELEVEL (string) : The query retrieval level. Can only take values in {SERIES, STRUDY, PATIENT, IMAGE}
-		PATIENTID (string) : patient id 
-		STUDYUID (string) : Study unique idetifier.
-		SERIESINSTANCEUID (string) : Series Instance UID.
-		SERIESDESCRIPTION (string) : Series Description.
-		PROTOCOLNAME (string) : protocol name.
-		ACQUISITIONDATE (string) : Acquisition Date.
-		PATIENTNAME (string) : The patient's name.
-		PATIENTBIRTHDATE (string) : The patient's birth date.
-		STUDYDATE (string) : Study Date.
-		DEVICESERIALNUMBER (string) : MRI device serial number.
-		MODALITY (string) : The Modality.
-		IMAGETYPE (string) : Image Type.
-		STUDYDESCRIPTION (string): The study description,
-		ACCESSIONNUMBER : (string) : The accession number. 
+		AET : Called AET
+		server_ip : server ip
+		server_AET : server_AET
+		port : port
+		QUERYRETRIVELEVEL : The query retrieval level. Can only take values in {SERIES, STRUDY, PATIENT, IMAGE}
+		PATIENTID : patient id 
+		STUDYUID : Study unique idetifier.
+		SERIESINSTANCEUID : Series Instance UID.
+		SERIESDESCRIPTION : Series Description.
+		PROTOCOLNAME : protocol name.
+		ACQUISITIONDATE : Acquisition Date.
+		PATIENTNAME : The patient's name.
+		PATIENTBIRTHDATE : The patient's birth date.
+		STUDYDATE : Study Date.
+		DEVICESERIALNUMBER : MRI device serial number.
+		MODALITY : The Modality.
+		IMAGETYPE : Image Type.
+		STUDYDESCRIPTION : The study description,
+		ACCESSIONNUMBER : The accession number. 
 	Returns : 
 		string : The log lines.
 	"""
@@ -136,16 +136,16 @@ def get(
 	"""
 	Builds a query for movescu.
 	Args : 
-		AET (string) : Called AET
-		STUDYDATE (string) : the study date.
-		server_ip (string) : server ip
-		server_AET (string) : server_AET
-		port (int) : port 
-		PATIENTID (string) : patient id 
-		STUDYINSTANCEUID (string) : Study instance unique idetifier.
-		SERIESINSTANCEUID (string) : Series instance unique identifier
-		move_port (int) : the port used for movescu command.
-		OUTDIR (string) : directory of output files
+		AET : Called AET
+		STUDYDATE : the study date.
+		server_ip : server ip
+		server_AET : server_AET
+		port : port 
+		PATIENTID : patient id 
+		STUDYINSTANCEUID : Study instance unique idetifier.
+		SERIESINSTANCEUID : Series instance unique identifier
+		move_port : the port used for movescu command.
+		OUTDIR : directory of output files
 	Returns : 
 		string : The log lines.
 	"""
@@ -172,8 +172,8 @@ def write_file(results : str, file : str = "output.txt") -> None:
 	"""
 	Writes results in file passed in parameters using the parameters passed as arguments.
 	Args : 
-		results (str) : a str of lines of logs
-		file (string) : path to text file where the log lines in results will be written.
+		results : a str of lines of logs
+		file : path to text file where the log lines in results will be written.
 	"""
 
 	if not os.path.exists(file):
@@ -195,11 +195,11 @@ def replace_default_params(
 	Helper function to replace default parameters in queries by new parameters.
 
 	Args : 
-		PARAMETERS (string) : The string containing default parameters for dicomserver. 
-		AET (string) : Called AET
-		server_ip (string) : server ip
-		server_AET (string) : server_AET
-		port (int) : port 
+		PARAMETERS : The string containing default parameters for dicomserver. 
+		AET : Called AET
+		server_ip : server ip
+		server_AET : server_AET
+		port : port 
 	Returns : 
 		string : modified parameters with input values.
 	"""
@@ -215,7 +215,7 @@ def run(query : str) -> str:
 	"""
 	Runs a the command passed as parameter. 
 	Args:
-		query (string) : query command line to be executed.
+		query : query command line to be executed.
 	Returns : 
 		string : The log lines.
 	"""

@@ -4,8 +4,9 @@ import os
 from tqdm import tqdm
 import sys
 import nipype
+from typing import List, Tuple
 
-def process_list(paths : list) -> list:
+def process_list(paths : List[str]) -> List[Tuple[str,str]]:
 	"""
 	Extracts subject and session identifiers as stored in data folder.
 	Args :
