@@ -86,6 +86,8 @@ The config file is a json file that should include the keys :
 - `server_AET`: PACS server application entity title
 - `AET`: current station application entity title
 - `move_port`: port number to use on the current station to receive images (C-MOVE destination)
+- `batch_size` : The number of series to be downloaded before sleeping for a while.
+- `batch_wait_time` : sleep time after each batch_size number of series is downloaded.
 
 The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
 
@@ -93,12 +95,12 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 
 ## Command line
 
-	python pacsman.py --info --save --queryfile path_to_queryfile
+	python pacsman.py --info --save --queryfile path_to_queryfile --config path_to_config_file
 
  - The --info or -i option allows you to dump the information in the retrieved series into csv files.
  - The --save or -s option allows you to save the queryed dicom images.
  - The --queryfile or -q path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
-
+ - The --config or -c path_to_config_file option is mandatory and specifies the config file to use for the query/retrieve.
 Note : you can download the images without the --info option or only dump the info if --save option is not included.
 
  - Running the command above will download the dicom images by default into data folder of the project folder. 
