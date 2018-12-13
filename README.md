@@ -112,7 +112,7 @@ The query file is a `.csv` file that should include one or many of these column 
 - StudyDate : The study dates of this column should be in the format YYYYMMDD (e.g 19900912 which indicates the 12th of September 1990). <br> Note : Querying on a date range is supported. (e.g 20150201-20160201 will query on studies between 01/02/2015 and 01/02/2016 ) 
 - StudyTime : The study time should be in the format HHMMSS (e.g 140500 which means 14:05:00)
 ⁻ SeriesDecription : The series description.
-- PatientID :  The patient ID 
+- PatientID :  The patient ID. 
 - ProtocolName : The protocol names.
 - StudyInstanceUID : The Study Instance UID.
 - PatientName : The patient name. (It is not recommanded to use this filter since there is no clear norm on how the patient names were stored on the pacs server)

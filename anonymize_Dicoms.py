@@ -274,6 +274,7 @@ def anonymize_all_dicoms_within_folder(
 	return new2old_idx
 
 def main(argv):
+
 	parser = argparse.ArgumentParser()
 	
 	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join(".","data"))
