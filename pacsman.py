@@ -1,5 +1,5 @@
 #Imports.
-from execute_commands import *
+from PACSMAN.code.execute_commands import *
 from numpy import unique
 import sys
 from tqdm import tqdm, trange
@@ -174,11 +174,11 @@ def main(argv):
 	
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join("..","files","config.json"))
+	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join(".","files","config.json"))
 	parser.add_argument('--save', "-s", action='store_true', help = "The images will be stored")
 	parser.add_argument('--info', "-i", action ='store_true', help = "The info csv files will be stored")
 	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
-	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join("..","data"))
+	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join(".","data"))
 	
 	args = parser.parse_args()
 	
@@ -193,7 +193,7 @@ def main(argv):
 		pacs_server = parameters["server_ip"] 
 		port = int(parameters["port"])
 		move_port = int(parameters["move_port"])
-		client_AET = parameters["AET"]		
+		client_AET = parameters["AET"]
 		server_AET = parameters["server_AET"]	
 		batch_wait_time = int(parameters["batch_wait_time"])
 		batch_size = int(parameters["batch_size"])

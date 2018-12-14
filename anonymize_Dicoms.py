@@ -38,15 +38,13 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 def anonymize_dicom_file(
 	filename : str,
 	output_filename : str, 
-	PatientID : str = "test1",
-	PatientName : str = "test1") -> None:
+	PatientID : str = "test1") -> None:
 	"""
 	Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
 	Args : 
 		filename: path to dicom image.
 		output_filename: output path of anonymized image. 
 		PatientID: the new patientID after anonymization.
-		PatientName: The new PatientName after anonymization.
 	"""
 
 	# Load the current dicom file to 'anonymize'
@@ -65,7 +63,7 @@ def anonymize_dicom_file(
 		dataset.PatientID = PatientID
 
 	if "PatientName" in attributes : 
-		dataset.PatientName = PatientName
+		dataset.PatientName = ""
 
 	if "InstitutionAddress" in attributes: 
 		dataset.InstitutionAddress = "Address"
@@ -252,7 +250,7 @@ def anonymize_all_dicoms_within_folder(
 			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-1]))):
 				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-1])))
 
-			anonymize_dicom_file(file,os.path.join(output_folder,os.path.join(*path[-4:])), PatientID = new_id, PatientName = "Obi Ben Kanobi")
+			anonymize_dicom_file(file,os.path.join(output_folder,os.path.join(*path[-4:])), PatientID = new_id)
 		
 		#If the patient folders are to be renamed.
 		if rename :

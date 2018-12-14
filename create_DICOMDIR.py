@@ -123,8 +123,8 @@ def create_dicomdir(out_path : str) -> None :
 def main(argv):
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files.",				default = os.path.join("..","data"))
-	parser.add_argument("--out_folder", "-o",	help = "Output directory where the dicoms and DICOMDIR will be saved.",	default = os.path.join("..","data"))
+	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files.",				default = os.path.join(".","data"))
+	parser.add_argument("--out_folder", "-o",	help = "Output directory where the dicoms and DICOMDIR will be saved.",	default = os.path.join(".","data"))
 	args = parser.parse_args()
 
 	in_path = args.in_folder
