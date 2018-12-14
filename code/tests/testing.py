@@ -324,10 +324,10 @@ def test_sanity_checks():
 		check_filter("hello")
 
 	with pytest.raises(ValueError):
-		check_tuple({"shrek" : "*" , "is" : 1, "love" : 2, "shrek is" : 3 , "life" : 4})
+		check_tuple({"California" : "*" , "Dreaming" : 1})
 
 	with pytest.raises(ValueError):
-		check_tuple({"shrek" : "" , "is" : "", "love" : "", "shrek is" : "" , "life" : ""})
+		check_tuple({"California" : "" , "Dreaming" : ""})
 
 
 	with pytest.raises(ValueError):
@@ -438,12 +438,12 @@ def test_check_output():
 	assert set(list_files(path)) == expected_result"""
 
 def test_anonymize():
-	anonymize_dicom_file("sample_image","output_sample_image",PatientID = "000420", PatientName = "Hello")
+	anonymize_dicom_file("sample_image","output_sample_image",PatientID = "000420")
 	dataset = pydicom.read_file("output_sample_image")
 	attributes = dataset.dir("")
 	
 	assert dataset.PatientID == "000420"
-	assert dataset.PatientName == "Hello"
+	assert dataset.PatientName == ""
 	assert dataset.InstitutionAddress == "Address"
 	assert dataset.ReferringPhysicianTelephoneNumbers == ""
 	assert dataset.PatientTelephoneNumbers == ""
@@ -519,7 +519,7 @@ def test_anonymize():
 	dataset.PatientAge = "091"
 	dataset.save_as("output_sample_image")
 	
-	anonymize_dicom_file("output_sample_image","output_sample_image",PatientID = "000420", PatientName = "Hello")
+	anonymize_dicom_file("output_sample_image","output_sample_image",PatientID = "000420")
 	dataset = pydicom.read_file("output_sample_image")
 	assert dataset.PatientAge == "90+Y"
 
@@ -541,7 +541,7 @@ def test_process_name():
 	assert process_person_names("") == ""
 
 def test_run():
-	assert [] == run("echo Shrek is love, shrek is life.")
+	assert [] == run("echo California Dreaming.")
 
 def test_generate_new_folder_name():
 	assert len(generate_new_folder_name()) <= 8
@@ -562,6 +562,7 @@ def test_move_and_rename():
 	move_and_rename_files("./test_set","./dicomdir")
 	assert len(glob("./test_set/*/*")) == len(glob("./dicomdir/*/*"))
 	assert len(glob("./test_set/*")) == len(glob("./dicomdir/*"))
+	#print()
 	assert len(glob("./test_set/*/*/*/*")) == len(glob("./dicomdir/*/*/*/*"))
 	create_dicomdir("./dicomdir")
 	os.chdir(os.path.abspath("./code/tests/"))
@@ -576,19 +577,19 @@ def test_move_dumps():
 		shutil.rmtree("./dicomdir")
 
 	os.mkdir("./dicomdir")
-	n_csv_files = len(glob("./test_set/sub-*/ses-*/*.csv"))
+	n_csv_files = sorted(glob("./test_set/sub-*/ses-*/*.csv"))
 	move_dumps.move("./test_set","./dicomdir")
 
 	assert glob("./test_set/sub-*/ses-*/*.csv") == []
-	assert len(glob("./dicomdir/sub-*/ses-*/*.csv")) == n_csv_files
-	
+	assert sorted(glob("./dicomdir/sub-*/ses-*/*.csv")) == n_csv_files
+	n_csv_files = [csv.split(os.sep)[-1] for csv in n_csv_files]
+
 	move_dumps.move("./dicomdir","./test_set")
 
-	assert len(glob("./test_set/sub-*/ses-*/*.csv")) == n_csv_files
+	assert [csv.split(os.sep)[-1] for csv in sorted(glob("./test_set/sub-*/ses-*/*.csv"))] == n_csv_files
 	assert glob("./dicomdir/sub-*/ses-*/*.csv") == []
 
 	shutil.rmtree("./dicomdir")
-
 
 
 @given(s = text())
@@ -641,5 +642,5 @@ TODO :
 			continue
 	assert ls == ["PatientID", "StudyInstanceUID"]"""
 
-if __name__ == "__main__" :
-	test_move_and_rename()
+#if __name__ == "__main__" :
+#	test_move_and_rename()

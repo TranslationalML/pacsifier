@@ -33,6 +33,9 @@ def move(dicom_path : str, output_path : str) -> None:
 
 		#Move the csv file into the session folder.
 		shutil.move(l, os.path.join(subsubfolder, path[-1]))
+		
+	if os.path.isfile(os.path.join(dicom_path, "mapper.json")) : 
+		shutil.move(os.path.join(dicom_path, "mapper.json"), os.path.join(output_path, "mapper.json"))
 
 def main(argv) : 
 
