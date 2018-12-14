@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Dict
 
 def check_ip(ip_address : str) -> None: 
 	"""
@@ -87,7 +88,7 @@ def check_filter(filter_text : str) -> None :
 	"""
 	if len(filter_text.split("=")) != 2 : raise ValueError("Invalid filter input.")
 
-def check_tuple(tuple_ : dict) -> None : 
+def check_tuple(tuple_ : Dict[str,str]) -> None : 
 	"""
 	Checks that the table has an acceptable input parameters. 
 	Args : 
@@ -144,7 +145,7 @@ def check_date(date : str) -> None:
 	return
 
 
-def check_config_file(config_file : dict) -> None : 
+def check_config_file(config_file : Dict[str,str]) -> None : 
 	"""
 	Checks that the config file passed as a parameter is valid or not.
 	Args: 

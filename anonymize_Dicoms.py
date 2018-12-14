@@ -70,7 +70,6 @@ def anonymize_dicom_file(
 
 	if "InstitutionName" in attributes: 
 		dataset.InstitutionName = ""
-		#/home/localadmin/Bureau/trippin/sub-124568/ses-20180108152705/0001-Scano2.0/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515392849.707206
 	
 	if "ReferringPhysicianTelephoneNumbers" in attributes : 
 		dataset.ReferringPhysicianTelephoneNumbers = ""
@@ -278,6 +277,7 @@ def main(argv):
 	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join(".","data"))
 	parser.add_argument("--out_folder", "-o",	help = "Output directory where the anonymized dicoms will be saved.",	default = os.path.join(".","data"))
 	parser.add_argument("--new_ids", 	"-n", 	help = "List of new ids.")
+	
 	args = parser.parse_args()
 
 

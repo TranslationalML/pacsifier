@@ -321,7 +321,7 @@ def main(argv):
 			IMAGETYPE = IMAGETYPE,
 			STUDYDESCRIPTION = STUDYDESCRIPTION,
 			ACCESSIONNUMBER = ACCESSIONNUMBER,
-			SEQUENCENAME = SEQUENCENAME) 
+			SEQUENCENAME = SEQUENCENAME)
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")
@@ -330,7 +330,6 @@ def main(argv):
 
 		#Extract all series ids.
 		series = parse_findscu_dump_file("current.txt")
-
 		
 		#loop over series
 		for serie in tqdm(series) :
