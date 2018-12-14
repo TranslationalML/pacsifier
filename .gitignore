@@ -85,4 +85,5 @@ files/yasser.csv
 /SequenceName
 /files/elena.csv
 /files/julius_popp_all_IPPs_dates_missing.csv
-files/julius_popp_all_IPPs_dates.csv
+/files/julius_popp_all_IPPs_dates.csv
+/code/tests/fails.txt
