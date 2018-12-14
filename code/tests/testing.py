@@ -263,6 +263,13 @@ def test_fuzz_date():
 	assert fuzzed in ["20180910", "20180909", "20180911", "20180912", "20180913"]
 	with pytest.raises(ValueError):
 		fuzz_date("20180911",fuzz_parameter = random.randint(-10000,0))
+def test_check_config_file():
+	with pytest.raises(ValueError):
+		check_config_file({"California Dreaming":1})
+
+def test_check_query_retrieval_level():
+	with pytest.raises(ValueError):
+		check_query_retrieval_level({"Hello"})
 
 def test_sanity_checks(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -378,64 +385,59 @@ def test_process_list():
 
 def test_check_output(): 
 	"""
-	run the command : python pacsman.py --info info --save save --queryfile complete_schizo.csv --out_directory ./tests/test_set
+	run the command : python pacsman.py --info --save --queryfile complete_schizo.csv --out_directory ./tests/test_set
 	"""
-	#pacsman.main(["--info info","--save bla", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config /home/localadmin/Bureau/PACSMAN/files/config.json"])
+	#pacsman.main(["--info info","--save bla", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
 	
 	subjects = glob("./test_set/*")
 	sessions = glob("./test_set/sub-*/ses-*")
 	csv_files = glob("./test_set/sub-*/ses-*/*.csv")
-	assert subjects == ['./test_set/sub-14']
+	assert subjects == ['./test_set/sub-2936187']
 
-	assert sessions == ['./test_set/sub-14/ses-20180108152705', './test_set/sub-14/ses-20180104082740']
-	assert csv_files == ['./test_set/sub-14/ses-20180108152705/0000-PTV2_6metas_FINAL_83min-RTDOSE.csv',
-	'./test_set/sub-14/ses-20180108152705/9000-1FOVS.csv',
-	'./test_set/sub-14/ses-20180108152705/0000-PTV2_6metas_FINAL_83min.csv',
-	'./test_set/sub-14/ses-20180108152705/0000-PTV1_Brain_Final_66min.csv',
-	'./test_set/sub-14/ses-20180108152705/0003-RTP1.0FOVS.csv',
-	'./test_set/sub-14/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTSS.csv',
-	'./test_set/sub-14/ses-20180108152705/0000-PTV2_6metas_FINAL_83min-RTSS.csv',
-	'./test_set/sub-14/ses-20180108152705/0002-RTP1.0Natif.csv',
-	'./test_set/sub-14/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTDOSE.csv',
-	'./test_set/sub-14/ses-20180108152705/0001-Scano2.0.csv',
-	'./test_set/sub-14/ses-20180108152705/0001-SecondaryCaptureSequence.csv',
-	'./test_set/sub-14/ses-20180104082740/0005-t1_gre_sag_45_3.csv',
-	'./test_set/sub-14/ses-20180104082740/0106-CBV_RGB.csv',
-	'./test_set/sub-14/ses-20180104082740/0104-MTT_RGB.csv',
-	'./test_set/sub-14/ses-20180104082740/0024-RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0020-TTP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0010-perf_tra17_6.csv',
-	'./test_set/sub-14/ses-20180104082740/0018-RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0013-PBP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0017-RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0028-t1_mprage_sagGD.csv',
-	'./test_set/sub-14/ses-20180104082740/0108-MPRGDCOR.csv',
-	'./test_set/sub-14/ses-20180104082740/0025-RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0023-RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0009-SWI_Images.csv',
-	'./test_set/sub-14/ses-20180104082740/0008-mIP_Images(SW).csv',
-	'./test_set/sub-14/ses-20180104082740/0029-svs_se_135.csv',
-	'./test_set/sub-14/ses-20180104082740/0107-MPRGDTRA.csv',
-	'./test_set/sub-14/ses-20180104082740/0026-t2_tse_tra43_3.csv',
-	'./test_set/sub-14/ses-20180104082740/0105-CBVCORR_RGB.csv',
-	'./test_set/sub-14/ses-20180104082740/0021-PBP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0015-RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0022-RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0027-t1_mprage_sagGD_ND.csv',
-	'./test_set/sub-14/ses-20180104082740/0109-svs_se_135_RGB.csv',
-	'./test_set/sub-14/ses-20180104082740/0016-RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0014-GBP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0011-perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0019-perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0007-Pha_Images.csv',
-	'./test_set/sub-14/ses-20180104082740/0006-Mag_Images.csv',
-	'./test_set/sub-14/ses-20180104082740/0012-TTP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-14/ses-20180104082740/0109-KEY_IMAGESPR.csv']
-
-"""def test_list_files():
-	path = os.path.join("..","..","code","*.py")
-	expected_result = {'../../code/sanity_checks.py', '../../code/depannage.py', '../../code/move_dumps.py', '../../code/execute_commands.py', '../../code/anonymize.py', '../../code/pacsman.py', '../../code/seek.py', '../../code/convertall.py', '../../code/heuristic.py', '../../code/convert.py'}
-	assert set(list_files(path)) == expected_result"""
+	assert sessions == ['./test_set/sub-2936187/ses-20180108152705', './test_set/sub-2936187/ses-20180104082740']
+	assert csv_files == ['./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min-RTDOSE.csv',
+	'./test_set/sub-2936187/ses-20180108152705/9000-1FOVS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0003-RTP1.0FOVS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTSS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min-RTSS.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTDOSE.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0001-Scano2.0.csv',
+	'./test_set/sub-2936187/ses-20180108152705/0001-SecondaryCaptureSequence.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0005-t1_gre_sag_45_3.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0106-CBV_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0104-MTT_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0024-RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0020-TTP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0010-perf_tra17_6.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0018-RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0013-PBP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0017-RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0028-t1_mprage_sagGD.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0108-MPRGDCOR.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0025-RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0023-RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0009-SWI_Images.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0008-mIP_Images(SW).csv',
+	'./test_set/sub-2936187/ses-20180104082740/0029-svs_se_135.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0107-MPRGDTRA.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0026-t2_tse_tra43_3.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0105-CBVCORR_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0021-PBP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0015-RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0022-RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0027-t1_mprage_sagGD_ND.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0109-svs_se_135_RGB.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0016-RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0014-GBP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0011-perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0019-perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0007-Pha_Images.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0006-Mag_Images.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0012-TTP_perf_tra17_6_MoCo.csv',
+	'./test_set/sub-2936187/ses-20180104082740/0109-KEY_IMAGESPR.csv']
 
 def test_anonymize():
 	anonymize_dicom_file("sample_image","output_sample_image",PatientID = "000420")
@@ -467,6 +469,12 @@ def test_anonymize():
 	if "PerformingPhysicianName" in attributes : 
 		assert dataset.PerformingPhysicianName == ""
 
+	if "ReferringPhysiciansAddress" in attributes : 
+		assert dataset.ReferringPhysiciansAddress == ""
+	
+	if "ReferringPhysiciansTelephoneNumber" in attributes : 
+		assert dataset.ReferringPhysiciansTelephoneNumber == ""
+	
 	if "PerformingPhysicianIDSequence" in attributes : 
 		assert dataset.PerformingPhysicianIDSequence == ""
 
@@ -523,7 +531,7 @@ def test_anonymize():
 	dataset = pydicom.read_file("output_sample_image")
 	assert dataset.PatientAge == "90+Y"
 
-def test_anonymize_all(): 
+def test_anonymize_all_dicoms_within_folder():
 	dict_ = anonymize_all_dicoms_within_folder(output_folder = ".", datapath=".", subject_dicom_path = "output_sample_image", rename = False)
 	#print(dict_)
 	#assert dict_ == {'000003': '__pycache__', '000002': 'test_set', '000000': '.pytest_cache', '000001': '.hypothesis'}
@@ -578,11 +586,13 @@ def test_move_dumps():
 
 	os.mkdir("./dicomdir")
 	n_csv_files = sorted(glob("./test_set/sub-*/ses-*/*.csv"))
+	n_csv_files = [csv.split(os.sep)[-1] for csv in n_csv_files]
+
 	move_dumps.move("./test_set","./dicomdir")
 
 	assert glob("./test_set/sub-*/ses-*/*.csv") == []
-	assert sorted(glob("./dicomdir/sub-*/ses-*/*.csv")) == n_csv_files
-	n_csv_files = [csv.split(os.sep)[-1] for csv in n_csv_files]
+	assert [csv.split(os.sep)[-1] for csv in sorted(glob("./dicomdir/sub-*/ses-*/*.csv"))] == n_csv_files
+	
 
 	move_dumps.move("./dicomdir","./test_set")
 
@@ -591,7 +601,6 @@ def test_move_dumps():
 
 	shutil.rmtree("./dicomdir")
 
-
 @given(s = text())
 @example(s = 'Obi-Wan Kenobi')
 def test_check_date_input(s):
@@ -599,6 +608,11 @@ def test_check_date_input(s):
 	if s == "" : assert processed == ""
 	else : assert process_person_names(s) == "*"+s.split(" ")[-1].upper()
 
+def test_convert_to_nifti():
+	convert_to_nifti("2936187", "20180104082740", "./test_set")
+	convert_to_nifti("2936187", "20180108152705", "./test_set")
+	convert_all("./test_set")
+	shutil.rmtree("./test_set/Nifti")
 
 #WHY ISN'T THIS SECTION WORKING.
 
