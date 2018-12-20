@@ -142,7 +142,6 @@ def test_get_invalid_inputs():
 	with pytest.raises(ValueError):
 		get("AET", "19930911", server_ip = "128.132.1855.16")
 
-
 def test_replace_default_parameters():
 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -392,11 +391,19 @@ def test_retrieve():
 		parameters = json.load(f)
 	
 	out_directory = os.path.join(".","test_set")
-	retrieve_dicoms_using_table(table, parameters, out_directory, False, False)
-	retrieve_dicoms_using_table(table, parameters, out_directory, False, True)
-	retrieve_dicoms_using_table(table, parameters, out_directory, True, True)
-	
+	#retrieve_dicoms_using_table(table, parameters, out_directory, False, False)
 
+	#assert glob("./test_set/sub-*/ses-*/*/*") == []
+	#retrieve_dicoms_using_table(table, parameters, out_directory, False, True)
+
+	#assert glob("./test_set/sub-*/ses-*/*/*") == []
+	retrieve_dicoms_using_table(table, parameters, out_directory, True, True)
+	assert glob("./test_set/sub-*/ses-*/*/*")[:6] == ['./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTDOSE/RD.1.2.840.114358.359.1.20180111162058.2694638356555',
+	'./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min/RP.1.2.840.114358.1230.20180115093558.1',
+	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393124.603136',
+	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393136.736167',
+	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393131.914801',
+	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393139.581407']
 
 def test_check_output(): 
 	"""
@@ -627,9 +634,9 @@ def test_convert_to_nifti():
 	convert_to_nifti("2936187", "20180104082740", "./test_set")
 	convert_to_nifti("2936187", "20180108152705", "./test_set")
 	convert_all("./test_set")
-	shutil.rmtree("./test_set/Nifti")
+	if os.path.isdir("./test_set/Nifti"):
+		shutil.rmtree("./test_set/Nifti")
 	shutil.rmtree("./test_set/sub-2936187")
-
 
 #WHY ISN'T THIS SECTION WORKING.
 
