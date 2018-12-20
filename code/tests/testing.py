@@ -54,6 +54,7 @@ def test_echo_invalid_inputs() :
 	with pytest.raises(ValueError):
 		echo(server_ip = "128.132.1855.16")
 
+
 def test_find_invalid_inputs(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 	
@@ -95,8 +96,7 @@ def test_find_invalid_inputs():
 
 	with pytest.raises(ValueError) : 
 		find("AET",  STUDYDATE = "19930911", server_ip = "128.132.1855.16")
-
-
+	
 def test_get_invalid_inputs():
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
@@ -141,6 +141,7 @@ def test_get_invalid_inputs():
 
 	with pytest.raises(ValueError):
 		get("AET", "19930911", server_ip = "128.132.1855.16")
+
 
 def test_replace_default_parameters():
 
@@ -383,6 +384,20 @@ def test_process_list():
 	paths = ["sub-25647/ses-20170425114530","sub-14569/ses-20170525114530","sub-5879/ses-20170625114530","sub-69875/ses-20170725114530"]
 	assert process_list(paths) == [("25647","20170425114530"),("14569","20170525114530"),("5879","20170625114530"),("69875","20170725114530")]
 
+def test_retrieve():
+	table = read_csv(os.path.join("..","..","files","test.csv"), dtype=str).fillna("")
+	config_path = os.path.join("..","..","files","config.json")
+
+	with open(config_path) as f:
+		parameters = json.load(f)
+	
+	out_directory = os.path.join(".","test_set")
+	retrieve_dicoms_using_table(table, parameters, out_directory, False, False)
+	retrieve_dicoms_using_table(table, parameters, out_directory, False, True)
+	retrieve_dicoms_using_table(table, parameters, out_directory, True, True)
+	
+
+
 def test_check_output(): 
 	"""
 	run the command : python pacsman.py --info --save --queryfile complete_schizo.csv --out_directory ./tests/test_set
@@ -613,6 +628,8 @@ def test_convert_to_nifti():
 	convert_to_nifti("2936187", "20180108152705", "./test_set")
 	convert_all("./test_set")
 	shutil.rmtree("./test_set/Nifti")
+	shutil.rmtree("./test_set/sub-2936187")
+
 
 #WHY ISN'T THIS SECTION WORKING.
 
