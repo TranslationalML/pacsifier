@@ -166,53 +166,25 @@ def process_person_names(name : str) -> str :
 	new_name = "*"+ splitted_name[-1]
 	return new_name
 
-########################################################################################################################
-##########################################################MAIN##########################################################
-########################################################################################################################
 
-def main(argv):
-	
-	parser = argparse.ArgumentParser()
-	
-	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join(".","files","config.json"))
-	parser.add_argument('--save', "-s", action='store_true', help = "The images will be stored")
-	parser.add_argument('--info', "-i", action ='store_true', help = "The info csv files will be stored")
-	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
-	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join(".","data"))
-	
-	args = parser.parse_args()
-	
-	config_path = args.config
-	
-	#Reading config file.
-	try:
-		with open(config_path) as f:
-			parameters = json.load(f)
-		check_config_file(parameters)
 
-		pacs_server = parameters["server_ip"] 
-		port = int(parameters["port"])
-		move_port = int(parameters["move_port"])
-		client_AET = parameters["AET"]
-		server_AET = parameters["server_AET"]	
-		batch_wait_time = int(parameters["batch_wait_time"])
-		batch_size = int(parameters["batch_size"])
-	except FileNotFoundError: 		
-		args.config = None
-		pass
-	
-	output_dir = args.out_directory
-	
-	#Check the case where the queryfile option is missing. If it is the case print help.
-	if args.queryfile == None or args.config == None: 
-		print("Missing mandatory parameter --queryfile or --config!")
-		parser.print_help()
-		sys.exit()
-
-	#Reading table.
-	table = read_csv(args.queryfile, dtype=str).fillna("")
-	
-	check_query_table_allowed_filters(table)
+def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], output_dir : str, save : bool, info : bool) -> None:
+	"""
+	Downloads and retrieves info dumps of dicom images using attributes passed in table.
+	Args : 
+		table : Query table
+		parameters : Query/retrieve parameters.
+		output_dir : The path to the output directory.
+		save : option to save the images.
+		info : option to save info dumps.
+	"""
+	pacs_server = parameters["server_ip"] 
+	port = int(parameters["port"])
+	move_port = int(parameters["move_port"])
+	client_AET = parameters["AET"]
+	server_AET = parameters["server_AET"]	
+	batch_wait_time = int(parameters["batch_wait_time"])
+	batch_size = int(parameters["batch_size"])
 
 	#Flexible parsing.
 	attributes_list = parse_query_table(table , ALLOWED_FILTERS)
@@ -341,7 +313,7 @@ def main(argv):
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
 			
 			#Make the patient folder.
-			if not os.path.isdir(patient_dir) and (args.save or args.info):
+			if not os.path.isdir(patient_dir) and (save or info):
 				os.mkdir(patient_dir)
 
 			if NEW_ID != "" : 
@@ -352,7 +324,7 @@ def main(argv):
 			patient_study_output_dir = os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
 
 			#Make the Study folder.
-			if not os.path.isdir(patient_study_output_dir) and (args.save or args.info):
+			if not os.path.isdir(patient_study_output_dir) and (save or info):
 				os.mkdir(patient_study_output_dir)
 
 			#Name the series folder after the SeriesDescription.
@@ -363,11 +335,11 @@ def main(argv):
 			patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie["SeriesNumber"].zfill(4)+"-"+folder_name.replace("<","").replace(">","").replace(":","").replace("/",""))
 
 			#Store all later retrieved files of current patient within the serie_id directory.
-			if not os.path.isdir(patient_serie_output_dir) and (args.save or args.info):
+			if not os.path.isdir(patient_serie_output_dir) and (save or info):
 				os.mkdir(patient_serie_output_dir)
 
 			#Retrieving files of current patient, study and serie.
-			if args.save :
+			if save :
 				get_res = get(
 					client_AET,
 					serie["StudyDate"],
@@ -380,7 +352,7 @@ def main(argv):
 					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
 
-			if args.info : 
+			if info : 
 
 				#Writing series info to csv file.
 				with open(patient_serie_output_dir+'.csv', 'w') as f: 
@@ -390,6 +362,51 @@ def main(argv):
 			
 			if os.path.isfile("current.txt"): 
 				os.remove("current.txt")
+
+########################################################################################################################
+##########################################################MAIN##########################################################
+########################################################################################################################
+
+def main(argv):
+	
+	parser = argparse.ArgumentParser()
+	
+	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join(".","files","config.json"))
+	parser.add_argument('--save', "-s", action='store_true', help = "The images will be stored")
+	parser.add_argument('--info', "-i", action ='store_true', help = "The info csv files will be stored")
+	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
+	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join(".","data"))
+	
+	args = parser.parse_args()
+	
+	config_path = args.config
+	save = args.save
+	info = args.info
+	#Reading config file.
+	try:
+		with open(config_path) as f:
+			parameters = json.load(f)
+		check_config_file(parameters)
+
+	except FileNotFoundError: 		
+		args.config = None
+		pass
+	
+	output_dir = args.out_directory
+	
+	#Check the case where the queryfile option is missing. If it is the case print help.
+	if args.queryfile == None or args.config == None: 
+		print("Missing mandatory parameter --queryfile or --config!")
+		parser.print_help()
+		sys.exit()
+
+	#Reading table.
+	table = read_csv(args.queryfile, dtype=str).fillna("")
+	
+	check_query_table_allowed_filters(table)
+
+	retrieve_dicoms_using_table(table, parameters, output_dir, save, info)
+
 				
 if __name__ == "__main__" :
 	main(sys.argv[1:])
