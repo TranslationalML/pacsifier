@@ -15,6 +15,8 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 5. Create the configuration file as described below.
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
+FIXME: environment spec file is not the same on linux as on Windows.
+
 ### Windows 7
 
 #### Installation
@@ -35,7 +37,7 @@ This is more annoying than the Linux install.
 6. Using `cmd.exe` in admin mode: Setup the python environment 
 	- Run a command prompt as admin (start menu - right click on Command Prompt - Run as administrator)
 	- Activate the base conda environment: `D:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
-	- Create the environment: `conda env create -n pacsman_minimal -f /path/to/PACSMAN/files/environment_minimal.yml`
+	- Create the environment: `conda env create -n pacsman_minimal -f /path/to/PACSMAN/deployment/utils/environment_minimal.yml`
 	- Note: This is messy but using `Anaconda Prompt` may get you a `NotWriteableError: The current user does not have write
 permissions to a required path`,
 7. Using `Anaconda prompt`: install support to run conda in PowerShell (<https://github.com/BCSharp/PSCondaEnvs>), because that's where chocolatey makes dcmtk available
