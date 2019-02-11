@@ -372,8 +372,8 @@ def main(argv):
 	parser = argparse.ArgumentParser()
 	
 	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join(".","files","config.json"))
-	parser.add_argument('--save', "-s", action='store_true', help = "The images will be stored")
-	parser.add_argument('--info', "-i", action ='store_true', help = "The info csv files will be stored")
+	parser.add_argument('--save', "-s", action='store_true', help = "Store images resulting from query")
+	parser.add_argument('--info', "-i", action ='store_true', help = "Store parsed version of findscu output (DICOM header subset)")
 	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
 	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join(".","data"))
 	
@@ -400,7 +400,7 @@ def main(argv):
 		parser.print_help()
 		sys.exit()
 
-	#Reading table.
+	#Read the query file.
 	table = read_csv(args.queryfile, dtype=str).fillna("")
 	
 	check_query_table_allowed_filters(table)
