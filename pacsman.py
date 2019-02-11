@@ -1,5 +1,7 @@
 #Imports.
 from PACSMAN.code.execute_commands import *
+import re
+import unicodedata
 from numpy import unique
 import sys
 from tqdm import tqdm, trange
@@ -302,7 +304,10 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 
 		#Extract all series ids.
 		series = parse_findscu_dump_file("current.txt")
-		
+
+		# Pre-compile sanitizing regex for folder renaming
+		my_re_clean=re.compile('[^0-9a-zA-Z]+') # keep only alphanums
+
 		#loop over series
 		for serie in tqdm(series) :
 			
@@ -330,9 +335,13 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 			#Name the series folder after the SeriesDescription.
 			folder_name = serie["SeriesDescription"]
 
+			# Pre-emptively sanitize the folder name - decompose into separate combining chars, then remove them using asci encoding-decoding. 
+			# finally replace illegal chars with underscores
+			folder_name=my_re_clean.sub('_', unicodedata.normalize('NFD', folder_name).encode('ascii','ignore').decode('ascii'))
+
 			#If the StudyDescription is an empty string name the folder No_series_description.
 			if folder_name == "" : folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir ,serie["SeriesNumber"].zfill(4)+"-"+folder_name.replace("<","").replace(">","").replace(":","").replace("/",""))
+			patient_serie_output_dir = os.path.join(patient_study_output_dir, serie["SeriesNumber"].zfill(5)+"-"+folder_name)
 
 			#Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir) and (save or info):

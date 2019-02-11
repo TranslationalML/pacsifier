@@ -232,7 +232,6 @@ def run(query : str) -> str:
 			
 			completed = subprocess.run(cmd, stderr = subprocess.PIPE, stdout = subprocess.PIPE, check=True)
 			lines = completed.stderr.decode('latin1').splitlines()
-			
 
 		else : 
 			completed = subprocess.check_output(cmd, stderr = subprocess.PIPE)
