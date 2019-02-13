@@ -185,10 +185,11 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 # Anonymization 
 ## Command line 
-	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory
+	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json
  
  - files-directory is the path to the folder that contains all the dicom images.
  - anonymized-files-directory is the path to the directory where the anonymized dicom images will be saved.
+ - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
 
 ## Important Notes 
  - If the anonymized-files-directory is the same as the files-directory the raw dicom images will be deleted and replaced by the anonymized ones (This proved useful when there was no more storage space left for additional images ).
