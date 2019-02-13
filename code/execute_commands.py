@@ -31,8 +31,7 @@ move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --
 def echo(
         server_ip: str = "88.202.185.144",
         port: int = 104,
-        server_AET: str = "theServertAET"
-) -> str:
+        server_AET: str = "theServertAET" ) -> str:
     """
       Checks that the PACS server can be reached and accepts associations
       Args :
