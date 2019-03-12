@@ -156,7 +156,7 @@ def anonymize_dicom_file(
 		dataset.PersonName = ""
 
 	if "AccessionNumber" in attributes :
-		dataset.AccessionNumber = 0
+		dataset.AccessionNumber = ""
 	
 	try : 
 		age = dataset.PatientAge
