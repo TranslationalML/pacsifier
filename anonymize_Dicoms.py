@@ -62,6 +62,9 @@ def anonymize_dicom_file(
 		old_id = dataset.PatientID
 		dataset.PatientID = PatientID
 
+	if "AccessionNumber" in attributes :
+		dataset.AccessionNumber = ""
+
 	if "PatientName" in attributes : 
 		dataset.PatientName = ""
 
@@ -137,6 +140,9 @@ def anonymize_dicom_file(
 	if "PersonAddress" in attributes : 
 		dataset.PersonAddress = ""
 
+	if "PatientAddress" in attributes : 
+		dataset.PatientAddress = ""
+
 	if "PatientMotherBirthName" in attributes : 
 		dataset.PatientMotherBirthName = ""
 
@@ -154,9 +160,6 @@ def anonymize_dicom_file(
 
 	if "PersonName" in attributes : 
 		dataset.PersonName = ""
-
-	if "AccessionNumber" in attributes :
-		dataset.AccessionNumber = ""
 	
 	try : 
 		age = dataset.PatientAge
