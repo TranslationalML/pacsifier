@@ -19,6 +19,8 @@ from create_DICOMDIR import *
 import move_dumps
 from hypothesis.strategies import text, integers
 
+#TODO: after anonymisation run dicom3tools' dcentvfy on whole series to check consistency
+
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! for coverage execute : py.test --cov=../../ testing.py !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ../../ points to the project folder !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

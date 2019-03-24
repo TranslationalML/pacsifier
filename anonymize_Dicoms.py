@@ -8,8 +8,9 @@ import random
 import json
 from typing import Dict
 import argparse
+import hashlib
 
-def fuzz_date(date : str, fuzz_parameter : int = 60) -> str: 
+def fuzz_date(date : str, fuzz_parameter : int = 30) -> str: 
 	"""
 	Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
 	Args : 
@@ -35,16 +36,26 @@ def fuzz_date(date : str, fuzz_parameter : int = 60) -> str:
 	del date_time
 	return str_date
 
+
 def anonymize_dicom_file(
 	filename : str,
 	output_filename : str, 
-	PatientID : str = "test1") -> None:
+	PatientID : str = "test1",
+	PatientID_numstr : str = '9292919239516130',
+	fuzzed_birthdate : str = None) -> None:
 	"""
 	Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
+	
 	Args : 
 		filename: path to dicom image.
 		output_filename: output path of anonymized image. 
 		PatientID: the new patientID after anonymization.
+		PatientID_numstr: a string of 0-9 digits corresponding to the patient ID (e.g. hashed) to be used in DICOM fields that need digits rather
+			than alphanums
+		fuzzed_birthdate: a fuzzed birthdate for this patient
+
+	TODO:
+		- Implement proper exception handling
 	"""
 
 	# Load the current dicom file to 'anonymize'
@@ -62,141 +73,90 @@ def anonymize_dicom_file(
 		old_id = dataset.PatientID
 		dataset.PatientID = PatientID
 
+	# Reuse the 16-digits numeric string patient ID here, which also correspond to a SH VR
 	if "AccessionNumber" in attributes :
-		dataset.AccessionNumber = ""
+		#dataset.AccessionNumber = ""
+		dataset.AccessionNumber = PatientID_numstr
+
+	# TODO - write a loop on attributes to erase, with dataset.data_element(my_var).value=""
 
 	if "PatientName" in attributes : 
-		dataset.PatientName = ""
+		#make it a valid PN VR
+		dataset.PatientName = PatientID+"^sub" 
 
 	if "InstitutionAddress" in attributes: 
 		dataset.InstitutionAddress = "Address"
 
-	if "InstitutionName" in attributes: 
-		dataset.InstitutionName = ""
-	
-	if "ReferringPhysicianTelephoneNumbers" in attributes : 
-		dataset.ReferringPhysicianTelephoneNumbers = ""
+	elements_to_blank=["CurrentPatientLocation", "CountryOfResidence", "InstitutionalDepartmentName", "InstitutionName", "IssuerOfPatientID", "NameOfPhysicianReadingStudy", 
+	"OperatorsName", "OrderCallbackPhoneNumber", "OtherPatientNames" , "OtherPatientIDs", "PatientAddress", "PatientBirthName", "PatientsBirthTime",
+	"PatientInstitutionResidence", "PatientMotherBirthName", "PatientTelephoneNumbers", "PersonAddress", "PersonName",
+	"PersonTelephoneNumbers", "PerformingPhysicianIDSequence", "PerformingPhysicianName", "PhysiciansReadingStudyIdentificationSequence", "PhysicianOfRecord",
+	"RegionOfResidence", "ReferringPhysiciansAddress", "ReferringPhysicianIDSequence", "ReferringPhysiciansName", "ReferringPhysicianTelephoneNumbers"]
+	# note: OtherPatientIDs is a retired attribute
+	for el in elements_to_blank:
+		if el in attributes:
+			dataset.data_element(el).value=""
 
-	if "ReferringPhysicianName" in attributes : 
-		dataset.ReferringPhysicianName = ""
-	
-	if "PatientTelephoneNumbers" in attributes : 
-		dataset.PatientTelephoneNumbers = ""
-	
-	if "PersonTelephoneNumbers" in attributes : 
-		dataset.PersonTelephoneNumbers = ""
-	
-	if "OrderCallbackPhoneNumber" in attributes : 
-		dataset.OrderCallbackPhoneNumber = ""
-
-	if "ReferringPhysiciansName" in attributes : 
-		dataset.ReferringPhysiciansName = ""
-
-	if "ReferringPhysiciansAddress" in attributes : 
-		dataset.ReferringPhysiciansAddress = ""
-
-	if "ReferringPhysiciansTelephoneNumber" in attributes : 
-		dataset.ReferringPhysiciansTelephoneNumber = ""
-
-	if "ReferringPhysicianIDSequence" in attributes : 
-		dataset.ReferringPhysicianIDSequence = ""
-
-	if "InstitutionalDepartmentName" in attributes : 
-		dataset.InstitutionalDepartmentName = ""
-
-	if "PhysicianOfRecord" in attributes : 
-		dataset.PhysicianOfRecord = ""
-
-	if "PerformingPhysicianName" in attributes : 
-		dataset.PerformingPhysicianName = ""
-
-	if "PerformingPhysicianIDSequence" in attributes : 
-		dataset.PerformingPhysicianIDSequence = ""
-
-	if "NameOfPhysicianReadingStudy" in attributes : 
-		dataset.NameOfPhysicianReadingStudy = ""
-
-	if "PhysicianReadingStudyIDSequence" in attributes : 
-		dataset.PhysicianReadingStudyIDSequence = ""
-
-	if "OperatorsName" in attributes : 
-		dataset.OperatorsName = ""
-
-	if "IssuerOfPatientID" in attributes : 
-		dataset.IssuerOfPatientID = ""
-
-	if "PatientsBirthTime" in attributes : 
-		dataset.PatientsBirthTime = ""
-
-	if "OtherPatientIDs" in attributes : 
-		dataset.OtherPatientIDs = ""
-
-	if "OtherPatientNames" in attributes : 
-		dataset.OtherPatientNames = ""
-
-	if "PatientBirthName" in attributes : 
-		dataset.PatientBirthName = ""
-
-	if "PersonAddress" in attributes : 
-		dataset.PersonAddress = ""
-
-	if "PatientAddress" in attributes : 
-		dataset.PatientAddress = ""
-
-	if "PatientMotherBirthName" in attributes : 
-		dataset.PatientMotherBirthName = ""
-
-	if "CountryOfResidence" in attributes : 
-		dataset.CountryOfResidence = ""
-
-	if "RegionOfResidence" in attributes : 
-		dataset.RegionOfResidence = ""
-
-	if "CurrentPatientLocation" in attributes : 
-		dataset.CurrentPatientLocation = ""
-
-	if "PatientInstitutionResidence" in attributes : 
-		dataset.PatientsInstitutionResidence = ""
-
-	if "PersonName" in attributes : 
-		dataset.PersonName = ""
-	
+	# now take care of age
 	try : 
 		age = dataset.PatientAge
 
 		#If age attribute is an empty string, skip this step all together
 		if age != '' :
 			if int(age[:3]) > 89 : 
-
 				ninety_plus = True
 				dataset.PatientAge = "90+Y"
-				dataset.PatientBirthDate = "19010101"
-				
+				dataset.PatientBirthDate = "19010101"			
 	except AttributeError : 
 		pass
 
-	#The StudyInstanceUID contains the old id. therefore, the old id should be replaced by the new anonymous one.
+	# One of the components of the StudyInstanceUID sometimes contains the original patientID (e.g. on GE Revolution CT machines).
+	# Therefore, the original patientID should be replaced by the new anonymous one.
+	# But DICOM standard part 5 chapter 9.1 'UID encoding rules' says 'Each component of a UID is a number and
+	# shall consist of one or more digits', and 'Each component numeric value shall be encoded using the characters 0-9'
+	# So we use a numeric equivalent instead of the new_id which has no restrictions
+	
 	if "StudyInstanceUID" in attributes : 
 		studyUID = dataset.StudyInstanceUID
-		dataset.StudyInstanceUID = studyUID.replace(old_id , PatientID)
+		dataset.StudyInstanceUID = studyUID.replace(old_id, PatientID_numstr)
 
-	for name in ['PatientBirthDate']:
-		if name in dataset:
+	# we also have to fix the potentially referrring tags
+	# RequestAttributesSequence 0040,0275 is type 3, so optional, we should be able to delete it
+	# ReferencedStudySequence 0008,1110 is type 3 in GENERAL STUDY MODULE ATTRIBUTES (type 2 in other modules), so we could also delete it
+	# - RequestAttributesSequence > ReferencedStudySequence > ReferencedSOPInstanceUID
+	# or
+	# - RequestAttributesSequence >  StudyInstanceUID
+	# or 
+	# - RequestAttributesSequence > Accession Number
+	# Also 
+	# - ReferencedStudySequence > ReferencedSOPInstanceUID
 
-			#Assign a new fuzzed birth date.
-			new_date = fuzz_date(dataset.data_element(name).value)
-			dataset.data_element(name).value = new_date
-			if not ninety_plus : 
+	if "RequestAttributesSequence" in attributes :
+		del dataset.RequestAttributesSequence
 
-				#Change the age of the patient according to the new fuzzed birth date.
-				new_age = str(int((datetime.strptime(dataset.StudyDate, "%Y%m%d") - datetime.strptime(new_date, "%Y%m%d")).days / 365))
-				try : 
-					dataset.PatientAge = str(new_age).zfill(3) + "Y"
-				except AttributeError : pass
+	if "ReferencedStudySequence" in attributes :
+		del dataset.ReferencedStudySequence
+	# 	ReferencedStudySequence = dataset.ReferencedStudySequence
+	# 	dataset.ReferencedStudySequence = ReferencedStudySequence.replace(old_id, PatientID_numstr)
+
+	#if "ReferencedSOPInstanceUID" in attributes : # 0008,1155 - only seems to exist in RequestAttributesSequence
+	#	del dataset.ReferencedSOPInstanceUID
+	# 	ReferencedSOPInstanceUID = dataset.ReferencedSOPInstanceUID
+	# 	dataset.ReferencedSOPInstanceUID = ReferencedSOPInstanceUID.replace(old_id, PatientID_numstr)
+
+	if 'PatientBirthDate' in dataset:
+		#Assign a new fuzzed birth date.
+		dataset.data_element('PatientBirthDate').value = fuzzed_birthdate
+		if not ninety_plus :
+			#Change the age of the patient according to the new fuzzed birth date.
+			new_age = str(int((datetime.strptime(dataset.StudyDate, "%Y%m%d") - datetime.strptime(fuzzed_birthdate, "%Y%m%d")).days / 365))
+			try : 
+				dataset.PatientAge = str(new_age).zfill(3) + "Y"
+			except AttributeError : pass
 	
 	# write the 'anonymized' DICOM out under the new filename
-
 	dataset.save_as(output_filename)
+
 
 def anonymize_all_dicoms_within_folder(
 	output_folder : str = ".",
@@ -223,7 +183,6 @@ def anonymize_all_dicoms_within_folder(
 		new_ids = {patients_folders[i] : str(i).zfill(6) for i in range(len(patients_folders))}
 
 	#Keep a mapping from old to new ids in a dictionary.
-	
 	old2new_idx = {patients_folders[i] : new_ids[patients_folders[i]] for i in range(len(patients_folders))}
 	old2set_idx = {}
 	#Loop over patients...
@@ -236,8 +195,21 @@ def anonymize_all_dicoms_within_folder(
 			old2set_idx[new_id] = patient.split("-")[-1]
 			os.remove(os.path.join(datapath,patient,"new_id.txt"))
 			
+		# generate numeric string new ID - UI VR must have only digits
+		# use sha512 to be faster on 64 bits plaforms and supported by python 3.5
+		new_id_numstr=str(int(hashlib.sha512(new_id.encode('UTF-8')).hexdigest(),base=16))[0:16]
+
 		#List all files within patient folder...
 		files = glob(current_path)
+
+		#grab real birth date 
+		first_file = pydicom.read_file(files[0])
+		if 'PatientBirthDate' in first_file:
+			real_birthdate = first_file.data_element('PatientBirthDate').value
+			fuzzed_birthdate = fuzz_date(real_birthdate)
+			#print('Replacing real birthdate {} with {}'.format(real_birthdate, fuzzed_birthdate))
+		else:
+			fuzzed_birthdate = ""
 
 		#Loop over all dicom files within a patient directory and anonymize them.
 		for file in files:
@@ -254,7 +226,11 @@ def anonymize_all_dicoms_within_folder(
 			if not os.path.isdir(os.path.join(output_folder,os.path.join(*path[-4:-1]))):
 				os.mkdir(os.path.join(output_folder,os.path.join(*path[-4:-1])))
 
-			anonymize_dicom_file(file,os.path.join(output_folder,os.path.join(*path[-4:])), PatientID = new_id)
+			anonymize_dicom_file(file,
+				os.path.join(output_folder,os.path.join(*path[-4:])),
+				PatientID = new_id,
+				PatientID_numstr = new_id_numstr,
+				fuzzed_birthdate =  fuzzed_birthdate)
 		
 		#If the patient folders are to be renamed.
 		if rename :
@@ -279,12 +255,11 @@ def main(argv):
 
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join(".","data"))
-	parser.add_argument("--out_folder", "-o",	help = "Output directory where the anonymized dicoms will be saved.",	default = os.path.join(".","data"))
+	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files to be anonymized.",				default = os.path.join(".","data"), required=True)
+	parser.add_argument("--out_folder", "-o",	help = "Output directory where the anonymized dicoms will be saved.",	default = os.path.join(".","data"), required=True)
 	parser.add_argument("--new_ids", 	"-n", 	help = "List of new ids.")
 	
 	args = parser.parse_args()
-
 
 	data_path = args.in_folder
 	output_folder = args.out_folder
