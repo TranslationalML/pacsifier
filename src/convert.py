@@ -30,7 +30,7 @@ def convert_to_nifti(subject : str, session : str , base : str) -> None:
 		base (string) : directory path
 	"""
 
-	#Get the directory where this file is (PACSMANS/code)
+	#Get the directory where this file is (PACSMANS/src)
 	dirname = os.path.dirname(__file__)
 
 	#Creating the command.

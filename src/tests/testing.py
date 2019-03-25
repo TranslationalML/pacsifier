@@ -556,7 +556,7 @@ def test_anonymize():
 	assert dataset.PatientAge == "90+Y"
 
 def test_anonymize_all_dicoms_within_folder():
-	dict_ = anonymize_all_dicoms_within_folder(output_folder = ".", datapath=".", subject_dicom_path = "output_sample_image", rename = False)
+	dict_ = anonymize_all_dicoms_within_root_folder(output_folder =".", datapath=".", pattern_dicom_files="output_sample_image", rename_patient_directories= False)
 	#print(dict_)
 	#assert dict_ == {'000003': '__pycache__', '000002': 'test_set', '000000': '.pytest_cache', '000001': '.hypothesis'}
 
@@ -597,7 +597,7 @@ def test_move_and_rename():
 	#print()
 	assert len(glob("./test_set/*/*/*/*")) == len(glob("./dicomdir/*/*/*/*"))
 	create_dicomdir("./dicomdir")
-	os.chdir(os.path.abspath("./code/tests/"))
+	os.chdir(os.path.abspath("./src/tests/"))
 	assert os.path.join(".","dicomdir","DICOMDIR") in glob(os.path.join(".","dicomdir","*"))
 
 	if os.path.isdir("./dicomdir") : 

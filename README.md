@@ -185,7 +185,7 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 # Anonymization 
 ## Command line 
-	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json
+	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable
  
  - `files-directory` is the path to the folder that contains all the dicom images.
  - `anonymized-files-directory` is the path to the directory where the anonymized dicom images will be saved.
@@ -197,8 +197,8 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
  	- The files-directory must contain subject folders with names that start with sub- (e.g. sub-123456). In any other case, the script will run but won't affect the data in any way.
  	- A subject folder must contain session folders with names that start with ses- (e.g. ses-20150423110533). In any other case, the script will run but won't have any effect on the dicom images.
  	- A session folder must contain other folders which contain only the dicom images to be anonymized. If the folders within the session folder contain another kind of file the program will crash. The session folder however, can contain any other files (not folders) and it won't affect the program.
-
  - The anonymized-files-directory must exist on the computer.
+ - The `--delete_identifiable` or `-i` option will *delete* files that have patient identifiers embedded in image data. This is the case for example for screen saves coming from the GE Revolution CT machine, which have the patient name embedded.  This uses the `ImageType` attribute and looks for 'SCREEN SAVE'.
 
 ## Examples
 
@@ -211,6 +211,11 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 	python anonymize.py --in_folder ~/data --out_folder ~/data 
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
+
+### Example 3 
+	python anonymize.py --in_folder ~/data --out_folder ~/anonymized_data --delete_identifiable 
+
+ Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder, and delete any identifiable images.
 
 # Converting to NIFTI 
 
