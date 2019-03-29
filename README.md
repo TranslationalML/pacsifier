@@ -203,17 +203,17 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 ## Examples
 
 ### Example 1 
-	python anonymize.py --in_folder ~/data --out_folder ~/anonymized_data
+	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/anonymized_data
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
 
 ### Example 2 
-	python anonymize.py --in_folder ~/data --out_folder ~/data 
+	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/data 
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
 
 ### Example 3 
-	python anonymize.py --in_folder ~/data --out_folder ~/anonymized_data --delete_identifiable 
+	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/anonymized_data --delete_identifiable 
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder, and delete any identifiable images.
 
