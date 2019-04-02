@@ -272,7 +272,8 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 		port = port,
 		server_AET = server_AET)
 		if not echo_res :
-			raise RuntimeError("Cannot associate with PACS server")
+			raise RuntimeError("Cannot associate with PACS server. Please check connectivity and firewall settings"
+				" with respect to ports configured in your config file.")
 		
 		#Look for series of current patient and current study.
 		find_series_res = find(
