@@ -82,7 +82,7 @@ An image is also on the dockerhub at  `benothma/pacsman:latest`
 
 ## Config file 
 
-The config file is a json file that should include the keys : 
+The config file is a json file that must include exactly these keys: 
 - `server_ip`: PACS server IP address
 - `port`: PACS server port number 
 - `server_AET`: PACS server application entity title

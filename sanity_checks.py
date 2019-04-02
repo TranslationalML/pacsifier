@@ -152,8 +152,9 @@ def check_config_file(config_file : Dict[str,str]) -> None :
 		dict : dictionary loaded from the config json file.
 	"""
 	items = set(config_file.keys())
-	if items != set(["server_ip","port","server_AET","AET","move_port","batch_size","batch_wait_time"]) : 
-		raise ValueError("Invalid config file!")
+	valid_keys=["server_ip","port","server_AET","AET","move_port","batch_size","batch_wait_time"]
+	if items != set(valid_keys) : 
+		raise ValueError("Invalid config file! Must contain these and only these keys: " + ' '.join(valid_keys))
 
 def check_query_retrieval_level(query_retrieval_level : str) -> None : 
 
