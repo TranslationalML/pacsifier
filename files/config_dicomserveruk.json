@@ -1,1 +1,7 @@
-{"server_ip": "88.202.185.144", "port": "104", "server_AET": "dicomserver", "AET": "PC_CIBM_RC", "move_port": "104"}
+{"server_ip": "88.202.185.144",
+"port": "104",
+"server_AET": "dicomserver",
+"AET": "my_AET",
+"move_port": "104",
+"batch_size": "30",
+"batch_wait_time":  "10"}
