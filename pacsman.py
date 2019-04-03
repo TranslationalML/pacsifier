@@ -218,6 +218,8 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 		
 		check_tuple(tuple_)
 
+		# TODO: refactor this! No need for extra variables just store in dict directly
+
 		PATIENTID = tuple_["PatientID"]
 		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
 		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
