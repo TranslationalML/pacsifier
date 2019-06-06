@@ -351,6 +351,7 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 				os.mkdir(patient_serie_output_dir)
 
 			#Retrieving files of current patient, study and serie.
+			#TODO: handle and report error 'F: cannot listen on port 104, insufficient privileges' in movescu
 			if save :
 				get_res = get(
 					client_AET,

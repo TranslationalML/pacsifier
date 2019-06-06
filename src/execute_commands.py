@@ -234,14 +234,12 @@ def run(query: str) -> str:
     except ValueError:
         exit()
     try:
-        if 'Linux' in platform.platform():
-
-            completed = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=True)
-            lines = completed.stderr.decode('latin1').splitlines()
-
-        else:
+        if 'Windows' in platform.platform():
             completed = subprocess.check_output(cmd, stderr=subprocess.PIPE)
             lines = completed.decode('latin1').splitlines()
+        else:
+            completed = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=True)
+            lines = completed.stderr.decode('latin1').splitlines()
         lines = [line.replace('\x00', '') for line in lines]
 
     except subprocess.CalledProcessError as e:
