@@ -62,6 +62,7 @@ def anonymize_dicom_file(
 
     TODO:
         - Implement proper exception handling
+        - Check if resulting anonimized StudyInstanceUID conforms to the proper VR (should be < 64 chars?)
     """
 
     # Load the current dicom file to 'anonymize'
