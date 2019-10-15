@@ -59,11 +59,11 @@ def anonymize_dicom_file(
         fuzzed_birthdate: a fuzzed birthdate for this patient
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves for dose reports coming from the GE Revolution CT machine, which have the patient name embedded.
-            Also the case for screen saves for dose reports from Toshiba/Canon Aquilion Prime, although these don't have SCREEN SAVE label in ImageType tyg
+            Also the case for screen saves for dose reports from Toshiba/Canon Aquilion Prime, although these don't have SCREEN SAVE label in ImageType tag
 
     TODO:
         - Implement proper exception handling
-        - Check if resulting anonimized StudyInstanceUID conforms to the proper VR (should be < 64 chars?)
+        - Check if resulting anonymized StudyInstanceUID conforms to the proper VR (should be < 64 chars?)
     """
 
     # Load the current dicom file to 'anonymize'
