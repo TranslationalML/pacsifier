@@ -20,7 +20,7 @@ RUN wget --no-check-certificate https://repo.continuum.io/miniconda/Miniconda3-l
 ENV PATH /opt/conda/envs/pacsman_minimal/bin:/opt/conda/bin:$PATH
 
 # create conda env for pacsman - for some reason adding on same line with && causes setup failure - shell issue?
-ADD ./files/environment_minimal.yml /tmp/environment_minimal.yml
+ADD ./deployment/utils/environment_minimal.yml /tmp/environment_minimal.yml
 RUN conda update conda
 RUN conda env create -n pacsman_minimal -f /tmp/environment_minimal.yml
 RUN conda clean --all --yes

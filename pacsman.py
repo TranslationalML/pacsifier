@@ -56,6 +56,7 @@ def readLineByLine(filename : str) -> Iterator[str]:
 	"""
 	with open(filename, 'r', encoding = "utf8") as f:
 		for line in f:
+			line = line.encode('ascii', 'ignore').decode('ascii')
 			yield line.strip('\n')
 
 def parse_findscu_dump_file(filename : str) -> List[Dict[str,str]]:
