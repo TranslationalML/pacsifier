@@ -1,5 +1,7 @@
 PACSMAN is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
 
+NOTE: This readme has not been updated in a little while. It's mostly correct but win7 is not supported anymore since too painful to install. Linux is recommended.
+
 # Deployment
 
 PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools.
