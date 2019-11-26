@@ -1,2 +1,2 @@
-PatientID
-PAT009
+PatientID,Modality
+PAT009,MR

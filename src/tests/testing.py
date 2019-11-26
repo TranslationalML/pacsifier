@@ -640,6 +640,12 @@ def test_convert_to_nifti():
 		shutil.rmtree("./test_set/Nifti")
 	shutil.rmtree("./test_set/sub-2936187")
 
+def test_encoding_problem():
+	'''
+	TODO Implement test for `UnicodeDecodeError: 'utf-8' codec can't decode byte 0xc9 in position 2622: invalid continuation byte`
+	'''
+	pass
+
 #WHY ISN'T THIS SECTION WORKING.
 
 """possible_dates = []
