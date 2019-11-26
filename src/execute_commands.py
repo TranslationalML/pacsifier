@@ -182,9 +182,9 @@ def write_file(results: str, file: str = "output.txt") -> None:
 
     if not os.path.exists(file):
     # os.mknod(file) # not cross-platform - unsupported on os X without root
-        f = open(file, "w")
+        f = open(file, "w", encoding="utf_8")
     else:
-        f = open(file, "a")
+        f = open(file, "a", encoding="utf_8")
     for line in results:
         f.write(str(line) + "\n")
     f.close()
