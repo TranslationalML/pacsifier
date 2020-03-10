@@ -4,6 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.5
+  - pip=10.0.1
   - Cerberus=1.2
   - chardet=3.0.4
   - hypothesis=3.71.3
