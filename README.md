@@ -60,27 +60,27 @@ permissions to a required path`,
 
 ## Using Docker
 
-    docker run --net=host -it --rm -v  ~/.:/base pacsmanlite:latest --save save --info info --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run --net=host -it --rm -v  ~/.:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
-### Building the pacsman image
+### Building the pacsman image yourself
 
-    cd /path/to/PACSMAN/; docker build --network=host -t pacsmanlite .
+    cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
 
 ### Deploying from a local image
 
-First load the docker image into the local docker install.
+First loada the docker image (`pacsman.tar`) from the distribution server or storage media where it's located into the local docker install on your computer.
 
 #### Linux
 
-    docker load -i /path/to/image/pacsmanlite.tar
+    docker load -i /path/to/image/pacsman.tar
 
-#### Windows 7
+#### Windows 10
 
-Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsmanlite.tar`
+TODO
 
-### Deploying from dockerhub
+#### Windows 7 (Deprecated)
 
-An image is also on the dockerhub at  `benothma/pacsman:latest`
+Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsman.tar`
 
 ## Config file 
 
@@ -96,6 +96,7 @@ The config file is a json file that must include exactly these keys:
 
 The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
 
+
 # Running queries 
 
 ## Command line
@@ -103,7 +104,8 @@ The AET and corresponding IP of the workstation should be declared on Carestream
 	python pacsman.py --info --save --queryfile path_to_queryfile --config path_to_config_file --out_directory path_to_out_directory
 
  - The --info or -i option allows you to dump the information in the retrieved series into csv files.
- - The --save or -s option allows you to save the queryed dicom images.
+ - The --save or -s option allows you to save the queryed dicom images to disk. Cannot be used with --move.
+ - The --move or -m option allows you to C-MOVE the queryed dicom images to another DICOM node specified in the config file. Cannot be used with --save.
  - The --queryfile or -q path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
  - The --config or -c path_to_config_file option is mandatory and specifies the config file to use for the query/retrieve.
  - The --out_directory or -d path_to_out_directory is optional and specifies the path to the folder where the info dumps and the dicom images will be stored.
