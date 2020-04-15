@@ -21,6 +21,7 @@ PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 echo_command = 'echoscu -ll trace -aec {} {} {}'  # server_AET IP port
 find_command = 'findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} -k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} --key 0008,103E={} --key 18,1030={} --key 8,22={} --key 0008,0020={} --key 0010,0010={} --key 10,30={} --key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={} --key 8,1030={} --key 8,50={} --key 18,24={}'
 move_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={} --port {} -od {}'
+move_remote_command = 'movescu -ll debug {} -aem {} -k 0008,0052="PATIENT" --patient --key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={}'
 
 
 ########################################################################################################################
@@ -169,6 +170,50 @@ def get(
         STUDYDATE,
         move_port,
         OUTDIR)
+    return run(command)
+
+
+def move_remote(
+        AET: str,
+        STUDYDATE: str,
+        server_ip: str = "88.202.185.144",
+        server_AET: str = "theServerAET",
+        port: int = 104,
+        PATIENTID: str = PATIENTID,
+        STUDYINSTANCEUID: str = STUDYINSTANCEUID,
+        SERIESINSTANCEUID: str = SERIESINSTANCEUID,
+        move_AET: str = "theMoveAET") -> str:
+    """
+    Builds a query for movescu.
+    Args :
+        AET : Called AET
+        STUDYDATE : the study date.
+        server_ip : server ip
+        server_AET : server_AET
+        port : port
+        PATIENTID : patient id
+        STUDYINSTANCEUID : Study instance unique idetifier.
+        SERIESINSTANCEUID : Series instance unique identifier
+        move_AET: the AET where to move the images
+    Returns :
+        string : The log lines.
+    """
+    check_ids(PATIENTID)
+    check_ids(SERIESINSTANCEUID, attribute="Series instance UID")
+    check_ids(STUDYINSTANCEUID, attribute="Study instance UID")
+    check_port(port)
+    check_AET(move_AET)
+
+    modified_params = replace_default_params(PARAMETERS, AET, server_ip, server_AET, port)
+    command = move_remote_command.format(
+        modified_params,
+        move_AET,
+        PATIENTID,
+        STUDYINSTANCEUID,
+        SERIESINSTANCEUID,
+        STUDYDATE,
+    )
+
     return run(command)
 
 
