@@ -171,7 +171,7 @@ def process_person_names(name : str) -> str :
 
 
 
-def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], output_dir : str, save : bool, info : bool) -> None:
+def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], output_dir : str, save : bool, info : bool, move: bool) -> None:
 	"""
 	Downloads and retrieves info dumps of dicom images using attributes passed in table.
 	Args : 
@@ -185,7 +185,8 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 	port = int(parameters["port"])
 	move_port = int(parameters["move_port"])
 	client_AET = parameters["AET"]
-	server_AET = parameters["server_AET"]	
+	server_AET = parameters["server_AET"]
+	move_AET = parameters["move_AET"]
 	batch_wait_time = int(parameters["batch_wait_time"])
 	batch_size = int(parameters["batch_size"])
 
@@ -366,6 +367,19 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
 
+			if move :
+				move_res = move_remote(
+					client_AET,
+					serie["StudyDate"],
+					server_ip=pacs_server,
+					server_AET=server_AET,
+					port=port,
+					PATIENTID=serie["PatientID"],
+					STUDYINSTANCEUID=serie["StudyInstanceUID"],
+					SERIESINSTANCEUID=serie["SeriesInstanceUID"],
+					move_AET=move_AET
+				)
+
 			if info : 
 
 				#Writing series info to csv file.
@@ -386,8 +400,9 @@ def main(argv):
 	parser = argparse.ArgumentParser()
 	
 	parser.add_argument('--config',"-c", help='Configuration file path', default=os.path.join(".","files","config.json"))
-	parser.add_argument('--save', "-s", action='store_true', help = "Store images resulting from query")
+	parser.add_argument('--save', "-s", action='store_true', help = "Store images resulting from query (cannot be used together with '--move')")
 	parser.add_argument('--info', "-i", action ='store_true', help = "Store parsed version of findscu output (DICOM header subset)")
+	parser.add_argument('--move', "-m", action='store_true', help="Move images resulting from query (cannot be used together with '--save')")
 	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
 	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join(".","data"))
 	
@@ -396,6 +411,7 @@ def main(argv):
 	config_path = args.config
 	save = args.save
 	info = args.info
+	move = args.move
 	#Reading config file.
 	try:
 		with open(config_path) as f:
@@ -407,6 +423,12 @@ def main(argv):
 		pass
 	
 	output_dir = args.out_directory
+
+	#Check the case where save & move are specified (it should be only one of the two)
+	if args.save and args.move:
+		print("You must select either '--save' to save locally or '--move' to define a remote destination, not both!")
+		parser.print_help()
+		sys.exit()
 	
 	#Check the case where the queryfile option is missing. If it is the case print help.
 	if args.queryfile == None or args.config == None: 
@@ -419,7 +441,7 @@ def main(argv):
 	
 	check_query_table_allowed_filters(table)
 
-	retrieve_dicoms_using_table(table, parameters, output_dir, save, info)
+	retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move)
 
 				
 if __name__ == "__main__" :

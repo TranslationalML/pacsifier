@@ -89,7 +89,8 @@ The config file is a json file that must include exactly these keys:
 - `port`: PACS server port number 
 - `server_AET`: PACS server application entity title
 - `AET`: current station application entity title
-- `move_port`: port number to use on the current station to receive images (C-MOVE destination)
+- `move_AET`: the AET of the remote move destination
+- `move_port`: port number to use on the move destination (local) to receive images (C-MOVE destination)
 - `batch_size` : The number of series to be downloaded before sleeping for a while.
 - `batch_wait_time` : sleep time after each batch_size number of series is downloaded.
 
