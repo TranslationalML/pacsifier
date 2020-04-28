@@ -1,12 +1,51 @@
 PACSMAN is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
 
+It is implemented as a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools. A Docker image is available.
+
+
 NOTE: This readme has not been updated in a little while. It's mostly correct but win7 is not supported anymore since too painful to install. Linux is recommended.
+
+# Building
+
+
+## Building the pacsman Docker image from the repo
+
+    cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
+
+
 
 # Deployment
 
-PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools.
+## From a Docker image
 
-## From source
+### Deploying from the gitlab Docker registry
+
+Login to the registry with `docker login registry.gitlab.com`
+
+Pull and run the image with `docker run registry.gitlab.com/jonasrichiardi/pacsman/pacsman`
+
+You should see the help message from PACSMAN.
+
+### Deploying from a local image
+
+First load the docker image (`pacsman.tar`) from the distribution server or storage media where it's located into the local docker install on your computer.
+
+#### Linux
+
+    docker load -i /path/to/image/pacsman.tar
+
+#### Windows 10
+
+TODO
+
+#### Windows 7 (Deprecated)
+
+Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsman.tar`
+
+
+
+
+## From source (deprecated)
 
 ### Ubuntu Linux
 
@@ -19,7 +58,8 @@ PACSMAN is a Python application running on Ubuntu Linux, relying on the DCMTK su
 
 FIXME: environment spec file is not the same on linux as on Windows.
 
-### Windows 7
+
+### Windows 7 (deprecated)
 
 #### Installation
 
@@ -52,49 +92,29 @@ permissions to a required path`,
 9. Create the PACS client/server configuration file as described below.  
 
 
+
+
 # Usage
+
+## Using Docker
+
+TODO explain paths and bind mounts for Docker.
+
+### Linux 
+    docker run --net=host -it --rm -v  ~/.:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+
+### Windows 10 
+
+TODO 
+
+
+## From source (deprecated) 
+
+## Windows 7 (deprecated)
 
 1. Using `Powershell` in normal mode we can now run pacsman
 	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
 2. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
-
-## Using Docker
-
-    docker run --net=host -it --rm -v  ~/.:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
-
-### Building the pacsman image yourself
-
-    cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
-
-### Deploying from a local image
-
-First loada the docker image (`pacsman.tar`) from the distribution server or storage media where it's located into the local docker install on your computer.
-
-#### Linux
-
-    docker load -i /path/to/image/pacsman.tar
-
-#### Windows 10
-
-TODO
-
-#### Windows 7 (Deprecated)
-
-Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsman.tar`
-
-## Config file 
-
-The config file is a json file that must include exactly these keys: 
-- `server_ip`: PACS server IP address
-- `port`: PACS server port number 
-- `server_AET`: PACS server application entity title
-- `AET`: current station application entity title
-- `move_AET`: the AET of the remote move destination
-- `move_port`: port number to use on the move destination (local) to receive images (C-MOVE destination)
-- `batch_size` : The number of series to be downloaded before sleeping for a while.
-- `batch_wait_time` : sleep time after each batch_size number of series is downloaded.
-
-The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
 
 
 # Running queries 
@@ -145,6 +165,22 @@ Notes :
 - If a line in a csv file contains an empty string on a particular columns, then, the query will not include the attribute corresponding to the column in question.
 - The querying does not accept the value `*` alone on any attribute. However it can be used as a wildcard if other characters are provided, e.g. `ProtocolName` could be set to `BEAT_SelfNav*`
 - the Series folders are named after the Series Description of its images. However, it may happen that a dicom image has no SeriesDescription stored. In that case, the image will be stored within a folder called No_series_description.
+
+## Config file 
+
+The config file is a json file that must include exactly these keys: 
+- `server_ip`: PACS server IP address
+- `port`: PACS server port number 
+- `server_AET`: PACS server application entity title
+- `AET`: current station application entity title
+- `move_AET`: the AET of the remote move destination
+- `move_port`: port number to use on the move destination (local) to receive images (C-MOVE destination)
+- `batch_size` : The number of series to be downloaded before sleeping for a while.
+- `batch_wait_time` : sleep time after each batch_size number of series is downloaded.
+
+The AET and corresponding IP of the workstation should be declared on Carestream, including the storeable attribute.
+
+
 
 ### Examples
 
