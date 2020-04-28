@@ -57,7 +57,7 @@ Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker 
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
 
 FIXME: environment spec file is not the same on linux as on Windows.
-
+FIXME: update doc to use conda env
 
 ### Windows 7 (deprecated)
 
@@ -98,24 +98,38 @@ permissions to a required path`,
 
 ## Using Docker
 
-TODO explain paths and bind mounts for Docker.
+To keep things simple, chose a directory (e.g. `my_dir`) that will store the query file (e.g. `my_query.csv`) and configuration file (e.g. `my_config.json`). Create a sub-directory (say `my_output_dir`) to store the DICOM files into.
+
+To make this directory accessible within the Docker container, you need to `bind mount` it as a docker volume to a specific location in the container by using the `-v` flag. In the examples below, we bind mount the host computer's directory into the `/base` volume within Docker. Then within the PACSMAN options (which runs *within* the container), paths for the config file and query files will be relative to that docker volume.
 
 ### Linux 
-    docker run --net=host -it --rm -v  ~/.:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run --net=host -it --rm -v ~/my_dir/.:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
 ### Windows 10 
 
-TODO 
+    docker run --net=host -it --rm -v c:\Users\my_user\my_dir:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
 
-## From source (deprecated) 
 
-## Windows 7 (deprecated)
+## From source
+
+### Windows 7 (deprecated)
 
 1. Using `Powershell` in normal mode we can now run pacsman
 	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
-2. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
+2. Verify the installation works by running this test: (TODO `XXX_TEST_WITH_EXAMPLE_CSV_HERE`)
 
+### Windows 10 (deprecated)
+
+TODO
+
+### Linux 
+
+Activate your conda environment. 
+
+TODO syntax
+
+See the section `Running queries`
 
 # Running queries 
 
