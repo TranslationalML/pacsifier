@@ -104,11 +104,11 @@ To make this directory accessible within the Docker container, you need to `bind
 
 ### Linux 
 
-    docker run --net=host -it --rm -v ~/my_dir/.:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run --net=host -it --rm -v ~/my_dir/.:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
 ### Windows 10 
 
-    docker run --net=host -it --rm -v c:\Users\my_user\my_dir:/base pacsman:latest --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run --net=host -it --rm -v c:\Users\my_user\my_dir:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
 
 
