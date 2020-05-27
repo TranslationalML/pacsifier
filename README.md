@@ -108,8 +108,9 @@ To make this directory accessible within the Docker container, you need to `bind
 
 ### Windows 10 
 
-    docker run --net=host -it --rm -v c:\Users\my_user\my_dir:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run -p my_move_port -it --rm -v c:\Users\my_user\my_dir:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
+Where `my_move_port` should be replaced by the same value as you have in the config file `move_port`.
 
 
 ## From source
