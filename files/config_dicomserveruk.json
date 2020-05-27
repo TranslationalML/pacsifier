@@ -1,8 +1,8 @@
 {"server_ip": "51.75.171.41",
-"port": "104",
+"port": "11112",
 "server_AET": "dicomserver",
 "AET": "my_AET",
-"move_port": "104",
+"move_port": "11112",
 "move_AET":"none",
 "batch_size": "30",
 "batch_wait_time":  "10"}
