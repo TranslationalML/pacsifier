@@ -321,6 +321,11 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 				time.sleep(batch_wait_time)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
+			# some patienteIDs have weird non alphanum characters, so make them reasonable
+			# Pre-emptively sanitize the patient dir name - decompose into separate combining chars, then remove them using asci encoding-decoding.
+			# finally replace illegal chars with underscores
+			patient_dir=my_re_clean.sub('_', unicodedata.normalize('NFD', patient_dir).encode('ascii','ignore').decode('ascii'))
+
 			
 			#Make the patient folder.
 			if not os.path.isdir(patient_dir) and (save or info):
