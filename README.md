@@ -139,7 +139,7 @@ See the section `Running queries`
 
 	python pacsman.py --info --save --queryfile path_to_queryfile --config path_to_config_file --out_directory path_to_out_directory
 
- - The --info or -i option allows you to dump the information in the retrieved series into csv files.
+ - The --info or -i option allows you to dump the information in the retrieved series (`findscu` output) into csv files.
  - The --save or -s option allows you to save the queryed dicom images to disk. Cannot be used with --move.
  - The --move or -m option allows you to C-MOVE the queryed dicom images to another DICOM node specified in the config file. Cannot be used with --save.
  - The --queryfile or -q path_to_queryfile option is mandatory and specifies which queryfile to use to query/retrieve.
