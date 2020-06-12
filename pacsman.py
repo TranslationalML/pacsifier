@@ -315,8 +315,8 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
         
 		#loop over series
 		for serie in tqdm(series) :
-		    
-		    if not serie["PatientID"].isalnum():  # if patient ID is not alphanumeric
+			
+			if not serie["PatientID"].isalnum():  # if patient ID is not alphanumeric
 				# replace illegal chars with underscores
 				serie["PatientID"] = my_re_clean.sub('_', unicodedata.normalize('NFD', serie["PatientID"]).encode('ascii','ignore').decode('ascii'))
 			
