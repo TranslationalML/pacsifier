@@ -309,22 +309,22 @@ def retrieve_dicoms_using_table(table : DataFrame, parameters : Dict[str,str], o
 
 		#Extract all series ids.
 		series = parse_findscu_dump_file("current.txt")
-
+		
 		# Pre-compile sanitizing regex for folder renaming
 		my_re_clean=re.compile('[^0-9a-zA-Z]+') # keep only alphanums
-
+        
 		#loop over series
 		for serie in tqdm(series) :
+		    
+		    if not serie["PatientID"].isalnum():  # if patient ID is not alphanumeric
+                # replace illegal chars with underscores
+                serie["PatientID"] = my_re_clean.sub('_', unicodedata.normalize('NFD', serie["PatientID"]).encode('ascii','ignore').decode('ascii'))
 			
 			counter+=1
 			if counter % batch_size == 0: 
 				time.sleep(batch_wait_time)
 
 			patient_dir = os.path.join(output_dir, "sub-"+ serie["PatientID"])
-			# some patienteIDs have weird non alphanum characters, so make them reasonable
-			# Pre-emptively sanitize the patient dir name - decompose into separate combining chars, then remove them using asci encoding-decoding.
-			# finally replace illegal chars with underscores
-			patient_dir=my_re_clean.sub('_', unicodedata.normalize('NFD', patient_dir).encode('ascii','ignore').decode('ascii'))
 
 			
 			#Make the patient folder.
