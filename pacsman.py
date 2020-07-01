@@ -220,7 +220,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 	counter = 0 
 	for i, tuple_ in enumerate(attributes_list):
 		
-		print("Retrieving images for element number ", i+1)
+		# print("Retrieving images for element number ", i+1)
 		
 		check_tuple(tuple_)
 
@@ -243,6 +243,8 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		ACCESSIONNUMBER = tuple_["AccessionNumber"]
 		NEW_ID = tuple_["new_ids"]
 		SEQUENCENAME = tuple_["SequenceName"]
+
+		print("Retrieving images for element number {0}: sub-{1}_ses-{2}".format(i+1, PATIENTID, STUDYDATE))
 
 		inputs = {
 		'PatientID' 		: PATIENTID, 
