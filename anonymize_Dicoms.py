@@ -209,7 +209,7 @@ def anonymize_all_dicoms_within_root_folder(
 
     patients_folders = next(os.walk(datapath))[1]
 
-    if not(patients_folders):
+    if not patients_folders:
         raise NotADirectoryError('Each patient should have their own directory under the provided root ' + datapath)
 
     if new_ids is None:
