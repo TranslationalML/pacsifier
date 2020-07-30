@@ -235,6 +235,10 @@ def anonymize_all_dicoms_within_root_folder(
         # List all files within patient folder...
         all_filenames = glob(current_path)
 
+        if not all_filenames:
+            raise FileNotFoundError('Patient directories are expect to conform to the pattern set'
+                                    'in pattern_dicom_files, currently ' + pattern_dicom_files )
+
         # grab real birth date
         # TODO handle case where first file does not contain birthdate - look for any file that does?
         first_file = pydicom.read_file(all_filenames[0])
