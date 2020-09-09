@@ -43,7 +43,9 @@ def anonymize_dicom_file(
         filename: str,
         output_filename: str,
         PatientID: str,
-        PatientID_numstr: str,
+        new_StudyInstanceUID: str,
+        new_SeriesInstanceUID: str,
+        new_SOPInstanceUID: str,
         fuzzed_birthdate: str,
         delete_identifiable_files: bool) -> None:
     """
@@ -54,8 +56,9 @@ def anonymize_dicom_file(
         filename: path to dicom image.
         output_filename: output path of anonymized image.
         PatientID: the new patientID after anonymization.
-        PatientID_numstr: a string of 0-9 digits corresponding to the patient ID (e.g. hashed) to be used in DICOM fields that need digits rather
-            than alphanums. Example: '9292919239516130'
+        new_StudyInstanceUID: Study instance UID to be used for depersonalisation. This should be a DICOM VR UI
+        new_SeriesInstanceUID: Series instance UID to be used for depersonalisation. This should be a DICOM VR UI.
+        new_SOPInstanceUID: SOP instance UID to be used for depersonalisation. This should be a DICOM VR UI
         fuzzed_birthdate: a fuzzed birthdate for this patient
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves for dose reports coming from the GE Revolution CT machine, which have the patient name embedded.
@@ -91,11 +94,6 @@ def anonymize_dicom_file(
             old_id = dataset.PatientID
             dataset.PatientID = PatientID
 
-        # Reuse the 16-digits numeric string patient ID here, which also correspond to a SH VR
-        if "AccessionNumber" in attributes:
-            # dataset.AccessionNumber = ""
-            dataset.AccessionNumber = PatientID_numstr
-
         if "PatientName" in attributes:
             # make it a valid PN VR
             dataset.PatientName = PatientID + "^sub"
@@ -103,7 +101,7 @@ def anonymize_dicom_file(
         if "InstitutionAddress" in attributes:
             dataset.InstitutionAddress = "Address"
 
-        elements_to_blank = ["CurrentPatientLocation", "CountryOfResidence", "InstitutionalDepartmentName",
+        elements_to_blank = ["AccessionNumber","CurrentPatientLocation", "CountryOfResidence", "InstitutionalDepartmentName",
                              "InstitutionName", "IssuerOfPatientID", "NameOfPhysicianReadingStudy",
                              "OperatorsName", "OrderCallbackPhoneNumber", "OtherPatientNames", "OtherPatientIDs",
                              "PatientAddress", "PatientBirthName", "PatientsBirthTime",
@@ -138,9 +136,11 @@ def anonymize_dicom_file(
         # So we use a numeric equivalent instead of the new_id which has no restrictions
 
         if "StudyInstanceUID" in attributes:
-            studyUID = dataset.StudyInstanceUID
-            dataset.StudyInstanceUID = studyUID.replace(old_id, PatientID_numstr)
-
+            dataset.StudyInstanceUID = new_StudyInstanceUID
+        if "SeriesInstanceUID" in attributes:
+            dataset.SeriesInstanceUID = new_SeriesInstanceUID
+        if "SOPInstanceUID" in attributes:
+            dataset.SOPInstanceUID = new_SOPInstanceUID
         # we also have to fix the potentially referrring tags
         # RequestAttributesSequence 0040,0275 is type 3, so optional, we should be able to delete it
         # ReferencedStudySequence 0008,1110 is type 3 in GENERAL STUDY MODULE ATTRIBUTES (type 2 in other modules), so we could also delete it
@@ -205,8 +205,7 @@ def anonymize_all_dicoms_within_root_folder(
 
     # TODO: fix required vs optional arguments
 
-    # Listing patient files.
-
+    # List all  patient directories.
     patients_folders = next(os.walk(datapath))[1]
 
     if not patients_folders:
@@ -218,6 +217,7 @@ def anonymize_all_dicoms_within_root_folder(
     # Keep a mapping from old to new ids in a dictionary.
     old2new_idx = {patients_folders[i]: new_ids[patients_folders[i]] for i in range(len(patients_folders))}
     old2set_idx = {}
+
     # Loop over patients...
     for patient in tqdm(patients_folders):
         new_id = old2new_idx[patient]
@@ -229,10 +229,10 @@ def anonymize_all_dicoms_within_root_folder(
             os.remove(os.path.join(datapath, patient, "new_id.txt"))
 
         # generate numeric string new ID - UI VR must have only digits
-        #  use sha512 to be faster on 64 bits plaforms and supported by python 3.5
+        # use sha512 to be faster on 64 bits platforms and supported by python 3.5
         new_id_numstr = str(int(hashlib.sha512(new_id.encode('UTF-8')).hexdigest(), base=16))[0:16]
 
-        # List all files within patient folder...
+        # List all files within patient folder
         all_filenames = glob(current_path)
 
         if not all_filenames:
@@ -249,27 +249,41 @@ def anonymize_all_dicoms_within_root_folder(
         else:
             fuzzed_birthdate = ""
 
-        # Loop over all dicom files within a patient directory and anonymize them.
-        for filename in all_filenames:
+        if not os.path.isdir(os.path.join(output_folder, patient)):  # create subject dir if needed
+            os.mkdir(os.path.join(output_folder, patient))
 
-            path = os.path.normpath(filename)
-            path = path.split(os.sep)
+        # List all study dirs for this patient.
+        study_dirs = next(os.walk(os.path.join(datapath, patient)))[1]
 
-            if not os.path.isdir(os.path.join(output_folder, os.path.join(*path[-4:-3]))):
-                os.mkdir(os.path.join(output_folder, os.path.join(*path[-4:-3])))
+        for study_dir in study_dirs:
+            if not os.path.isdir(os.path.join(output_folder, patient, study_dir)):  # create study dir if needed
+                os.mkdir(os.path.join(output_folder, patient, study_dir))
 
-            if not os.path.isdir(os.path.join(output_folder, os.path.join(*path[-4:-2]))):
-                os.mkdir(os.path.join(output_folder, os.path.join(*path[-4:-2])))
+            new_StudyInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-            if not os.path.isdir(os.path.join(output_folder, os.path.join(*path[-4:-1]))):
-                os.mkdir(os.path.join(output_folder, os.path.join(*path[-4:-1])))
+            # List all study dirs for this patient.
+            series_dirs = next(os.walk(os.path.join(datapath, patient, study_dir)))[1]
 
-            anonymize_dicom_file(filename,
-                                 os.path.join(output_folder, os.path.join(*path[-4:])),
-                                 PatientID=new_id,
-                                 PatientID_numstr=new_id_numstr,
-                                 fuzzed_birthdate=fuzzed_birthdate,
-                                 delete_identifiable_files=delete_identifiable_files)
+        for series_dir in series_dirs:
+            if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir )):  # create series dir if needed
+                os.mkdir(os.path.join(output_folder, patient, study_dir, series_dir))
+
+            new_SeriesInstanceUID=pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+
+            all_filenames_series = glob(os.path.join(datapath, patient, study_dir,series_dir,'*'))
+
+            # Loop over all dicom files within a patient directory and anonymize them.
+            for filename in all_filenames_series:
+                new_SOPInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+
+                anonymize_dicom_file(filename,
+                                     os.path.join(output_folder, patient, study_dir, series_dir, os.path.basename(filename)),
+                                     PatientID=new_id,
+                                     new_StudyInstanceUID=new_StudyInstanceUID,
+                                     new_SeriesInstanceUID=new_SeriesInstanceUID,
+                                     new_SOPInstanceUID=new_SOPInstanceUID,
+                                     fuzzed_birthdate=fuzzed_birthdate,
+                                     delete_identifiable_files=delete_identifiable_files)
 
         # If the patient folders are to be renamed.
         if rename_patient_directories:
