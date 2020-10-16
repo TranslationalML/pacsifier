@@ -261,29 +261,29 @@ def anonymize_all_dicoms_within_root_folder(
 
             new_StudyInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-            # List all study dirs for this patient.
+            # List all series dirs for this patient.
             series_dirs = next(os.walk(os.path.join(datapath, patient, study_dir)))[1]
 
-        for series_dir in series_dirs:
-            if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir )):  # create series dir if needed
-                os.mkdir(os.path.join(output_folder, patient, study_dir, series_dir))
+            for series_dir in series_dirs:
+                if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir )):  # create series dir if needed
+                    os.mkdir(os.path.join(output_folder, patient, study_dir, series_dir))
 
-            new_SeriesInstanceUID=pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+                new_SeriesInstanceUID=pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-            all_filenames_series = glob(os.path.join(datapath, patient, study_dir,series_dir,'*'))
+                all_filenames_series = glob(os.path.join(datapath, patient, study_dir,series_dir,'*'))
 
-            # Loop over all dicom files within a patient directory and anonymize them.
-            for filename in all_filenames_series:
-                new_SOPInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+                # Loop over all dicom files within a patient directory and anonymize them.
+                for filename in all_filenames_series:
+                    new_SOPInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-                anonymize_dicom_file(filename,
-                                     os.path.join(output_folder, patient, study_dir, series_dir, os.path.basename(filename)),
-                                     PatientID=new_id,
-                                     new_StudyInstanceUID=new_StudyInstanceUID,
-                                     new_SeriesInstanceUID=new_SeriesInstanceUID,
-                                     new_SOPInstanceUID=new_SOPInstanceUID,
-                                     fuzzed_birthdate=fuzzed_birthdate,
-                                     delete_identifiable_files=delete_identifiable_files)
+                    anonymize_dicom_file(filename,
+                                         os.path.join(output_folder, patient, study_dir, series_dir, os.path.basename(filename)),
+                                         PatientID=new_id,
+                                         new_StudyInstanceUID=new_StudyInstanceUID,
+                                         new_SeriesInstanceUID=new_SeriesInstanceUID,
+                                         new_SOPInstanceUID=new_SOPInstanceUID,
+                                         fuzzed_birthdate=fuzzed_birthdate,
+                                         delete_identifiable_files=delete_identifiable_files)
 
         # If the patient folders are to be renamed.
         if rename_patient_directories:
