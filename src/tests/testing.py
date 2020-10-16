@@ -380,12 +380,17 @@ def test_sanity_checks():
 	with pytest.raises(ValueError):
 		check_date_range("19930825-dakdjak")
 
+
 def test_process_list():
 	
-	paths = ["sub-25647/ses-20170425114530","sub-14569/ses-20170525114530","sub-5879/ses-20170625114530","sub-69875/ses-20170725114530"]
-	assert process_list(paths) == [("25647","20170425114530"),("14569","20170525114530"),("5879","20170625114530"),("69875","20170725114530")]
+	paths = ["sub-1234/ses-20170425114510","sub-3456/ses-20170525114500","sub-6788/ses-20170625114500"]
+	assert process_list(paths) == [("1234","20170425114510"),("3456","20170525114500"),("5879","20170625114500"),("69875","20170725114500")]
 
+
+# TODO update for DICOMserverUK
 def test_retrieve():
+	pass
+
 	table = read_csv(os.path.join("..","..","files","test.csv"), dtype=str).fillna("")
 	config_path = os.path.join("..","..","files","config.json")
 
@@ -400,69 +405,23 @@ def test_retrieve():
 
 	#assert glob("./test_set/sub-*/ses-*/*/*") == []
 	retrieve_dicoms_using_table(table, parameters, out_directory, True, True)
-	assert glob("./test_set/sub-*/ses-*/*/*")[:6] == ['./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTDOSE/RD.1.2.840.114358.359.1.20180111162058.2694638356555',
-	'./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min/RP.1.2.840.114358.1230.20180115093558.1',
-	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393124.603136',
-	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393136.736167',
-	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393131.914801',
-	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif/CT.1.2.392.200036.9116.2.6.1.3268.2054951902.1515393139.581407']
+	assert glob("./test_set/sub-*/ses-*/*/*")[:6] == ['./test_set/sub-XXX/ses-YYY/foo/bar', 'XXX' ]
 
-def test_check_output(): 
-	"""
-	run the command : python pacsman.py --info --save --queryfile complete_schizo.csv --out_directory ./tests/test_set
-	"""
-	#pacsman.main(["--info info","--save bla", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
-	
-	subjects = glob("./test_set/*")
-	sessions = glob("./test_set/sub-*/ses-*")
-	csv_files = glob("./test_set/sub-*/ses-*/*.csv")
-	assert subjects == ['./test_set/sub-2936187']
 
-	assert sessions == ['./test_set/sub-2936187/ses-20180108152705', './test_set/sub-2936187/ses-20180104082740']
-	assert csv_files == ['./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min-RTDOSE.csv',
-	'./test_set/sub-2936187/ses-20180108152705/9000-1FOVS.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0003-RTP1.0FOVS.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTSS.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0000-PTV2_6metas_FINAL_83min-RTSS.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0002-RTP1.0Natif.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0000-PTV1_Brain_Final_66min-RTDOSE.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0001-Scano2.0.csv',
-	'./test_set/sub-2936187/ses-20180108152705/0001-SecondaryCaptureSequence.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0005-t1_gre_sag_45_3.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0106-CBV_RGB.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0104-MTT_RGB.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0024-RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0020-TTP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0010-perf_tra17_6.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0018-RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0013-PBP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0017-RELMTT_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0028-t1_mprage_sagGD.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0108-MPRGDCOR.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0025-RELCCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0023-RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0009-SWI_Images.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0008-mIP_Images(SW).csv',
-	'./test_set/sub-2936187/ses-20180104082740/0029-svs_se_135.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0107-MPRGDTRA.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0026-t2_tse_tra43_3.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0105-CBVCORR_RGB.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0021-PBP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0015-RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0022-RELCBV_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0027-t1_mprage_sagGD_ND.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0109-svs_se_135_RGB.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0016-RELCBF_LOCAL_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0014-GBP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0011-perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0019-perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0007-Pha_Images.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0006-Mag_Images.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0012-TTP_perf_tra17_6_MoCo.csv',
-	'./test_set/sub-2936187/ses-20180104082740/0109-KEY_IMAGESPR.csv']
+# TODO update this to use DICOMserverUK
+def test_check_output_info():
+	pass
 
+	#pacsman.main(["--info", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
+	#subjects = glob("./test_set/*")
+	#sessions = glob("./test_set/sub-*/ses-*")
+	#csv_files = glob("./test_set/sub-*/ses-*/*.csv")
+
+	# assert subjects == ['./test_set/sub-XXX']
+	# assert sessions == ['./test_set/sub-XXX/ses-YYY', './test_set/sub-XXX/ses-ZZZ']
+	#assert csv_files == ['./test_set/sub-XXX/ses-YYY/foo.csv', ... ]
+
+# TODO update
 def test_anonymize():
 	anonymize_dicom_file("sample_image","output_sample_image",PatientID = "000420")
 	dataset = pydicom.read_file("output_sample_image")
@@ -632,13 +591,15 @@ def test_check_date_input(s):
 	if s == "" : assert processed == ""
 	else : assert process_person_names(s) == "*"+s.split(" ")[-1].upper()
 
+# TODO update to DICOMserverUK
 def test_convert_to_nifti():
-	convert_to_nifti("2936187", "20180104082740", "./test_set")
-	convert_to_nifti("2936187", "20180108152705", "./test_set")
+	convert_to_nifti("XXXX", "YYYY", "./test_set")
+	convert_to_nifti("XXXX", "YYYY", "./test_set")
 	convert_all("./test_set")
 	if os.path.isdir("./test_set/Nifti"):
 		shutil.rmtree("./test_set/Nifti")
-	shutil.rmtree("./test_set/sub-2936187")
+	shutil.rmtree("./test_set/sub-XXXX")
+
 
 def test_encoding_problem():
 	'''
@@ -646,7 +607,6 @@ def test_encoding_problem():
 	'''
 	pass
 
-#WHY ISN'T THIS SECTION WORKING.
 
 """possible_dates = []
 for year in range(1900,2019):
@@ -665,28 +625,3 @@ for year in range(1900,2019):
 def hyp_fuzz_date(s,t):
 	fuzz_date(s,fuzz_parameter = t)
 """
-
-
-"""
-TODO :
-- Hypothesis testing. on what?
-- Heuristic mapping.
-- Docker version.
-
-""" 
-"""def test_id_presence():
-	ls = []
-	filename = "/home/localadmin/Bureau/PACSMAN/data/sub-1051363/ses-20150203160809/MPRAGE_P3/MR.1.3.12.2.1107.5.2.43.67014.201502031612481792906060"
-	dataset = pydicom.read_file(filename)
-	attributes = dataset.dir("")
-
-	for name in attributes : 
-		try:
-			if dataset.PatientID in dataset.data_element(name).value : 
-				ls.append(name)
-		except TypeError: 
-			continue
-	assert ls == ["PatientID", "StudyInstanceUID"]"""
-
-#if __name__ == "__main__" :
-#	test_move_and_rename()

@@ -4,7 +4,7 @@ import warnings
 import string 
 import numpy as np
 import random
-from PACSMAN.code.execute_commands import run
+from src.execute_commands import run
 from glob import glob
 import shutil
 from typing import Tuple, Dict, List

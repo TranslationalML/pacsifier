@@ -5,13 +5,16 @@ It is implemented as a Python application running on Ubuntu Linux, relying on th
 
 NOTE: This readme has not been updated in a little while. It's mostly correct but win7 is not supported anymore since too painful to install. Linux is recommended.
 
-# Building
+# Building and testing
 
 
 ## Building the pacsman Docker image from the repo
 
     cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
 
+## Running the test suite 
+
+    cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
 
 
 # Deployment
