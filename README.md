@@ -105,6 +105,8 @@ To keep things simple, chose a directory (e.g. `my_dir`) that will store the que
 
 To make this directory accessible within the Docker container, you need to `bind mount` it as a docker volume to a specific location in the container by using the `-v` flag. In the examples below, we bind mount the host computer's directory into the `/base` volume within Docker. Then within the PACSMAN options (which runs *within* the container), paths for the config file and query files will be relative to that docker volume.
 
+This docker image's entrypoint is `pacsman.py`.
+
 ### Linux 
 
     docker run --net=host -it --rm -v ~/my_dir/.:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
