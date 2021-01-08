@@ -253,6 +253,11 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
  - `anonymized-files-directory` is the path to the directory where the anonymized dicom images will be saved.
  - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
 
+## Docker command-line (Windows)
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python anonymize_Dicoms.py ...
+
+where `...` refers to the same argument as above
+
 ## Important Notes 
  - If the anonymized-files-directory is the same as the files-directory the raw dicom images will be deleted and replaced by the anonymized ones (This proved useful when there was no more storage space left for additional images ).
  - The files-directory must contain the following structure : 
