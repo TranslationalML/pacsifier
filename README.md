@@ -5,7 +5,7 @@ It is implemented as a Python application running on Ubuntu Linux, relying on th
 
 NOTE: This readme has not been updated in a little while. It's mostly correct but win7 is not supported anymore since too painful to install. Linux is recommended.
 
-# Building and testing
+# Building and testing
 
 
 ## Building the pacsman Docker image from the repo
@@ -21,7 +21,7 @@ NOTE: This readme has not been updated in a little while. It's mostly correct bu
 
 ## From a Docker image
 
-### Deploying from the gitlab Docker registry
+### Deploying from the gitlab Docker registry
 
 Login to the registry with `docker login registry.gitlab.com`
 
@@ -97,7 +97,7 @@ permissions to a required path`,
 
 
 
-# Usage
+# Usage
 
 ## Using Docker
 
@@ -107,11 +107,14 @@ To make this directory accessible within the Docker container, you need to `bind
 
 This docker image's entrypoint is `pacsman.py`.
 
-### Linux 
+### Linux 
 
     docker run --net=host -it --rm -v ~/my_dir/.:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
-### Windows 10 
+### Windows 10 
+	
+You need to give Docker permission to access your chosen directory `my_dir`. To do this, right-click onto Docker in your taskbar > Settings > File sharing.
+Then add permission for `my_dir`. 
 
     docker run -p my_move_port -it --rm -v c:\Users\my_user\my_dir:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
