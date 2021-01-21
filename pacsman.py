@@ -277,10 +277,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			QUERYRETRIVELEVEL = "IMAGE"
 
 		# check if we can ping the PACS
-		echo_res =  echo(
-		server_ip = pacs_server,
-		port = port,
-		server_AET = server_AET)
+		echo_res =  echo(server_ip = pacs_server, port = port, server_AET = server_AET)
 		if not echo_res :
 			raise RuntimeError("Cannot associate with PACS server. Please check connectivity and firewall settings"
 				" with respect to ports configured in your config file.")
@@ -313,7 +310,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 
 		write_file(find_series_res, file="current.txt")
 
-		# Extract all series ids.
+		# Extract all series StudyInstanceUIDs etc.
 		series = parse_findscu_dump_file("current.txt")
 		
 		# Pre-compile sanitizing regex for folder renaming
@@ -324,11 +321,13 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			# replace illegal chars with underscores
 			patientID_sanitized = my_re_clean.sub('_', unicodedata.normalize('NFD', serie["PatientID"]).encode('ascii','ignore').decode('ascii'))
 
+			#TODO handle empty patientID_sanitized
+
 			counter += 1
 			if counter % batch_size == 0: 
 				time.sleep(batch_wait_time)
 
-			patient_dir = os.path.join(output_dir, "sub- " + patientID_sanitized)
+			patient_dir = os.path.join(output_dir, "sub-" + patientID_sanitized)
 
 			# Make the patient folder.
 			if not os.path.isdir(patient_dir) and (save or info):
