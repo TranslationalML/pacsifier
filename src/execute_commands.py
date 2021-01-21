@@ -264,7 +264,7 @@ def replace_default_params(
 
 def run(query: str) -> str:
     """
-    Runs a the command passed as parameter.
+    Runs the command passed as parameter.
     Args:
         query : query command line to be executed.
     Returns :
@@ -275,9 +275,10 @@ def run(query: str) -> str:
         cmd = shlex.split(query.replace("\\", "\\\\"))
         with open("log.txt", "a") as f:
             f.write(query + "\n")
-
-    except ValueError:
+    except ValueError as e:
+        print('* Command parsing error: {}'.format(' '.join(cmd)))
         exit()
+
     try:
         if 'Windows' in platform.platform():
             completed = subprocess.check_output(cmd, stderr=subprocess.PIPE)
@@ -286,9 +287,9 @@ def run(query: str) -> str:
             completed = subprocess.run(cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=True)
             lines = completed.stderr.decode('latin1').splitlines()
         lines = [line.replace('\x00', '') for line in lines]
-
     except subprocess.CalledProcessError as e:
-        print('* Command did not succeed: {}'.format(' '.join(cmd)))
+        print('* Command did not succeed: {}, return code {}'.format(' '.join(cmd),e.returncode))
+        print('* Output: {}'.format(e.stderr))
 
         with open("fails.txt", "a") as f:
             f.write(query + "\n")

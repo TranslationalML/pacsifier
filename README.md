@@ -129,7 +129,7 @@ Where `my_move_port` should be replaced by the same value as you have in the con
 	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
 2. Verify the installation works by running this test: (TODO `XXX_TEST_WITH_EXAMPLE_CSV_HERE`)
 
-### Windows 10 (deprecated)
+### Windows 10 (deprecated)
 
 TODO
 
