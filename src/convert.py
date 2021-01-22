@@ -6,7 +6,8 @@ import sys
 import nipype
 from typing import List, Tuple
 
-def process_list(paths : List[str]) -> List[Tuple[str,str]]:
+
+def process_list(paths: List[str]) -> List[Tuple[str,str]]:
 	"""
 	Extracts subject and session identifiers as stored in data folder.
 	Args :
@@ -15,13 +16,14 @@ def process_list(paths : List[str]) -> List[Tuple[str,str]]:
 		list : list of tuples like (subject, session).
 	"""
 	tuples = []
-	for l in paths : 
+	for l in paths:
 		path = os.path.normpath(l)
 		path = path.split(os.sep)
 		tuples.append((path[-2].split("-")[-1], path[-1].split("-")[-1]))
 	return tuples
 
-def convert_to_nifti(subject : str, session : str , base : str) -> None:
+
+def convert_to_nifti(subject: str, session: str, base: str) -> None:
 	"""
 	Converts the subject and session in base directory corresponding dicom files to nifti.
 	Args :
@@ -46,7 +48,8 @@ def convert_to_nifti(subject : str, session : str , base : str) -> None:
 	#Running the command.
 	run(command)
 
-def convert_all(base : str) -> None:
+
+def convert_all(base: str) -> None:
 	"""
 	Converts all dicom files within base directory to nifti files.
 	Args :
@@ -65,8 +68,9 @@ def convert_all(base : str) -> None:
 		convert_to_nifti(tuple_[0], tuple_[1], abs_path)
 
 
-def main(argv) :
+def main(argv):
 	convert_all(argv[0])
+
 
 if __name__ == "__main__" :
 	main(sys.argv[1:])

@@ -1,7 +1,6 @@
 from src.execute_commands import *
 import re
 import unicodedata
-from numpy import unique
 import sys
 from tqdm import tqdm, trange
 import os
@@ -11,10 +10,9 @@ import json
 from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, \
 	check_config_file
 from datetime import datetime
-from typing import Iterator
+from typing import Iterator, Dict, Any, Type, List
 from cerberus import Validator
 import csv
-from typing import Dict, Any, Type, List
 import time
 import argparse
 
@@ -43,9 +41,9 @@ ALLOWED_FILTERS=list(tag_to_attribute.values())
 ALLOWED_FILTERS.append("new_ids")
 
 
-########################################################################################################################
-########################################################FUNCTIONS#######################################################
-########################################################################################################################
+# ######################################################################################################################
+# #######################################################FUNCTIONS######################################################
+# ######################################################################################################################
 
 def readLineByLine(filename: str) -> Iterator[str]:
 	"""
@@ -102,7 +100,8 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 			output_dict=sample_dict
 			continue
 
-		if not start: continue
+		if not start:
+			continue
 		for tag in sorted(tag_to_attribute.keys()):
 
 			# if current line contains a given tag then extract information from it.
@@ -116,7 +115,8 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 				except IndexError:
 					pass
 
-				if item == "(no": continue
+				if item == "(no":
+					continue
 				output_dict[tag_to_attribute[tag]] = item
 
 	return id_table
@@ -136,6 +136,7 @@ def check_query_table_allowed_filters(table: DataFrame, allowed_filters: List[st
 			raise ValueError("Attribute " + col + " not allowed! Please check the input table's column names.")
 
 	return
+
 
 def parse_query_table(table: DataFrame, allowed_filters: List[str]=ALLOWED_FILTERS) -> List[Dict[str, str]]:
 	"""
@@ -160,6 +161,7 @@ def parse_query_table(table: DataFrame, allowed_filters: List[str]=ALLOWED_FILTE
 
 	return attributes_list
 
+
 def process_person_names(name: str) -> str:
 	"""
 	Processing name to be the input of the query. 
@@ -168,7 +170,8 @@ def process_person_names(name: str) -> str:
 	Returns : 
 		string : patient name in the format it will be used in the query.
 	"""
-	if name == "": return ""
+	if name == "":
+		return ""
 	splitted_name=name.upper().split(" ")
 	new_name="*" + splitted_name[-1]
 	return new_name
@@ -247,7 +250,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		print("Retrieving images for element number {0}: sub-{1}_ses-{2}".format(i+1, PATIENTID, STUDYDATE))
 
 		inputs = {
-		'PatientID' 		: PATIENTID, 
+		'PatientID' 		: PATIENTID,
 		'StudyDate' 		: STUDYDATE,
 		'StudyInstanceUID' 	: STUDYINSTANCEUID,
 		'SeriesInstanceUID' : SERIESINSTANCEUID,
@@ -305,7 +308,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			ACCESSIONNUMBER=ACCESSIONNUMBER,
 			SEQUENCENAME=SEQUENCENAME)
 
-		if os.path.isfile("current.txt") : 
+		if os.path.isfile("current.txt") :
 			os.remove("current.txt")
 
 		write_file(find_series_res, file="current.txt")
@@ -425,7 +428,7 @@ def main(argv):
 			parameters=json.load(f)
 		check_config_file(parameters)
 
-	except FileNotFoundError: 		
+	except FileNotFoundError:
 		args.config=None
 		pass
 	

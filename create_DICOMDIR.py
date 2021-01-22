@@ -1,18 +1,18 @@
 import sys
 import os
 import warnings
+import argparse
 import string 
-import numpy as np
 import random
 from src.execute_commands import run
 from glob import glob
 import shutil
 from typing import Tuple, Dict, List
-from pydicom.filereader import read_dicomdir
 warnings.filterwarnings("ignore")
 
 command = "dcmmkdir --recurse {}"
 names = []
+
 
 def generate_new_folder_name(names : List[str] = []) -> str:
 	"""
@@ -31,6 +31,8 @@ def generate_new_folder_name(names : List[str] = []) -> str:
 		generated = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 	return generated
+
+
 def add_or_retrieve_name(current_folder : str, old_2_new : Dict[str,str]) -> Tuple[str,Dict[str,str]]: 
 	"""
 	Checks if the current folder has had a generated new name. If that is the case, return its new name, otherwise, generate a new name.
@@ -52,6 +54,8 @@ def add_or_retrieve_name(current_folder : str, old_2_new : Dict[str,str]) -> Tup
 		folder_name = old_2_new[current_folder]
 
 	return folder_name, old_2_new
+
+
 def move_and_rename_files(dicom_path : str, output_path : str) -> None : 
 	"""
 	Copies all the files within the dicom hierarchy into new hierarchy with appropriate names for DICOMDIR creation.
@@ -99,6 +103,8 @@ def move_and_rename_files(dicom_path : str, output_path : str) -> None :
 		#Copying dicom files into the previously created series folder with 8 characters or less names.
 		file_name = generate_new_folder_name(names = names)
 		shutil.copyfile(l, os.path.join(subsubsubfolder, file_name))
+
+
 def create_dicomdir(out_path : str) -> None : 
 	"""
 	Create a DICOMDIR of all dicoms with the path passed as parameter.
@@ -120,11 +126,12 @@ def create_dicomdir(out_path : str) -> None :
 	#Point back the script path.
 	os.chdir(os.path.abspath(dir_path))
 
+
 def main(argv):
 	parser = argparse.ArgumentParser()
 	
-	parser.add_argument("--in_folder",	"-d",	help = "Directory to the dicom files.",				default = os.path.join(".","data"))
-	parser.add_argument("--out_folder", "-o",	help = "Output directory where the dicoms and DICOMDIR will be saved.",	default = os.path.join(".","data"))
+	parser.add_argument("--in_folder",	"-d",	help="Directory to the dicom files.",				default=os.path.join(".","data"))
+	parser.add_argument("--out_folder", "-o",	help="Output directory where the dicoms and DICOMDIR will be saved.",	default=os.path.join(".","data"))
 	args = parser.parse_args()
 
 	in_path = args.in_folder
@@ -135,6 +142,7 @@ def main(argv):
 
 	#Creating the DICOMDIR within the out_path.
 	create_dicomdir(out_path)
-	
+
+
 if __name__ == "__main__":
 	main(sys.argv[1:])

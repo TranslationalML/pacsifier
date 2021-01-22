@@ -1,4 +1,3 @@
-import unittest
 import sys
 sys.path.insert(0, '../../')
 sys.path.insert(0, '../')
@@ -218,18 +217,21 @@ def test_process_text_file() :
 	'Modality': ''}]
 
 	#Testing all the dictionaries in the list are identical.
-	dict_list =  parse_findscu_dump_file(filename = "test.txt")
+	dict_list =  parse_findscu_dump_file(filename = "test_data/findscu_dump_file_example.txt")
 	for i, dict_ in enumerate(dict_list) :
 		shared_items = {k: res[i][k] for k in res[i] if k in dict_ and res[i][k] == dict_[k]}
 		assert len(shared_items) == len(res[i])
 
+
 def test_check_table() : 
 
-	table = read_csv("test.csv").fillna("")
+	table = read_csv("test_data/query_file_invalid.txt").fillna("")
 	with pytest.raises(ValueError) :
 		check_query_table_allowed_filters(table)
-	valid_table = read_csv("valid.csv").fillna("")
+
+	valid_table = read_csv("test_data/query_file_invalid.txt").fillna("")
 	assert check_query_table_allowed_filters(valid_table) == None
+
 
 def test_parse_table() : 
 
@@ -259,19 +261,24 @@ def test_parse_table() :
 		shared_items = {k: expected[i][k] for k in expected[i] if k in dict_ and expected[i][k] == dict_[k]}
 		assert len(shared_items) == len(expected[i])
 
+
 def test_fuzz_date():
 	
 	fuzzed = fuzz_date("20180911", fuzz_parameter = 2)
 	assert fuzzed in ["20180910", "20180909", "20180911", "20180912", "20180913"]
 	with pytest.raises(ValueError):
 		fuzz_date("20180911",fuzz_parameter = random.randint(-10000,0))
+
+
 def test_check_config_file():
 	with pytest.raises(ValueError):
 		check_config_file({"California Dreaming":1})
 
+
 def test_check_query_retrieval_level():
 	with pytest.raises(ValueError):
 		check_query_retrieval_level({"Hello"})
+
 
 def test_sanity_checks(): 
 	dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -421,6 +428,7 @@ def test_check_output_info():
 	# assert sessions == ['./test_set/sub-XXX/ses-YYY', './test_set/sub-XXX/ses-ZZZ']
 	#assert csv_files == ['./test_set/sub-XXX/ses-YYY/foo.csv', ... ]
 
+
 # TODO update
 def test_anonymize():
 	anonymize_dicom_file("sample_image","output_sample_image",PatientID = "000420")
@@ -514,25 +522,30 @@ def test_anonymize():
 	dataset = pydicom.read_file("output_sample_image")
 	assert dataset.PatientAge == "90+Y"
 
+
 def test_anonymize_all_dicoms_within_folder():
 	dict_ = anonymize_all_dicoms_within_root_folder(output_folder =".", datapath=".", pattern_dicom_files="output_sample_image", rename_patient_directories= False)
 	#print(dict_)
 	#assert dict_ == {'000003': '__pycache__', '000002': 'test_set', '000000': '.pytest_cache', '000001': '.hypothesis'}
 
+
 def test_read_line_by_line():
-	lines = list(readLineByLine("test.txt"))[:4]
+	lines = list(readLineByLine("test_data/findscu_dump_file_example.txt"))[:4]
 	assert lines == [
 	'I: Requesting Association',
 	'I: Association Accepted (Max Send PDV: 32756)',
 	'I: Sending Find Request (MsgID 1)',
 	'I: Request Identifiers:']
 
+
 def test_process_name():
 	assert process_person_names("Obi-Wan Kenobi") == "*KENOBI"
 	assert process_person_names("") == ""
 
+
 def test_run():
 	assert [] == run("echo California Dreaming.")
+
 
 def test_generate_new_folder_name():
 	assert len(generate_new_folder_name()) <= 8
@@ -540,10 +553,11 @@ def test_generate_new_folder_name():
 	assert reduce(lambda x,y : x and y ,[(letter in (string.ascii_uppercase + string.digits)) for letter in name])
 	assert generate_new_folder_name(names = ["".join(name)]) != "".join(name)
 
-def test_add_or_retrieve_name():
 
+def test_add_or_retrieve_name():
 	folder_name, old_2_new = add_or_retrieve_name("Hello", {})
 	assert add_or_retrieve_name("Hello", {"Hello" : folder_name}) == (folder_name, old_2_new)
+
 
 def test_move_and_rename():
 	if os.path.isdir("./dicomdir") : 
@@ -561,6 +575,7 @@ def test_move_and_rename():
 
 	if os.path.isdir("./dicomdir") : 
 		shutil.rmtree("./dicomdir")
+
 
 def test_move_dumps():
 
@@ -584,12 +599,14 @@ def test_move_dumps():
 
 	shutil.rmtree("./dicomdir")
 
+
 @given(s = text())
 @example(s = 'Obi-Wan Kenobi')
 def test_check_date_input(s):
 	processed = process_person_names(s)
 	if s == "" : assert processed == ""
 	else : assert process_person_names(s) == "*"+s.split(" ")[-1].upper()
+
 
 # TODO update to DICOMserverUK
 def test_convert_to_nifti():

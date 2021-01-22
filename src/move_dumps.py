@@ -4,7 +4,7 @@ import os
 import sys
 import argparse 
 
-def move(dicom_path : str, output_path : str) -> None:
+def move(dicom_path: str, output_path: str) -> None:
 	"""
 	Moves all csv info files within a dicom directory into a new directory.
 	Args : 
@@ -37,6 +37,7 @@ def move(dicom_path : str, output_path : str) -> None:
 	if os.path.isfile(os.path.join(dicom_path, "mapper.json")) : 
 		shutil.move(os.path.join(dicom_path, "mapper.json"), os.path.join(output_path, "mapper.json"))
 
+
 def main(argv) : 
 
 	parser = argparse.ArgumentParser()
@@ -57,5 +58,6 @@ def main(argv) :
 	#Move csv files within dicom_path within output_path
 	move(dicom_path, output_path)
 
-if __name__ == "__main__" : 
+
+if __name__ == "__main__":
 	main(sys.argv[1:])
