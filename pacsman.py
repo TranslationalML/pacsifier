@@ -317,7 +317,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		my_re_clean =re.compile('[^0-9a-zA-Z]+') # keep only alphanums
 
 		# loop over series
-		for serie in tqdm(series) :
+		for serie in tqdm(series):
 			# replace illegal chars with underscores
 			patientID_sanitized = my_re_clean.sub('_', unicodedata.normalize('NFD', serie["PatientID"]).encode('ascii','ignore').decode('ascii'))
 
@@ -333,7 +333,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			if not os.path.isdir(patient_dir) and (save or info):
 				os.mkdir(patient_dir)
 
-			if NEW_ID != "" : 
+			if NEW_ID != "":
 				file = open(os.path.join(patient_dir ,"new_id.txt"), "w")
 				file.write(str(NEW_ID)) 
 				file.close() 
@@ -352,8 +352,9 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			folder_name =my_re_clean.sub('_', unicodedata.normalize('NFD', folder_name).encode('ascii' ,'ignore').decode('ascii'))
 
 			# If the StudyDescription is an empty string name the folder No_series_description.
-			if folder_name == "" : folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir, serie["SeriesNumber"].zfill(5) +"- " +folder_name)
+			if folder_name == "":
+				folder_name = "No_series_description"
+			patient_serie_output_dir = os.path.join(patient_study_output_dir, serie["SeriesNumber"].zfill(5) + "-" + folder_name)
 
 			# Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir) and (save or info):
@@ -361,7 +362,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 
 			# Retrieving files of current patient, study and serie.
 			# TODO: handle and report error 'F: cannot listen on port 104, insufficient privileges' in movescu
-			if save :
+			if save:
 				get_res = get(
 					client_AET,
 					serie["StudyDate"],
@@ -374,7 +375,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 					move_port = move_port,
 					OUTDIR  = patient_serie_output_dir)
 
-			if move :
+			if move:
 				move_res = move_remote(
 					client_AET,
 					serie["StudyDate"],
@@ -387,10 +388,9 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 					move_AET=move_AET
 				)
 
-			if info : 
-
+			if info:
 				# Writing series info to csv file.
-				with open(patient_serie_output_dir +'.csv', 'w') as f:
+				with open(patient_serie_output_dir + '.csv', 'w') as f:
 					w = csv.DictWriter(f, serie.keys())
 					w.writeheader()
 					w.writerow(serie)
@@ -451,5 +451,5 @@ def main(argv):
 	retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move)
 
 				
-if __name__ == "__main__" :
+if __name__ == "__main__":
 	main(sys.argv[1:])
