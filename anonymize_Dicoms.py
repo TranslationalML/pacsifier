@@ -211,11 +211,20 @@ def anonymize_all_dicoms_within_root_folder(
     if not patients_folders:
         raise NotADirectoryError('Each patient should have their own directory under the provided root ' + datapath)
 
+    if not os.path.isdir(output_folder):
+        raise NotADirectoryError('Output directory {} does not exist, please create it.'.format(output_folder))
+
     if new_ids is None:
         new_ids = {patients_folders[i]: str(i).zfill(6) for i in range(len(patients_folders))}
 
     # Keep a mapping from old to new ids in a dictionary.
-    old2new_idx = {patients_folders[i]: new_ids[patients_folders[i]] for i in range(len(patients_folders))}
+    try:
+        old2new_idx = {patients_folders[i]: new_ids[patients_folders[i]] for i in range(len(patients_folders))}
+    except KeyError as e:
+        print(e)
+        print('Cannot map old to new identifiers, check that keys in your new_ids file match patient names on disk')
+        exit(1)
+
     old2set_idx = {}
 
     # Loop over patients...

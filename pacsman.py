@@ -2,15 +2,14 @@ from src.execute_commands import *
 import re
 import unicodedata
 import sys
-from tqdm import tqdm, trange
+from tqdm import tqdm
 import os
 import warnings
 from pandas import read_csv, DataFrame
 import json
 from sanity_checks import check_ids, check_date, check_date_range, check_ip, check_port, check_AET, check_tuple, \
 	check_config_file
-from datetime import datetime
-from typing import Iterator, Dict, Any, Type, List
+from typing import Iterator, Dict, List
 from cerberus import Validator
 import csv
 import time
@@ -110,7 +109,6 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 				item=""
 				try:
 					item=line.split("[")[1].split("]")[0].replace(" ", "").replace("'", "_").replace("/", "")
-
 				# In case line.split gives a list of length less that 4 pass to next line.
 				except IndexError:
 					pass
@@ -427,7 +425,6 @@ def main(argv):
 		with open(config_path) as f:
 			parameters=json.load(f)
 		check_config_file(parameters)
-
 	except FileNotFoundError:
 		args.config=None
 		pass
