@@ -39,7 +39,7 @@ tag_to_attribute = {  # type : Dict[str,str]
 	"(0008,0050)": "AccessionNumber",
 	"(0018,0024)": "SequenceName"}
 
-ALLOWED_FILTERS = list(tag_to_attribute.values())
+ALLOWED_FILTERS=list(tag_to_attribute.values())
 ALLOWED_FILTERS.append("new_ids")
 
 
@@ -57,7 +57,7 @@ def readLineByLine(filename: str) -> Iterator[str]:
 	"""
 	with open(filename, 'r', encoding="utf_8") as f:
 		for line in f:
-			line = line.encode('ascii', 'ignore').decode('ascii')
+			line=line.encode('ascii', 'ignore').decode('ascii')
 			yield line.strip('\n')
 
 
@@ -69,10 +69,10 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 	Returns : 
 		list : list dictionaries each containing the attributes of a series.
 	"""
-	start = False
+	start=False
 
-	id_table = []  # type : List[str]
-	output_dict = {"": ""}  # type : Dict[str,str]
+	id_table=[]  # type : List[str]
+	output_dict={"": ""}  # type : Dict[str,str]
 
 	# Iterate over text lines
 	for line in readLineByLine(filename):
@@ -98,8 +98,8 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 		if "------------" in line or "Releasing Association" in line:
 			if start: id_table.append(output_dict)
 
-			start = True
-			output_dict = sample_dict
+			start=True
+			output_dict=sample_dict
 			continue
 
 		if not start: continue
@@ -108,9 +108,9 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 			# if current line contains a given tag then extract information from it.
 			if tag in line:
 
-				item = ""
+				item=""
 				try:
-					item = line.split("[")[1].split("]")[0].replace(" ", "").replace("'", "_").replace("/", "")
+					item=line.split("[")[1].split("]")[0].replace(" ", "").replace("'", "_").replace("/", "")
 
 				# In case line.split gives a list of length less that 4 pass to next line.
 				except IndexError:
@@ -122,14 +122,14 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
 	return id_table
 
 
-def check_query_table_allowed_filters(table: DataFrame, allowed_filters: List[str] = ALLOWED_FILTERS) -> None:
+def check_query_table_allowed_filters(table: DataFrame, allowed_filters: List[str]=ALLOWED_FILTERS) -> None:
 	"""
 	Checks if the csv table passed as input has only attributes that are allowed.
 	Args : 
 		table : table containing all filters.
 		allowed_filters : list of allowed attribute names.
 	"""
-	cols = table.columns
+	cols=table.columns
 	for col in cols:
 
 		if col not in allowed_filters:
@@ -137,7 +137,7 @@ def check_query_table_allowed_filters(table: DataFrame, allowed_filters: List[st
 
 	return
 
-def parse_query_table(table: DataFrame, allowed_filters: List[str] = ALLOWED_FILTERS) -> List[Dict[str, str]]:
+def parse_query_table(table: DataFrame, allowed_filters: List[str]=ALLOWED_FILTERS) -> List[Dict[str, str]]:
 	"""
 	Takes the table passed as script input and parse it using its attributes in the query/retrieve command.
 	Args : 
@@ -147,14 +147,14 @@ def parse_query_table(table: DataFrame, allowed_filters: List[str] = ALLOWED_FIL
 		list : list of dictionaries each containing the corresponding value of each attribute in allowed_filters. 
 			   In case an attribute has no corresponding column in the csv table, an empty string is given. 
 	"""
-	attributes_list = []
+	attributes_list=[]
 	for idx in table.index:
 
 		# Initializing item dictionary.
-		filter_dictionary = {filter_: "" for filter_ in allowed_filters}
+		filter_dictionary={filter_: "" for filter_ in allowed_filters}
 
 		for col in table.columns:
-			filter_dictionary[col] = table.loc[idx, col]
+			filter_dictionary[col]=table.loc[idx, col]
 
 		attributes_list.append(filter_dictionary)
 
@@ -169,8 +169,8 @@ def process_person_names(name: str) -> str:
 		string : patient name in the format it will be used in the query.
 	"""
 	if name == "": return ""
-	splitted_name = name.upper().split(" ")
-	new_name = "*" + splitted_name[-1]
+	splitted_name=name.upper().split(" ")
+	new_name="*" + splitted_name[-1]
 	return new_name
 
 
@@ -185,17 +185,17 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		save : option to save the images.
 		info : option to save info dumps.
 	"""
-	pacs_server = parameters["server_ip"]
-	port = int(parameters["port"])
-	move_port = int(parameters["move_port"])
-	client_AET = parameters["AET"]
-	server_AET = parameters["server_AET"]
-	move_AET = parameters["move_AET"]
-	batch_wait_time = int(parameters["batch_wait_time"])
-	batch_size = int(parameters["batch_size"])
+	pacs_server=parameters["server_ip"]
+	port=int(parameters["port"])
+	move_port=int(parameters["move_port"])
+	client_AET=parameters["AET"]
+	server_AET=parameters["server_AET"]
+	move_AET=parameters["move_AET"]
+	batch_wait_time=int(parameters["batch_wait_time"])
+	batch_size=int(parameters["batch_size"])
 
 	# Flexible parsing.
-	attributes_list = parse_query_table(table, ALLOWED_FILTERS)
+	attributes_list=parse_query_table(table, ALLOWED_FILTERS)
 
 	schema = {
 	'PatientID' 	: {'type' : 'string', 'maxlength' : 64},
@@ -216,8 +216,8 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		# "ImageType" 		: {'type' : 'string', 'maxlength' : 16} The norm says it is a CS but apparently it is something else on Chuv PACS server.
 	}
 
-	validator = Validator(schema)
-	counter = 0 
+	validator=Validator(schema)
+	counter=0
 	for i, tuple_ in enumerate(attributes_list):
 		
 		# print("Retrieving images for element number ", i+1)
@@ -226,23 +226,23 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 
 		# TODO: refactor this! No need for extra variables just store in dict directly
 
-		PATIENTID = tuple_["PatientID"]
-		STUDYINSTANCEUID = tuple_["StudyInstanceUID"]
-		SERIESINSTANCEUID  = tuple_["SeriesInstanceUID"]
-		SERIESDESCRIPTION = tuple_["SeriesDescription"] 
-		PROTOCOLNAME = tuple_["ProtocolName"]
-		ACQUISITIONDATE = tuple_["AcquisitionDate"]
-		STUDYDATE = tuple_["StudyDate"]
-		PATIENTNAME = process_person_names(tuple_["PatientName"])
-		PATIENTBIRTHDATE = tuple_ ["PatientBirthDate"]
-		DEVICESERIALNUMBER = tuple_["DeviceSerialNumber"]
-		IMAGETYPE = tuple_["ImageType"]
-		MODALITY = tuple_["Modality"]
-		SERIESNUMBER = tuple_["SeriesNumber"]
-		STUDYDESCRIPTION = tuple_["StudyDescription"]
-		ACCESSIONNUMBER = tuple_["AccessionNumber"]
-		NEW_ID = tuple_["new_ids"]
-		SEQUENCENAME = tuple_["SequenceName"]
+		PATIENTID=tuple_["PatientID"]
+		STUDYINSTANCEUID=tuple_["StudyInstanceUID"]
+		SERIESINSTANCEUID =tuple_["SeriesInstanceUID"]
+		SERIESDESCRIPTION=tuple_["SeriesDescription"]
+		PROTOCOLNAME=tuple_["ProtocolName"]
+		ACQUISITIONDATE=tuple_["AcquisitionDate"]
+		STUDYDATE=tuple_["StudyDate"]
+		PATIENTNAME=process_person_names(tuple_["PatientName"])
+		PATIENTBIRTHDATE=tuple_ ["PatientBirthDate"]
+		DEVICESERIALNUMBER=tuple_["DeviceSerialNumber"]
+		IMAGETYPE=tuple_["ImageType"]
+		MODALITY=tuple_["Modality"]
+		SERIESNUMBER=tuple_["SeriesNumber"]
+		STUDYDESCRIPTION=tuple_["StudyDescription"]
+		ACCESSIONNUMBER=tuple_["AccessionNumber"]
+		NEW_ID=tuple_["new_ids"]
+		SEQUENCENAME=tuple_["SequenceName"]
 
 		print("Retrieving images for element number {0}: sub-{1}_ses-{2}".format(i+1, PATIENTID, STUDYDATE))
 
@@ -272,12 +272,12 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		check_date_range(ACQUISITIONDATE)
 		check_date(PATIENTBIRTHDATE)
 
-		QUERYRETRIVELEVEL = "SERIES"
+		QUERYRETRIVELEVEL="SERIES"
 		if IMAGETYPE != "":
-			QUERYRETRIVELEVEL = "IMAGE"
+			QUERYRETRIVELEVEL="IMAGE"
 
 		# check if we can ping the PACS
-		echo_res =  echo(server_ip = pacs_server, port = port, server_AET = server_AET)
+		echo_res= echo(server_ip=pacs_server, port=port, server_AET=server_AET)
 		if not echo_res :
 			raise RuntimeError("Cannot associate with PACS server. Please check connectivity and firewall settings"
 				" with respect to ports configured in your config file.")
@@ -285,25 +285,25 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		# Look for series of current patient and current study.
 		find_series_res = find(
 			client_AET,
-			server_ip = pacs_server,
-			server_AET = server_AET,
-			port = port,
-			QUERYRETRIVELEVEL = QUERYRETRIVELEVEL,
-			PATIENTID = PATIENTID,
-			STUDYUID = STUDYINSTANCEUID,
-			SERIESINSTANCEUID = SERIESINSTANCEUID,
-			SERIESDESCRIPTION = SERIESDESCRIPTION,
-			PROTOCOLNAME = PROTOCOLNAME, 
-			ACQUISITIONDATE = ACQUISITIONDATE, 
-			STUDYDATE = STUDYDATE,
-			PATIENTNAME = PATIENTNAME,
-			PATIENTBIRTHDATE = PATIENTBIRTHDATE,
-			DEVICESERIALNUMBER = DEVICESERIALNUMBER,
-			MODALITY = MODALITY,
-			IMAGETYPE = IMAGETYPE,
-			STUDYDESCRIPTION = STUDYDESCRIPTION,
-			ACCESSIONNUMBER = ACCESSIONNUMBER,
-			SEQUENCENAME = SEQUENCENAME)
+			server_ip=pacs_server,
+			server_AET=server_AET,
+			port=port,
+			QUERYRETRIVELEVEL=QUERYRETRIVELEVEL,
+			PATIENTID=PATIENTID,
+			STUDYUID=STUDYINSTANCEUID,
+			SERIESINSTANCEUID=SERIESINSTANCEUID,
+			SERIESDESCRIPTION=SERIESDESCRIPTION,
+			PROTOCOLNAME=PROTOCOLNAME,
+			ACQUISITIONDATE=ACQUISITIONDATE,
+			STUDYDATE=STUDYDATE,
+			PATIENTNAME=PATIENTNAME,
+			PATIENTBIRTHDATE=PATIENTBIRTHDATE,
+			DEVICESERIALNUMBER=DEVICESERIALNUMBER,
+			MODALITY=MODALITY,
+			IMAGETYPE=IMAGETYPE,
+			STUDYDESCRIPTION=STUDYDESCRIPTION,
+			ACCESSIONNUMBER=ACCESSIONNUMBER,
+			SEQUENCENAME=SEQUENCENAME)
 
 		if os.path.isfile("current.txt") : 
 			os.remove("current.txt")
@@ -311,7 +311,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		write_file(find_series_res, file="current.txt")
 
 		# Extract all series StudyInstanceUIDs etc.
-		series = parse_findscu_dump_file("current.txt")
+		series=parse_findscu_dump_file("current.txt")
 		
 		# Pre-compile sanitizing regex for folder renaming
 		my_re_clean =re.compile('[^0-9a-zA-Z]+') # keep only alphanums
@@ -319,7 +319,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 		# loop over series
 		for serie in tqdm(series):
 			# replace illegal chars with underscores
-			patientID_sanitized = my_re_clean.sub('_', unicodedata.normalize('NFD', serie["PatientID"]).encode('ascii','ignore').decode('ascii'))
+			patientID_sanitized=my_re_clean.sub('_', unicodedata.normalize('NFD', serie["PatientID"]).encode('ascii','ignore').decode('ascii'))
 
 			#TODO handle empty patientID_sanitized
 
@@ -327,34 +327,34 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			if counter % batch_size == 0: 
 				time.sleep(batch_wait_time)
 
-			patient_dir = os.path.join(output_dir, "sub-" + patientID_sanitized)
+			patient_dir=os.path.join(output_dir, "sub-" + patientID_sanitized)
 
 			# Make the patient folder.
 			if not os.path.isdir(patient_dir) and (save or info):
 				os.mkdir(patient_dir)
 
 			if NEW_ID != "":
-				file = open(os.path.join(patient_dir ,"new_id.txt"), "w")
+				file=open(os.path.join(patient_dir ,"new_id.txt"), "w")
 				file.write(str(NEW_ID)) 
 				file.close() 
 
-			patient_study_output_dir = os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
+			patient_study_output_dir=os.path.join(patient_dir, "ses-" + serie["StudyDate"] + serie["StudyTime"])
 
 			# Make the Study folder.
 			if not os.path.isdir(patient_study_output_dir) and (save or info):
 				os.mkdir(patient_study_output_dir)
 
 			# Name the series folder after the SeriesDescription.
-			folder_name = serie["SeriesDescription"]
+			folder_name=serie["SeriesDescription"]
 
 			# Pre-emptively sanitize the folder name - decompose into separate combining chars, then remove them using asci encoding-decoding. 
 			# finally replace illegal chars with underscores
-			folder_name =my_re_clean.sub('_', unicodedata.normalize('NFD', folder_name).encode('ascii' ,'ignore').decode('ascii'))
+			folder_name =my_re_clean.sub('_', unicodedata.normalize('NFD', folder_name).encode('ascii', 'ignore').decode('ascii'))
 
 			# If the StudyDescription is an empty string name the folder No_series_description.
 			if folder_name == "":
-				folder_name = "No_series_description"
-			patient_serie_output_dir = os.path.join(patient_study_output_dir, serie["SeriesNumber"].zfill(5) + "-" + folder_name)
+				folder_name="No_series_description"
+			patient_serie_output_dir=os.path.join(patient_study_output_dir, serie["SeriesNumber"].zfill(5) + "-" + folder_name)
 
 			# Store all later retrieved files of current patient within the serie_id directory.
 			if not os.path.isdir(patient_serie_output_dir) and (save or info):
@@ -366,14 +366,14 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 				get_res = get(
 					client_AET,
 					serie["StudyDate"],
-					server_ip = pacs_server,
-					server_AET = server_AET,
-					port = port,
-					PATIENTID = serie["PatientID"],
-					STUDYINSTANCEUID = serie["StudyInstanceUID"],
-					SERIESINSTANCEUID = serie["SeriesInstanceUID"],
-					move_port = move_port,
-					OUTDIR  = patient_serie_output_dir)
+					server_ip=pacs_server,
+					server_AET=server_AET,
+					port=port,
+					PATIENTID=serie["PatientID"],
+					STUDYINSTANCEUID=serie["StudyInstanceUID"],
+					SERIESINSTANCEUID=serie["SeriesInstanceUID"],
+					move_port=move_port,
+					OUTDIR=patient_serie_output_dir)
 
 			if move:
 				move_res = move_remote(
@@ -391,7 +391,7 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 			if info:
 				# Writing series info to csv file.
 				with open(patient_serie_output_dir + '.csv', 'w') as f:
-					w = csv.DictWriter(f, serie.keys())
+					w=csv.DictWriter(f, serie.keys())
 					w.writeheader()
 					w.writerow(serie)
 			
@@ -404,32 +404,32 @@ def retrieve_dicoms_using_table(table: DataFrame, parameters: Dict[str, str], ou
 
 def main(argv):
 	
-	parser = argparse.ArgumentParser()
+	parser=argparse.ArgumentParser()
 	
 	parser.add_argument('--config', "-c", help='Configuration file path', default=os.path.join("." ,"files" ,"config.json"))
-	parser.add_argument('--save', "-s", action='store_true', help = "Store images resulting from query (cannot be used together with '--move')")
-	parser.add_argument('--info', "-i", action ='store_true', help = "Store parsed version of findscu output (DICOM header subset)")
+	parser.add_argument('--save', "-s", action='store_true', help="Store images resulting from query (cannot be used together with '--move')")
+	parser.add_argument('--info', "-i", action ='store_true', help="Store parsed version of findscu output (DICOM header subset)")
 	parser.add_argument('--move', "-m", action='store_true', help="Move images resulting from query (cannot be used together with '--save')")
-	parser.add_argument("--queryfile", "-q", help = 'Path to query file')
-	parser.add_argument("--out_directory", "-d" , help = 'Output directory where images will be saved', default = os.path.join("." ,"data"))
+	parser.add_argument("--queryfile", "-q", help='Path to query file')
+	parser.add_argument("--out_directory", "-d" , help='Output directory where images will be saved', default=os.path.join("." ,"data"))
 	
-	args = parser.parse_args()
+	args=parser.parse_args()
 	
-	config_path = args.config
-	save = args.save
-	info = args.info
-	move = args.move
+	config_path=args.config
+	save=args.save
+	info=args.info
+	move=args.move
 	# Reading config file.
 	try:
 		with open(config_path) as f:
-			parameters = json.load(f)
+			parameters=json.load(f)
 		check_config_file(parameters)
 
 	except FileNotFoundError: 		
-		args.config = None
+		args.config=None
 		pass
 	
-	output_dir = args.out_directory
+	output_dir=args.out_directory
 
 	# Check the case where save & move are specified (it should be only one of the two)
 	if args.save and args.move:
@@ -444,7 +444,7 @@ def main(argv):
 		sys.exit()
 
 	# Read the query file.
-	table = read_csv(args.queryfile, dtype=str).fillna("")
+	table=read_csv(args.queryfile, dtype=str).fillna("")
 	
 	check_query_table_allowed_filters(table)
 
