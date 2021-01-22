@@ -25,8 +25,8 @@ I: Find Response: 1 (Pending)
 I: 
 I: # Dicom-Data-Set
 I: # Used TransferSyntax: Little Endian Explicit
-I: (0008,0020) DA [20171020]                               #   8, 1 StudyDate
-I: (0008,0030) TM [104457]                                 #   6, 1 StudyTime
+I: (0008,0020) DA [20171001]                               #   8, 1 StudyDate
+I: (0008,0030) TM [114557]                                 #   6, 1 StudyTime
 I: (0008,0052) CS [SERIES]                                 #   6, 1 QueryRetrieveLevel
 I: (0008,0054) AE [csps1FIR]                               #   8, 1 RetrieveAETitle
 I: (0008,103e) LO [4metas24Gy_PTV18Gy_68min - RTDOSE ]     #  34, 1 SeriesDescription
@@ -34,17 +34,17 @@ I: (0010,0010) PN [dummyname ]                       #  16, 1 PatientName
 I: (0010,0020) LO [dummyid ]                               #   8, 1 PatientID
 I: (0010,0021) LO (no value available)                     #   0, 0 IssuerOfPatientID
 I: (0010,0022) CS [TEXT]                                   #   4, 1 TypeOfPatientID
-I: (0010,0030) DA [19640417]                               #   8, 1 PatientBirthDate
+I: (0010,0030) DA [19640101]                               #   8, 1 PatientBirthDate
 I: (0020,000d) UI [1.2.826.0.1.3680043.2.146.2.20.3171184.1700225197.0] #  52, 1 StudyInstanceUID
-I: (0020,000e) UI [1.2.840.114358.359.1.20171101170336.1838414727465] #  50, 1 SeriesInstanceUID
-I: 
+I: (0020,000e) UI [1.2.840.114358.359.1.20171101170336.3712639202739] #  50, 1 SeriesInstanceUID
+I:
 I: ---------------------------
 I: Find Response: 2 (Pending)
 I: 
 I: # Dicom-Data-Set
 I: # Used TransferSyntax: Little Endian Explicit
-I: (0008,0020) DA [20171020]                               #   8, 1 StudyDate
-I: (0008,0030) TM [104457]                                 #   6, 1 StudyTime
+I: (0008,0020) DA [20171001]                               #   8, 1 StudyDate
+I: (0008,0030) TM [114557]                                 #   6, 1 StudyTime
 I: (0008,0052) CS [SERIES]                                 #   6, 1 QueryRetrieveLevel
 I: (0008,0054) AE [csps1FIR]                               #   8, 1 RetrieveAETitle
 I: (0008,103e) LO [4metas24Gy_PTV18Gy_68min]               #  24, 1 SeriesDescription
@@ -52,8 +52,8 @@ I: (0010,0010) PN [dummyname ]                       #  16, 1 PatientName
 I: (0010,0020) LO [dummyid ]                               #   8, 1 PatientID
 I: (0010,0021) LO (no value available)                     #   0, 0 IssuerOfPatientID
 I: (0010,0022) CS [TEXT]                                   #   4, 1 TypeOfPatientID
-I: (0010,0030) DA [19640417]                               #   8, 1 PatientBirthDate
-I: (0020,000d) UI [1.2.826.0.1.3680043.2.146.2.20.3171184.170022.173107110677054118] #  64, 1 StudyInstanceUID
-I: (0020,000e) UI [1.2.840.114358.1230.20171101171003.1]   #  36, 1 SeriesInstanceUID
+I: (0010,0030) DA [19640101]                               #   8, 1 PatientBirthDate
+I: (0020,000d) UI [1.2.826.0.1.3680043.2.146.2.20.3171184.170022.232193921818771717] #  64, 1 StudyInstanceUID
+I: (0020,000e) UI [1.2.840.231122.1230.23181726456172.1]   #  36, 1 SeriesInstanceUID
 I: 
 Ï:-----------------------------

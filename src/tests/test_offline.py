@@ -182,17 +182,17 @@ def test_replace_default_parameters():
 		replace_default_params(PARAMETERS, "AET", "214.54.1.1","",80)
 
 
-def test_process_text_file() :
+def test_process_findscu_dump_file() :
 
 	res = [{
-	'SeriesInstanceUID': '1.2.840.114358.359.1.20171101170336.1838414727465',
-	'StudyDate': '20171020',
+	'SeriesInstanceUID': '1.2.840.114358.359.1.20171101170336.3712639202739',
+	'StudyDate': '20171001',
 	'SeriesDescription': '4metas24Gy_PTV18Gy_68min-RTDOSE',
-	'PatientBirthDate': '19640417',
+	'PatientBirthDate': '19640101',
 	'ProtocolName': '',
 	'SeriesNumber': '',
 	'ImageType': '',
-	'StudyTime': '104457',
+	'StudyTime': '114557',
 	'PatientID': 'dummyid',
 	'DeviceSerialNumber': '',
 	'StudyDescription': '',
@@ -200,42 +200,42 @@ def test_process_text_file() :
 	'PatientName': 'dummyname',
 	'AccessionNumber': '',
 	'Modality': ''},
-	{'SeriesInstanceUID': '1.2.840.114358.1230.20171101171003.1',
-	'StudyDate': '20171020',
+	{'SeriesInstanceUID': '1.2.840.231122.1230.23181726456172.1',
+	'StudyDate': '20171001',
 	'SeriesDescription': '4metas24Gy_PTV18Gy_68min',
-	'PatientBirthDate': '19640417',
+	'PatientBirthDate': '19640101',
 	'ProtocolName': '', 
 	'SeriesNumber': '', 
 	'ImageType': '',
-	'StudyTime': '104457',
+	'StudyTime': '114557',
 	'PatientID': 'dummyid',
 	'DeviceSerialNumber': '',
 	'StudyDescription': '',
-	'StudyInstanceUID': '1.2.826.0.1.3680043.2.146.2.20.3171184.170022.173107110677054118',
+	'StudyInstanceUID': '1.2.826.0.1.3680043.2.146.2.20.3171184.170022.232193921818771717',
 	'PatientName': 'dummyname',
 	'AccessionNumber': '',
 	'Modality': ''}]
 
 	#Testing all the dictionaries in the list are identical.
 	dict_list =  parse_findscu_dump_file(filename = "test_data/findscu_dump_file_example.txt")
-	for i, dict_ in enumerate(dict_list) :
+	for i, dict_ in enumerate(dict_list):
 		shared_items = {k: res[i][k] for k in res[i] if k in dict_ and res[i][k] == dict_[k]}
 		assert len(shared_items) == len(res[i])
 
 
 def test_check_table() : 
 
-	table = read_csv("test_data/query_file_invalid.txt").fillna("")
+	table = read_csv("test_data/query_file_invalid.csv").fillna("")
 	with pytest.raises(ValueError) :
 		check_query_table_allowed_filters(table)
 
-	valid_table = read_csv("test_data/query_file_invalid.txt").fillna("")
+	valid_table = read_csv("test_data/query_file_valid.csv").fillna("")
 	assert check_query_table_allowed_filters(valid_table) == None
 
 
 def test_parse_table() : 
 
-	table = read_csv("valid.csv")
+	table = read_csv("test_data/query_file_valid.csv")
 	parsed_table = parse_query_table(table)
 
 	expected = [
@@ -391,42 +391,7 @@ def test_sanity_checks():
 def test_process_list():
 	
 	paths = ["sub-1234/ses-20170425114510","sub-3456/ses-20170525114500","sub-6788/ses-20170625114500"]
-	assert process_list(paths) == [("1234","20170425114510"),("3456","20170525114500"),("5879","20170625114500"),("69875","20170725114500")]
-
-
-# TODO update for DICOMserverUK
-def test_retrieve():
-	pass
-
-	table = read_csv(os.path.join("..","..","files","test.csv"), dtype=str).fillna("")
-	config_path = os.path.join("..","..","files","config.json")
-
-	with open(config_path) as f:
-		parameters = json.load(f)
-	
-	out_directory = os.path.join(".","test_set")
-	#retrieve_dicoms_using_table(table, parameters, out_directory, False, False)
-
-	#assert glob("./test_set/sub-*/ses-*/*/*") == []
-	#retrieve_dicoms_using_table(table, parameters, out_directory, False, True)
-
-	#assert glob("./test_set/sub-*/ses-*/*/*") == []
-	retrieve_dicoms_using_table(table, parameters, out_directory, True, True)
-	assert glob("./test_set/sub-*/ses-*/*/*")[:6] == ['./test_set/sub-XXX/ses-YYY/foo/bar', 'XXX' ]
-
-
-# TODO update this to use DICOMserverUK
-def test_check_output_info():
-	pass
-
-	#pacsman.main(["--info", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
-	#subjects = glob("./test_set/*")
-	#sessions = glob("./test_set/sub-*/ses-*")
-	#csv_files = glob("./test_set/sub-*/ses-*/*.csv")
-
-	# assert subjects == ['./test_set/sub-XXX']
-	# assert sessions == ['./test_set/sub-XXX/ses-YYY', './test_set/sub-XXX/ses-ZZZ']
-	#assert csv_files == ['./test_set/sub-XXX/ses-YYY/foo.csv', ... ]
+	assert process_list(paths) == [("1234","20170425114510"),("3456","20170525114500"),("6788","20170625114500")]
 
 
 # TODO update
@@ -524,7 +489,8 @@ def test_anonymize():
 
 
 def test_anonymize_all_dicoms_within_folder():
-	dict_ = anonymize_all_dicoms_within_root_folder(output_folder =".", datapath=".", pattern_dicom_files="output_sample_image", rename_patient_directories= False)
+	dict_ = anonymize_all_dicoms_within_root_folder(output_folder =".", datapath=".",
+													pattern_dicom_files="output_sample_image", rename_patient_directories= False)
 	#print(dict_)
 	#assert dict_ == {'000003': '__pycache__', '000002': 'test_set', '000000': '.pytest_cache', '000001': '.hypothesis'}
 
