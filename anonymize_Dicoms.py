@@ -343,7 +343,7 @@ def main(argv):
     delete_identifiable_files = args.delete_identifiable
     remove_private_tags = args.remove_private_tags
     new_ids = args.new_ids
-    rename_patient_directories = args.keep_patient_dir_names
+    rename_patient_directories = not args.keep_patient_dir_names
 
     if args.new_ids:
         new_ids = json.load(open(args.new_ids, "r"))
