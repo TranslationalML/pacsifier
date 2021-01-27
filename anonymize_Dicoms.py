@@ -47,7 +47,8 @@ def anonymize_dicom_file(
         new_SeriesInstanceUID: str,
         new_SOPInstanceUID: str,
         fuzzed_birthdate: str,
-        delete_identifiable_files: bool) -> None:
+        delete_identifiable_files: bool,
+        remove_private_tags: bool = False) -> None:
     """
     Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
     If identifiable data is present, deletes the file
@@ -63,7 +64,7 @@ def anonymize_dicom_file(
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves for dose reports coming from the GE Revolution CT machine, which have the patient name embedded.
             Also the case for screen saves for dose reports from Toshiba/Canon Aquilion Prime, although these don't have SCREEN SAVE label in ImageType tag
-
+        remove_private_tags: should we remove all private tags?
     TODO:
         - Implement proper exception handling
         - Check if resulting anonymized StudyInstanceUID conforms to the proper VR (should be < 64 chars?)
@@ -85,6 +86,9 @@ def anonymize_dicom_file(
             if 'SCREEN SAVE' in dataset.data_element('ImageType').value:
                 delete_this_file = True
             if 'SECONDARY' in dataset.data_element('ImageType').value and 'CT' in dataset.data_element('Modality').value:
+                delete_this_file = True
+        if "Modality" in attributes:
+            if 'SR' in dataset.data_element('Modality').value:
                 delete_this_file = True
 
     if delete_this_file:
@@ -177,6 +181,9 @@ def anonymize_dicom_file(
                 except AttributeError:
                     pass
 
+        if remove_private_tags:
+            dataset.remove_private_tags()
+
         # write the 'anonymized' DICOM out under the new filename
         dataset.save_as(output_filename)
 
@@ -187,7 +194,8 @@ def anonymize_all_dicoms_within_root_folder(
         pattern_dicom_files: str = os.path.join("ses-*", "*", "*"),
         new_ids: str = None,
         rename_patient_directories: bool = True,
-        delete_identifiable_files: bool = True) -> Dict[str, str]:
+        delete_identifiable_files: bool = True,
+        remove_private_tags: bool = False) -> Dict[str, str]:
     """
     Anonymizes all dicom images located at the datapath in the structure specified by pattern_dicom_files parameter.
     Args :
@@ -199,6 +207,7 @@ def anonymize_all_dicoms_within_root_folder(
         rename_patient_directories : Should we rename_patient_directories patient directories using the anonymized ids?
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves coming from the GE Revolution CT machine, which have the patient name embedded.
+        remove_private_tags: should we remove all private tags?
     Returns :
         dict : Dictionary keeping track of the new patientIDs and old patientIDs mappings.
     """
@@ -271,7 +280,7 @@ def anonymize_all_dicoms_within_root_folder(
             series_dirs = next(os.walk(os.path.join(datapath, patient, study_dir)))[1]
 
             for series_dir in series_dirs:
-                if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir )):  # create series dir if needed
+                if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir)):  # create series dir if needed
                     os.mkdir(os.path.join(output_folder, patient, study_dir, series_dir))
 
                 new_SeriesInstanceUID=pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
@@ -289,13 +298,14 @@ def anonymize_all_dicoms_within_root_folder(
                                          new_SeriesInstanceUID=new_SeriesInstanceUID,
                                          new_SOPInstanceUID=new_SOPInstanceUID,
                                          fuzzed_birthdate=fuzzed_birthdate,
-                                         delete_identifiable_files=delete_identifiable_files)
+                                         delete_identifiable_files=delete_identifiable_files,
+                                         remove_private_tags=remove_private_tags)
 
         # If the patient folders are to be renamed.
         if rename_patient_directories:
             try:
                 os.rename(os.path.join(output_folder, patient), os.path.join(output_folder, "sub-" + new_id))
-            except OSError:
+            except OSError: # if destination dir already exists
                 os.rename(os.path.join(output_folder, patient), os.path.join(output_folder, "sub-" + new_id + "_2"))
 
     # return a mapping from new ids to old ids as a dictionary.
@@ -320,14 +330,20 @@ def main(argv):
                         default=os.path.join(".", "data"), required=True)
     parser.add_argument("--delete_identifiable", "-i", help="Delete identifiable files like Dose reports.",
                         default=False, required=False, action='store_true')
+    parser.add_argument("--remove_private_tags", "-p", help="Remove private tags.",
+                        default=False, required=False, action='store_true')
     parser.add_argument("--new_ids", "-n", help="List of new ids.")
+    parser.add_argument("--keep_patient_dir_names", "-k", help="Do not rename patient directories, keep original IDs",
+                        default=False, required=False, action='store_true')
 
     args = parser.parse_args()
 
     data_path = os.path.normcase(os.path.abspath(args.in_folder))
     output_folder = os.path.normcase(os.path.abspath(args.out_folder))
     delete_identifiable_files = args.delete_identifiable
+    remove_private_tags = args.remove_private_tags
     new_ids = args.new_ids
+    rename_patient_directories = args.keep_patient_dir_names
 
     if args.new_ids:
         new_ids = json.load(open(args.new_ids, "r"))
@@ -345,7 +361,9 @@ def main(argv):
         mapper = anonymize_all_dicoms_within_root_folder(output_folder=output_folder,
                                                          datapath=data_path,
                                                          new_ids=new_ids,
-                                                         delete_identifiable_files=delete_identifiable_files)
+                                                         delete_identifiable_files=delete_identifiable_files,
+                                                         remove_private_tags=remove_private_tags,
+                                                         rename_patient_directories=rename_patient_directories)
 
 
 if __name__ == "__main__":
