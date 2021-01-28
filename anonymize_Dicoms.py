@@ -304,9 +304,9 @@ def anonymize_all_dicoms_within_root_folder(
         # If the patient folders are to be renamed.
         if rename_patient_directories:
             try:
-                os.rename(os.path.join(output_folder, patient), os.path.join(output_folder, "sub-" + new_id))
+                os.replace(os.path.join(output_folder, patient), os.path.join(output_folder, "sub-" + new_id))
             except OSError: # if destination dir already exists
-                os.rename(os.path.join(output_folder, patient), os.path.join(output_folder, "sub-" + new_id + "_2"))
+                os.replace(os.path.join(output_folder, patient), os.path.join(output_folder, "sub-" + new_id + "_2"))
 
     # return a mapping from new ids to old ids as a dictionary.
     new2old_idx = {new: old.replace("sub-", "") for old, new in old2new_idx.items()}
