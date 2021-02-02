@@ -2,17 +2,15 @@
 Add private DICOM tags to several studies so that Karnak can de-identify them using provided patient codes
 and route them to the appropriate Kheops album
 """
-import warnings
+
 import pydicom
 from glob import glob
 import sys
 import os
 from tqdm import tqdm
-import random
 import json
 from typing import Dict
 import argparse
-import hashlib
 
 
 def tag_dicom_file(
@@ -46,15 +44,15 @@ def tag_dicom_file(
 
 
 def tag_all_dicoms_within_root_folder(*,
-                                      data_path: str = None,
-                                      new_ids: str = None,
-                                      album_name: str = None
+                                      data_path: str,
+                                      new_ids: Dict[str, str],
+                                      album_name: str
                                       ) -> None:
     """
     Tags all dicom images located at the datapath for Karnak, adding an album name and patientCode private tags.
     Args :
         data_path: The path to the dicom images.
-        new_ids : The patient codes  to be used after de-identifying the original ids.
+        new_ids: The real:code mapping to be used after de-identifying the original ids.
         album_name : The name of the Kheops album
     """
 
@@ -74,7 +72,6 @@ def tag_all_dicoms_within_root_folder(*,
 
     # Keep a mapping from old to new ids in a dictionary.
     old2new_idx = {patients_folders[i]: new_ids[patients_folders[i]] for i in range(len(patients_folders))}
-    old2set_idx = {}
 
     # TODO add Cerberus validation on album_name and newid - both should be DICOM VR LO
 
