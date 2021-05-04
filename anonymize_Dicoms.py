@@ -114,7 +114,8 @@ def anonymize_dicom_file(
                              "PersonTelephoneNumbers", "PerformingPhysicianIDSequence", "PerformingPhysicianName",
                              "PhysiciansReadingStudyIdentificationSequence", "PhysicianOfRecord",
                              "RegionOfResidence", "ReferringPhysiciansAddress", "ReferringPhysicianIDSequence",
-                             "ReferringPhysiciansName", "ReferringPhysicianTelephoneNumbers"]
+                             "ReferringPhysiciansName", "ReferringPhysicianTelephoneNumbers",
+                             "RelatedSeriesSequenceAttribute"]
         # note: OtherPatientIDs is a retired attribute
         for el in elements_to_blank:
             if el in attributes:
