@@ -248,7 +248,7 @@ Using this csv file, the query will retrieve images of the patient with patient 
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
-# Anonymization 
+# Anonymization (Directly with PACSMAN)
 ## Command line 
 	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable
  
@@ -286,6 +286,15 @@ Runnning the command above will replace all the images within data folder with a
 	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/anonymized_data --delete_identifiable 
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder, and delete any identifiable images.
+
+# Anonymization (via Karnak gateway)
+
+## Docker command-line (Windows)
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python add_Karnak_tags.py --new_ids my_new_ids.json --album_name my_album_name
+
+ - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code, same syntax as for direct PACSMAN anonymisation. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
+ - `my_album_name` must match a Kheops album name
+
 
 # Converting to NIFTI 
 
