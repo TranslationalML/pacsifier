@@ -84,6 +84,9 @@ def main(argv):
     response = requests.post(parameters['deid_URL'], headers=head, json=json_data, verify=False)
 
     print(response.text)
+    with open(os.path.normpath(os.path.join(args.out_directory, "new_ids_{}.json".format(args.album_name))), "w") as f:
+        f.write(response.text)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
