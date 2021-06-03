@@ -250,18 +250,18 @@ This csv file will retrieve all the images with ProtocolName starting with BEAT_
 
 # Anonymization
 
-## Getting pseudonyms from the De-ID API at CHUV 
+## Getting pseudonyms from the De-ID API at CHUV (GPCR) 
 
 For patients that have a study declared in the Horus system, you can get consistent pseudonyms using the De-ID API.
 
 ### Command line 
-	python get_pseudonyms.py --config my_config_deid.json --queryfile my_query.csv --album_name my_album_name --out_directory ./
+	python get_pseudonyms.py --config my_config_deid.json --queryfile my_query.csv --project_name my_project_name --out_directory ./
 
  - `my_config_deid.json` is the configuration file for the de-ID API, containing token and service URL.
  - `my_query.csv` is the PACSMAN query file, listing all PatientIDs to pseudonymise
- - `my_album_name` Corresponds both to the project name on Horus and to the album name on Kheops where the study will be pushed
+ - `my_project_name` Corresponds both to the project name on GPCR and may correspond to the album name on Kheops where the study will be pushed
 
-After running, the output directory will contain a file `new_ids_[my_album_name].json` which can be used directly with
+After running, the output directory will contain a file `new_ids_[my_project_name].json` which can be used directly with
 anonymisation process below
 
 ### Docker command-line (Windows)
