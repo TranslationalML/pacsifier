@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from glob import glob
 import sys
 import os
+import warnings
 from tqdm import tqdm
 import random
 import json
@@ -252,8 +253,9 @@ def anonymize_all_dicoms_within_root_folder(
         all_filenames = glob(current_path)
 
         if not all_filenames:
-            raise FileNotFoundError('Patient directories are expect to conform to the pattern set'
-                                    'in pattern_dicom_files, currently ' + pattern_dicom_files )
+            warnings.warn(f"Problem reading data for patient {patient} at {current_path}.")
+            raise FileNotFoundError('Patient directories are expect to conform to the pattern set '
+                                    'in pattern_dicom_files, currently ' + pattern_dicom_files)
 
         # grab real birth date
         # TODO handle case where first file does not contain birthdate - look for any file that does?
