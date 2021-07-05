@@ -253,56 +253,56 @@ def anonymize_all_dicoms_within_root_folder(
         all_filenames = glob(current_path)
 
         if not all_filenames:
-            warnings.warn(f"Problem reading data for patient {patient} at {current_path}.")
-            raise FileNotFoundError('Patient directories are expect to conform to the pattern set '
-                                    'in pattern_dicom_files, currently ' + pattern_dicom_files)
-
-        # grab real birth date
-        # TODO handle case where first file does not contain birthdate - look for any file that does?
-        first_file = pydicom.read_file(all_filenames[0])
-        if 'PatientBirthDate' in first_file:
-            real_birthdate = first_file.data_element('PatientBirthDate').value
-            fuzzed_birthdate = fuzz_date(real_birthdate)
-        # print('Replacing real birthdate {} with {}'.format(real_birthdate, fuzzed_birthdate))
+            warnings.warn('Problem reading data for patient ' + patient + ' at ' + current_path + '.')
+            warnings.warn('Patient directories are expect to conform to the pattern set '
+                          'in pattern_dicom_files, currently ' + pattern_dicom_files)
         else:
-            fuzzed_birthdate = ""
+            # grab real birth date
+            # TODO handle case where first file does not contain birthdate - look for any file that does?
+            first_file = pydicom.read_file(all_filenames[0])
+            if 'PatientBirthDate' in first_file:
+                real_birthdate = first_file.data_element('PatientBirthDate').value
+                fuzzed_birthdate = fuzz_date(real_birthdate)
+            # print('Replacing real birthdate {} with {}'.format(real_birthdate, fuzzed_birthdate))
+            else:
+                fuzzed_birthdate = ""
 
-        if not os.path.isdir(os.path.join(output_folder, patient)):  # create subject dir if needed
-            os.mkdir(os.path.join(output_folder, patient))
+            if not os.path.isdir(os.path.join(output_folder, patient)):  # create subject dir if needed
+                os.mkdir(os.path.join(output_folder, patient))
 
-        # List all study dirs for this patient.
-        study_dirs = next(os.walk(os.path.join(datapath, patient)))[1]
+            # List all study dirs for this patient.
+            study_dirs = next(os.walk(os.path.join(datapath, patient)))[1]
 
-        for study_dir in study_dirs:
-            if not os.path.isdir(os.path.join(output_folder, patient, study_dir)):  # create study dir if needed
-                os.mkdir(os.path.join(output_folder, patient, study_dir))
+            for study_dir in study_dirs:
+                if not os.path.isdir(os.path.join(output_folder, patient, study_dir)):  # create study dir if needed
+                    os.mkdir(os.path.join(output_folder, patient, study_dir))
 
-            new_StudyInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+                new_StudyInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-            # List all series dirs for this patient.
-            series_dirs = next(os.walk(os.path.join(datapath, patient, study_dir)))[1]
+                # List all series dirs for this patient.
+                series_dirs = next(os.walk(os.path.join(datapath, patient, study_dir)))[1]
 
-            for series_dir in series_dirs:
-                if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir)):  # create series dir if needed
-                    os.mkdir(os.path.join(output_folder, patient, study_dir, series_dir))
+                for series_dir in series_dirs:
+                    if not os.path.isdir(os.path.join(output_folder, patient, study_dir, series_dir)):  # create series dir if needed
+                        os.mkdir(os.path.join(output_folder, patient, study_dir, series_dir))
 
-                new_SeriesInstanceUID=pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+                    new_SeriesInstanceUID=pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-                all_filenames_series = glob(os.path.join(datapath, patient, study_dir,series_dir,'*'))
+                    all_filenames_series = glob(os.path.join(datapath, patient, study_dir,series_dir,'*'))
 
-                # Loop over all dicom files within a patient directory and anonymize them.
-                for filename in all_filenames_series:
-                    new_SOPInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
+                    # Loop over all dicom files within a patient directory and anonymize them.
+                    for filename in all_filenames_series:
+                        new_SOPInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
-                    anonymize_dicom_file(filename,
-                                         os.path.join(output_folder, patient, study_dir, series_dir, os.path.basename(filename)),
-                                         PatientID=new_id,
-                                         new_StudyInstanceUID=new_StudyInstanceUID,
-                                         new_SeriesInstanceUID=new_SeriesInstanceUID,
-                                         new_SOPInstanceUID=new_SOPInstanceUID,
-                                         fuzzed_birthdate=fuzzed_birthdate,
-                                         delete_identifiable_files=delete_identifiable_files,
-                                         remove_private_tags=remove_private_tags)
+                        anonymize_dicom_file(filename,
+                                             os.path.join(output_folder, patient, study_dir, series_dir, os.path.basename(filename)),
+                                             PatientID=new_id,
+                                             new_StudyInstanceUID=new_StudyInstanceUID,
+                                             new_SeriesInstanceUID=new_SeriesInstanceUID,
+                                             new_SOPInstanceUID=new_SOPInstanceUID,
+                                             fuzzed_birthdate=fuzzed_birthdate,
+                                             delete_identifiable_files=delete_identifiable_files,
+                                             remove_private_tags=remove_private_tags)
 
         # If the patient folders are to be renamed.
         if rename_patient_directories:
