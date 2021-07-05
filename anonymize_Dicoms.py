@@ -352,19 +352,14 @@ def main(argv):
     if not os.path.isdir(output_folder):
         raise NotADirectoryError('Output directory does not exist. Please create it first.')
 
-    # prevent deletion of identifiable files if output is the same as input dir
-    if (data_path == output_folder) & delete_identifiable_files:
-        warnings.warn('You have chosen in-place anonymisation with the delete-identifiable option. This is not'
-                      'allowed since it could erase files in your in-folder. Please modify your options.')
-    else:
-        print("Anonymizing dicom files within path {} into {}".format(os.path.abspath(data_path), os.path.abspath(output_folder)))
-        # Anonymizing all files.
-        mapper = anonymize_all_dicoms_within_root_folder(output_folder=output_folder,
-                                                         datapath=data_path,
-                                                         new_ids=new_ids,
-                                                         delete_identifiable_files=delete_identifiable_files,
-                                                         remove_private_tags=remove_private_tags,
-                                                         rename_patient_directories=rename_patient_directories)
+    print("Anonymizing dicom files within path {} into {}".format(os.path.abspath(data_path), os.path.abspath(output_folder)))
+    # Anonymizing all files.
+    mapper = anonymize_all_dicoms_within_root_folder(output_folder=output_folder,
+                                                     datapath=data_path,
+                                                     new_ids=new_ids,
+                                                     delete_identifiable_files=delete_identifiable_files,
+                                                     remove_private_tags=remove_private_tags,
+                                                     rename_patient_directories=rename_patient_directories)
 
 
 if __name__ == "__main__":
