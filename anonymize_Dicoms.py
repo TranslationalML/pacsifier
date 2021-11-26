@@ -13,6 +13,21 @@ import argparse
 import hashlib
 
 
+def parse_date(date:str) -> Tuple[int,int,int]:
+    """
+    Extracts year, month, day from a date
+    Args:
+        date: date in YYYYMMDD format.
+    Returns:
+        year, month, day
+    """
+    year = int(date[:4])
+    month = int(date[4:6])
+    day = int(date[6:8])
+
+    return year, month, day
+
+
 def fuzz_date(date: str, fuzz_parameter: int = 30) -> Tuple[str, int]:
     """
     Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
@@ -26,9 +41,8 @@ def fuzz_date(date: str, fuzz_parameter: int = 30) -> Tuple[str, int]:
     if fuzz_parameter <= 0:
         raise ValueError("Fuzz parameter must be strictly positive!")
 
-    year = int(date[:4])
-    month = int(date[4:6])
-    day = int(date[6:8])
+    # TODO more robust parsing with datetime type rather than manual
+    year, month, day = parse_date(date)
 
     # Generating random fuzz parameter.
     fuzz = random.randint(-fuzz_parameter, fuzz_parameter)
@@ -309,6 +323,7 @@ def anonymize_all_dicoms_within_root_folder(
                                              fuzzed_birthdate=fuzzed_birthdate,
                                              delete_identifiable_files=delete_identifiable_files,
                                              remove_private_tags=remove_private_tags)
+            # TODO rename study dir to remove date if needed
 
         # If the patient folders are to be renamed.
         if rename_patient_directories:
