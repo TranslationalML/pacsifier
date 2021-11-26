@@ -264,8 +264,9 @@ def test_parse_table() :
 
 def test_fuzz_date():
 	
-	fuzzed = fuzz_date("20180911", fuzz_parameter = 2)
+	fuzzed, offset_days = fuzz_date("20180911", fuzz_parameter=2)
 	assert fuzzed in ["20180910", "20180909", "20180911", "20180912", "20180913"]
+	assert abs(offset_days) <= 2
 	with pytest.raises(ValueError):
 		fuzz_date("20180911",fuzz_parameter = random.randint(-10000,0))
 
