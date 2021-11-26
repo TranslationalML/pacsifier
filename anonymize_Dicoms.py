@@ -8,19 +8,20 @@ import warnings
 from tqdm import tqdm
 import random
 import json
-from typing import Dict
+from typing import Dict, Tuple
 import argparse
 import hashlib
 
 
-def fuzz_date(date: str, fuzz_parameter: int = 30) -> str:
+def fuzz_date(date: str, fuzz_parameter: int = 30) -> Tuple[str, int]:
     """
     Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
     Args :
         date: date in YYYYMMDD format.
         fuzz_parameter: the number of days by which the date will be fuzzed.
     Returns :
-        string : new fuzzed date.
+        str_date : new fuzzed date.
+        fuzz: number of days used in offset (can be positive or negative)
     """
     if fuzz_parameter <= 0:
         raise ValueError("Fuzz parameter must be strictly positive!")
@@ -37,7 +38,7 @@ def fuzz_date(date: str, fuzz_parameter: int = 30) -> str:
     str_date = (date_time + timedelta(days=fuzz)).strftime("%Y%m%d")  # type : str
 
     del date_time
-    return str_date
+    return str_date, fuzz
 
 
 def anonymize_dicom_file(
@@ -197,7 +198,8 @@ def anonymize_all_dicoms_within_root_folder(
         new_ids: str = None,
         rename_patient_directories: bool = True,
         delete_identifiable_files: bool = True,
-        remove_private_tags: bool = False) -> Dict[str, str]:
+        remove_private_tags: bool = False,
+        fuzz_study_dates: bool = False) -> Dict[str, str]:
     """
     Anonymizes all dicom images located at the datapath in the structure specified by pattern_dicom_files parameter.
     Args :
@@ -210,6 +212,7 @@ def anonymize_all_dicoms_within_root_folder(
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves coming from the GE Revolution CT machine, which have the patient name embedded.
         remove_private_tags: should we remove all private tags?
+        fuzz_study_dates: should we shift the study dates randomly by +- 30 days?
     Returns :
         dict : Dictionary keeping track of the new patientIDs and old patientIDs mappings.
     """
@@ -224,6 +227,8 @@ def anonymize_all_dicoms_within_root_folder(
 
     if new_ids is None:
         new_ids = {patients_folders[i]: str(i).zfill(6) for i in range(len(patients_folders))}
+
+    #TODO initialise data structure to keep track of day offsets in birthday fuzzing
 
     # Keep a mapping from old to new ids in a dictionary.
     try:
@@ -262,10 +267,11 @@ def anonymize_all_dicoms_within_root_folder(
             first_file = pydicom.read_file(all_filenames[0])
             if 'PatientBirthDate' in first_file:
                 real_birthdate = first_file.data_element('PatientBirthDate').value
-                fuzzed_birthdate = fuzz_date(real_birthdate)
+                fuzzed_birthdate, birthdate_offset_days = fuzz_date(real_birthdate)
             # print('Replacing real birthdate {} with {}'.format(real_birthdate, fuzzed_birthdate))
             else:
                 fuzzed_birthdate = ""
+                birthdate_offset_days = 0
 
             if not os.path.isdir(os.path.join(output_folder, patient)):  # create subject dir if needed
                 os.mkdir(os.path.join(output_folder, patient))
@@ -335,6 +341,8 @@ def main(argv):
                         default=False, required=False, action='store_true')
     parser.add_argument("--remove_private_tags", "-p", help="Remove private tags.",
                         default=False, required=False, action='store_true')
+    parser.add_argument("--fuzz_study_dates", "-s", help="Fuzz study dates.",
+                        default=False, required=False, action='store_true')
     parser.add_argument("--new_ids", "-n", help="List of new ids.")
     parser.add_argument("--keep_patient_dir_names", "-k", help="Do not rename patient directories, keep original IDs",
                         default=False, required=False, action='store_true')
@@ -345,6 +353,7 @@ def main(argv):
     output_folder = os.path.normcase(os.path.abspath(args.out_folder))
     delete_identifiable_files = args.delete_identifiable
     remove_private_tags = args.remove_private_tags
+    fuzz_study_dates = args.fuzz_study_dates
     new_ids = args.new_ids
     rename_patient_directories = not args.keep_patient_dir_names
 
@@ -361,7 +370,8 @@ def main(argv):
                                                      new_ids=new_ids,
                                                      delete_identifiable_files=delete_identifiable_files,
                                                      remove_private_tags=remove_private_tags,
-                                                     rename_patient_directories=rename_patient_directories)
+                                                     rename_patient_directories=rename_patient_directories,
+                                                     fuzz_study_dates=fuzz_study_dates)
 
 
 if __name__ == "__main__":
