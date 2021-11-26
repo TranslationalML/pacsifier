@@ -28,6 +28,24 @@ def parse_date(date:str) -> Tuple[int,int,int]:
     return year, month, day
 
 
+def shift_date_by_some_days(date_str: str, shift: int) -> str:
+    """
+    Add or subtract days from a date
+    Args :
+        date: date in YYYYMMDD format.
+        shift: the number of days by which the date will be shifted (can be positive or negative.
+    Returns :
+        new_date_str : shifted date
+    """
+    # TODO more robust parsing with datetime type rather than manual
+    year, month, day = parse_date(date_str)
+
+    date_time = datetime(day=day, month=month, year=year)  # type : datetime
+    new_date_str = (date_time + timedelta(days=shift)).strftime("%Y%m%d")  # type : str
+
+    return new_date_str
+
+
 def fuzz_date(date: str, fuzz_parameter: int = 30) -> Tuple[str, int]:
     """
     Fuzzes date in a range of fuzz_parameter days prior to fuzz_parameter days after.
@@ -41,18 +59,13 @@ def fuzz_date(date: str, fuzz_parameter: int = 30) -> Tuple[str, int]:
     if fuzz_parameter <= 0:
         raise ValueError("Fuzz parameter must be strictly positive!")
 
-    # TODO more robust parsing with datetime type rather than manual
-    year, month, day = parse_date(date)
-
-    # Generating random fuzz parameter.
+    # Generate random date shift in -fuzz_parameter +fuzz_parameter
     fuzz = random.randint(-fuzz_parameter, fuzz_parameter)
 
-    # Processing new date.
-    date_time = datetime(day=day, month=month, year=year)  # type : datetime
-    str_date = (date_time + timedelta(days=fuzz)).strftime("%Y%m%d")  # type : str
+    # Shift the date
+    fuzzed_date = shift_date_by_some_days(date, fuzz)
 
-    del date_time
-    return str_date, fuzz
+    return fuzzed_date, fuzz
 
 
 def anonymize_dicom_file(
