@@ -248,6 +248,8 @@ Using this csv file, the query will retrieve images of the patient with patient 
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
+
+
 # Anonymization
 
 ## Getting pseudonyms from the De-ID API at CHUV (GPCR) 
@@ -271,11 +273,13 @@ anonymisation process below
 ## Anonymizing directly with PACSMAN
 
 ### Command line 
-	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable
+	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable --fuzz_acq_dates
  
  - `files-directory` is the path to the folder that contains all the dicom images.
  - `anonymized-files-directory` is the path to the directory where the anonymized dicom images will be saved.
  - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
+ - `--delete_identifiable` - remove identifiable files (see below)
+ - `--fuzz_acq_dates` - shifts acquisition dates by a random amount, synchronised with birth date fuzzing. Returns a file 'date_offsets.csv'.
 
 ### Docker command-line (Windows)
 	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python anonymize_Dicoms.py ...
