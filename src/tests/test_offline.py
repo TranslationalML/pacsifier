@@ -397,16 +397,21 @@ def test_sanity_checks():
 
 # TODO update
 def test_anonymize():
-	anonymize_dicom_file("test_data/rubo_sample_file_0003.DCM","output_sample_image",PatientID = "00042",
+	in_file="test_data/rubo_sample_file_0003.DCM"
+	out_file="test_data/rubo_sample_file_0003_anon.DCM"
+	anonymize_dicom_file(in_file,out_file,PatientID = "00042",
 						 new_StudyInstanceUID="0000001.01", new_SeriesInstanceUID="000012.01",
-						 new_SOPInstanceUID="000000010.101",fuzzed_birthdate="20140626",
+						 new_SOPInstanceUID="000000010.101",fuzz_birthdate=True,
+						 fuzz_acqdates=True,fuzz_days_shift=10,
 						 delete_identifiable_files=True, remove_private_tags= False)
-	dataset = pydicom.read_file("output_sample_image")
+	dataset = pydicom.read_file(out_file)
 	attributes = dataset.dir("")
 	
 	assert dataset.PatientID == "00042"
 	assert dataset.PatientName == "00042^sub"
 	assert dataset.InstitutionAddress == "Address"
+	assert dataset.PatientBirthDate == "19580729" # original date PatientBirthDate 19580719 -> check + 10 days shift
+	assert dataset.StudyDate == "19930404" # original StudyDate 19930325
 	if "ReferringPhysicianTelephoneNumbers" in attributes:
 		assert dataset.ReferringPhysicianTelephoneNumbers == ""
 	if "PatientTelephoneNumbers" in attributes:
@@ -494,7 +499,8 @@ def test_anonymize():
 	
 	anonymize_dicom_file("test_data/temp_output_sample_image.DCM","test_data/temp_output_sample_image.DCM",PatientID = "00042",
 						 new_StudyInstanceUID="0000001.01", new_SeriesInstanceUID="000012.01",
-						 new_SOPInstanceUID="000000010.101",fuzzed_birthdate="",
+						 new_SOPInstanceUID="000000010.101",fuzz_birthdate=True,
+						 fuzz_acqdates=False,fuzz_days_shift=5,
 						 delete_identifiable_files=True, remove_private_tags= False)
 
 	dataset = pydicom.read_file("test_data/temp_output_sample_image.DCM")

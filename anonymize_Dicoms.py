@@ -1,4 +1,6 @@
 import warnings
+
+import numpy as np
 import pydicom
 from datetime import datetime, timedelta
 from glob import glob
@@ -75,8 +77,10 @@ def anonymize_dicom_file(
         new_StudyInstanceUID: str,
         new_SeriesInstanceUID: str,
         new_SOPInstanceUID: str,
-        fuzzed_birthdate: str,
-        delete_identifiable_files: bool,
+        fuzz_birthdate: bool = True,
+        fuzz_acqdates: bool = False,
+        fuzz_days_shift: int = 0,
+        delete_identifiable_files: bool = False,
         remove_private_tags: bool = False) -> None:
     """
     Anonymizes the dicom image located at filename by affecting  patient id, patient name and date.
@@ -89,17 +93,25 @@ def anonymize_dicom_file(
         new_StudyInstanceUID: Study instance UID to be used for depersonalisation. This should be a DICOM VR UI
         new_SeriesInstanceUID: Series instance UID to be used for depersonalisation. This should be a DICOM VR UI.
         new_SOPInstanceUID: SOP instance UID to be used for depersonalisation. This should be a DICOM VR UI
-        fuzzed_birthdate: a fuzzed birthdate for this patient
+        fuzz_birthdate: whether to fuzz the birthdate or not
+        fuzz_acqdates: whether to fuzz  acquisition-related dates including study date, InstanceCreationDate,
+            SeriesDate, AcquisitionDate, ContentDate, PerformedProcedureStepStartDate, and
+            (07a3,101b) ST (e.g. 201703251500), (07a3,1020) DA
+        fuzz_days_shift: how many days to shift dates (birth and various acquisition dates) by. Can be positive or negative
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves for dose reports coming from the GE Revolution CT machine, which have the patient name embedded.
             Also the case for screen saves for dose reports from Toshiba/Canon Aquilion Prime, although these don't have SCREEN SAVE label in ImageType tag
         remove_private_tags: should we remove all private tags?
     TODO:
         - Implement proper exception handling
-        - Check if resulting anonymized StudyInstanceUID conforms to the proper VR (should be < 64 chars?)
+        - Check if resulting depersonalised StudyInstanceUID conforms to the proper VR (should be < 64 chars?)
+        - Fuzz acquisition times: InstanceCreationTime, StudyTime, Seriestime, AcquisitionTime, ContentTime,
+         TimeOfSecondaryCapture, PerformedProcedureStepStartTime (VR: TM)
+        - Replace datestring in ReferencedSOPInstanceUID and FrameOfReferenceUID too...
+        - Handle private date-containing tags? (07a3, 101b) ST(e.g. 201703251500) and  (07a3, 1020) DA
     """
 
-    # Load the current dicom file to 'anonymize'
+    # Load the current dicom file to depersonalise
     try:
         dataset = pydicom.read_file(filename)
     except pydicom.errors.InvalidDicomError:
@@ -199,9 +211,14 @@ def anonymize_dicom_file(
         # 	ReferencedSOPInstanceUID = dataset.ReferencedSOPInstanceUID
         # 	dataset.ReferencedSOPInstanceUID = ReferencedSOPInstanceUID.replace(old_id, PatientID_numstr)
 
-        if 'PatientBirthDate' in dataset:
-            # Assign a new fuzzed birth date.
-            dataset.data_element('PatientBirthDate').value = fuzzed_birthdate
+        if 'PatientBirthDate' in attributes:
+            # Assign a new fuzzed birth date, except if patient is 90+ in which case don't touch the fake birthdate.
+            if fuzz_birthdate:
+                fuzzed_birthdate = shift_date_by_some_days(dataset.data_element('PatientBirthDate'),fuzz_days_shift)
+                dataset.data_element('PatientBirthDate').value = fuzzed_birthdate
+            else:
+                fuzzed_birthdate = dataset.data_element('PatientBirthDate')
+
             if not ninety_plus:
                 # Change the age of the patient according to the new fuzzed birth date.
                 new_age = str(int((datetime.strptime(dataset.StudyDate, "%Y%m%d") - datetime.strptime(fuzzed_birthdate,
@@ -210,6 +227,16 @@ def anonymize_dicom_file(
                     dataset.PatientAge = str(new_age).zfill(3) + "Y"
                 except AttributeError:
                     pass
+
+        if fuzz_acqdates:
+            if not 'StudyDate' in attributes:
+                raise AssertionError(f"Cannot fuzz acquisition dates, StudyDate not in Dicom tags in file {filename}")
+            fuzzed_acqdate = shift_date_by_some_days(dataset.data_element('StudyDate'), fuzz_days_shift)
+            dates_to_fuzz=['StudyDate', 'InstanceCreationDate','SeriesDate','AcquisitionDate','ContentDate',
+                           'PerformedProcedureStepStartDate', 'DateOfSecondaryCapture']
+            for el in dates_to_fuzz:
+                if el in attributes:
+                    dataset.data_element(el).value = fuzzed_acqdate
 
         if remove_private_tags:
             dataset.remove_private_tags()
@@ -226,7 +253,7 @@ def anonymize_all_dicoms_within_root_folder(
         rename_patient_directories: bool = True,
         delete_identifiable_files: bool = True,
         remove_private_tags: bool = False,
-        fuzz_study_dates: bool = False) -> Dict[str, str]:
+        fuzz_acq_dates: bool = False) -> Dict[str, str]:
     """
     Anonymizes all dicom images located at the datapath in the structure specified by pattern_dicom_files parameter.
     Args :
@@ -239,7 +266,7 @@ def anonymize_all_dicoms_within_root_folder(
         delete_identifiable_files: Should we delete DICOM Series which have identifiable information in the image data itself?
             This is the case for example for screen saves coming from the GE Revolution CT machine, which have the patient name embedded.
         remove_private_tags: should we remove all private tags?
-        fuzz_study_dates: should we shift the study dates randomly by +- 30 days?
+        fuzz_acq_dates: should we shift the acquisition-related dates randomly by +- 30 days?
     Returns :
         dict : Dictionary keeping track of the new patientIDs and old patientIDs mappings.
     """
@@ -255,7 +282,7 @@ def anonymize_all_dicoms_within_root_folder(
     if new_ids is None:
         new_ids = {patients_folders[i]: str(i).zfill(6) for i in range(len(patients_folders))}
 
-    #TODO initialise data structure to keep track of day offsets in birthday fuzzing
+    all_date_offsets=np.zeros(len(patients_folders), dtype=np.int16)
 
     # Keep a mapping from old to new ids in a dictionary.
     try:
@@ -268,7 +295,7 @@ def anonymize_all_dicoms_within_root_folder(
     old2set_idx = {}
 
     # Loop over patients...
-    for patient in tqdm(patients_folders):
+    for patient_index, patient in enumerate(tqdm(patients_folders)):
         new_id = old2new_idx[patient]
         current_path = os.path.join(datapath, patient, pattern_dicom_files)
 
@@ -299,6 +326,7 @@ def anonymize_all_dicoms_within_root_folder(
             else:
                 fuzzed_birthdate = ""
                 birthdate_offset_days = 0
+            all_date_offsets[patient_index] = birthdate_offset_days
 
             if not os.path.isdir(os.path.join(output_folder, patient)):  # create subject dir if needed
                 os.mkdir(os.path.join(output_folder, patient))
@@ -309,6 +337,18 @@ def anonymize_all_dicoms_within_root_folder(
             for study_dir in study_dirs:
                 if not os.path.isdir(os.path.join(output_folder, patient, study_dir)):  # create study dir if needed
                     os.mkdir(os.path.join(output_folder, patient, study_dir))
+
+                if fuzz_acq_dates:
+                    # grab study date from dir name - sub-20170115
+                    study_dir_prefix, original_study_date = study_dir.split(sep='-')
+                    # shift it
+                    fuzzed_study_date = shift_date_by_some_days(original_study_date, int(all_date_offsets[patient_index]))
+                    # rename dir
+                    fuzzed_study_dir = f"{study_dir_prefix}-{fuzzed_study_date}"
+                    #TODO edge case: what if fuzzed date maps to an already existing session? should be OK since
+                    #not yet written to output
+                else:
+                    fuzzed_study_date=""
 
                 new_StudyInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
@@ -333,10 +373,15 @@ def anonymize_all_dicoms_within_root_folder(
                                              new_StudyInstanceUID=new_StudyInstanceUID,
                                              new_SeriesInstanceUID=new_SeriesInstanceUID,
                                              new_SOPInstanceUID=new_SOPInstanceUID,
-                                             fuzzed_birthdate=fuzzed_birthdate,
+                                             fuzz_birthdate=True,
+                                             fuzz_acqdates=fuzz_acq_dates,
+                                             fuzz_days_shift=int(all_date_offsets[patient_index]),
                                              delete_identifiable_files=delete_identifiable_files,
                                              remove_private_tags=remove_private_tags)
-            # TODO rename study dir to remove date if needed
+                # actually rename dirs if needed
+                if fuzz_acq_dates:
+                    os.replace(os.path.join(output_folder, patient, study_dir),
+                                os.path.join(output_folder, patient, fuzzed_study_dir))
 
         # If the patient folders are to be renamed.
         if rename_patient_directories:
@@ -355,6 +400,9 @@ def anonymize_all_dicoms_within_root_folder(
         else:
             json.dump(old2set_idx, fp)
 
+    # dump date offsets to a csv
+    all_date_offsets.tofile(os.path.join(output_folder, 'date_offsets.csv'), sep=',')
+
     return new2old_idx
 
 
@@ -369,7 +417,7 @@ def main(argv):
                         default=False, required=False, action='store_true')
     parser.add_argument("--remove_private_tags", "-p", help="Remove private tags.",
                         default=False, required=False, action='store_true')
-    parser.add_argument("--fuzz_study_dates", "-s", help="Fuzz study dates.",
+    parser.add_argument("--fuzz_acq_dates", "-a", help="Fuzz acquisition dates.",
                         default=False, required=False, action='store_true')
     parser.add_argument("--new_ids", "-n", help="List of new ids.")
     parser.add_argument("--keep_patient_dir_names", "-k", help="Do not rename patient directories, keep original IDs",
@@ -381,7 +429,7 @@ def main(argv):
     output_folder = os.path.normcase(os.path.abspath(args.out_folder))
     delete_identifiable_files = args.delete_identifiable
     remove_private_tags = args.remove_private_tags
-    fuzz_study_dates = args.fuzz_study_dates
+    fuzz_acq_dates = args.fuzz_acq_dates
     new_ids = args.new_ids
     rename_patient_directories = not args.keep_patient_dir_names
 
@@ -399,7 +447,7 @@ def main(argv):
                                                      delete_identifiable_files=delete_identifiable_files,
                                                      remove_private_tags=remove_private_tags,
                                                      rename_patient_directories=rename_patient_directories,
-                                                     fuzz_study_dates=fuzz_study_dates)
+                                                     fuzz_acq_dates=fuzz_acq_dates)
 
 
 if __name__ == "__main__":
