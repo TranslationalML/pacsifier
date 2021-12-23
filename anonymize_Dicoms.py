@@ -229,7 +229,7 @@ def anonymize_dicom_file(
                     pass
 
         if fuzz_acqdates:
-            if not 'StudyDate' in attributes:
+            if 'StudyDate' not in attributes:
                 raise AssertionError(f"Cannot fuzz acquisition dates, StudyDate not in Dicom tags in file {filename}")
             fuzzed_acqdate = shift_date_by_some_days(dataset.data_element('StudyDate'), fuzz_days_shift)
             dates_to_fuzz=['StudyDate', 'InstanceCreationDate','SeriesDate','AcquisitionDate','ContentDate',
