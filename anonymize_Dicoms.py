@@ -187,6 +187,11 @@ def anonymize_dicom_file(
             dataset.SeriesInstanceUID = new_SeriesInstanceUID
         if "SOPInstanceUID" in attributes:
             dataset.SOPInstanceUID = new_SOPInstanceUID
+        if "MediaStorageSOPInstanceUID" in attributes:
+            dataset.MediaStorageSOPInstanceUID = new_SOPInstanceUID
+        if "ReferencedSOPInstanceUID" in attributes:
+            dataset.ReferencedSOPInstanceUID = new_SOPInstanceUID
+
         # we also have to fix the potentially referrring tags
         # RequestAttributesSequence 0040,0275 is type 3, so optional, we should be able to delete it
         # ReferencedStudySequence 0008,1110 is type 3 in GENERAL STUDY MODULE ATTRIBUTES (type 2 in other modules), so we could also delete it
@@ -205,11 +210,6 @@ def anonymize_dicom_file(
             del dataset.ReferencedStudySequence
         # 	ReferencedStudySequence = dataset.ReferencedStudySequence
         # 	dataset.ReferencedStudySequence = ReferencedStudySequence.replace(old_id, PatientID_numstr)
-
-        # if "ReferencedSOPInstanceUID" in attributes : # 0008,1155 - only seems to exist in RequestAttributesSequence
-        #	del dataset.ReferencedSOPInstanceUID
-        # 	ReferencedSOPInstanceUID = dataset.ReferencedSOPInstanceUID
-        # 	dataset.ReferencedSOPInstanceUID = ReferencedSOPInstanceUID.replace(old_id, PatientID_numstr)
 
         if 'PatientBirthDate' in attributes:
             # Assign a new fuzzed birth date, except if patient is 90+ in which case don't touch the fake birthdate.
