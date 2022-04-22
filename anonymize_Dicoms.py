@@ -367,7 +367,7 @@ def anonymize_all_dicoms_within_root_folder(
 
                         anonymize_dicom_file(filename,
                                              os.path.join(output_folder, patient, study_dir, series_dir,
-                                                          os.path.basename(filename)),
+                                                          f"{new_SOPInstanceUID}.dcm"),
                                              PatientID=new_id,
                                              new_StudyInstanceUID=new_StudyInstanceUID,
                                              new_SeriesInstanceUID=new_SeriesInstanceUID,
