@@ -189,8 +189,6 @@ def anonymize_dicom_file(
             dataset.SOPInstanceUID = new_SOPInstanceUID
         if "MediaStorageSOPInstanceUID" in attributes:
             dataset.MediaStorageSOPInstanceUID = new_SOPInstanceUID
-        if "ReferencedSOPInstanceUID" in attributes:
-            dataset.ReferencedSOPInstanceUID = new_SOPInstanceUID
 
         # we also have to fix the potentially referrring tags
         # RequestAttributesSequence 0040,0275 is type 3, so optional, we should be able to delete it
@@ -368,7 +366,8 @@ def anonymize_all_dicoms_within_root_folder(
                         new_SOPInstanceUID = pydicom.uid.generate_uid(pydicom.uid.PYDICOM_ROOT_UID)
 
                         anonymize_dicom_file(filename,
-                                             os.path.join(output_folder, patient, study_dir, series_dir, os.path.basename(filename)),
+                                             os.path.join(output_folder, patient, study_dir, series_dir,
+                                                          os.path.basename(filename)),
                                              PatientID=new_id,
                                              new_StudyInstanceUID=new_StudyInstanceUID,
                                              new_SeriesInstanceUID=new_SeriesInstanceUID,
