@@ -339,10 +339,11 @@ def anonymize_all_dicoms_within_root_folder(
                 if fuzz_acq_dates:
                     # grab study date from dir name - sub-20170115
                     study_dir_prefix, original_study_date = study_dir.split(sep='-')
+                    original_study_time=original_study_date[8:]  # empty string if original_study_date is YYYYMMDD
                     # shift it
                     fuzzed_study_date = shift_date_by_some_days(original_study_date, int(all_date_offsets[patient_index]))
                     # rename dir
-                    fuzzed_study_dir = f"{study_dir_prefix}-{fuzzed_study_date}"
+                    fuzzed_study_dir = f"{study_dir_prefix}-{fuzzed_study_date}{original_study_time}"
                     #TODO edge case: what if fuzzed date maps to an already existing session? should be OK since
                     #not yet written to output
                 else:
