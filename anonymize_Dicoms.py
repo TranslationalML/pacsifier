@@ -191,6 +191,8 @@ def anonymize_dicom_file(
         # See https://dicom.nema.org/dicom/2013/output/chtml/part10/chapter_7.html
         if (0x02, 0x0) in dataset.file_meta:
             dataset.file_meta[0x02, 0x03].value = new_SOPInstanceUID
+        if "ReferencedPerformedProcedureStepSequence" in attributes:
+            del dataset.ReferencedPerformedProcedureStepSequence
 
         # we also have to fix the potentially referrring tags
         # RequestAttributesSequence 0040,0275 is type 3, so optional, we should be able to delete it
@@ -202,6 +204,7 @@ def anonymize_dicom_file(
         # - RequestAttributesSequence > Accession Number
         # Also
         # - ReferencedStudySequence > ReferencedSOPInstanceUID
+        # - ReferencedPerformedProcedureStepSequence > ReferencedSOPInstanceUID
 
         if "RequestAttributesSequence" in attributes:
             del dataset.RequestAttributesSequence
