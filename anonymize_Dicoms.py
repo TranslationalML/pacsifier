@@ -187,8 +187,10 @@ def anonymize_dicom_file(
             dataset.SeriesInstanceUID = new_SeriesInstanceUID
         if "SOPInstanceUID" in attributes:
             dataset.SOPInstanceUID = new_SOPInstanceUID
-        if "MediaStorageSOPInstanceUID" in attributes:
-            dataset.MediaStorageSOPInstanceUID = new_SOPInstanceUID
+        # make Media Storage SOP Instance UID equal to  new SOPInstanceUID.
+        # See https://dicom.nema.org/dicom/2013/output/chtml/part10/chapter_7.html
+        if (0x02, 0x0) in dataset.file_meta:
+            dataset.file_meta[0x02, 0x03].value = new_SOPInstanceUID
 
         # we also have to fix the potentially referrring tags
         # RequestAttributesSequence 0040,0275 is type 3, so optional, we should be able to delete it
