@@ -9,8 +9,8 @@ RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64
 # set up conda environment
 ENV PATH /opt/conda/bin:$PATH
 RUN conda update -n base -c defaults conda && conda config --add channels conda-forge
-COPY ./deployment/utils/environment_minimal_202001.yml .
-RUN conda env create -f environment_minimal_202001.yml
+COPY ./deployment/utils/environment_minimal_202301.yml .
+RUN conda env create -f environment_minimal_202301.yml
 RUN conda clean --all --yes
 
 WORKDIR /app
