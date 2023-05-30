@@ -222,7 +222,7 @@ A csv file like the one written above will retrieve:
 
 #### Example 2 
 
-	StudyDate,patientID
+	StudyDate,PatientID
 	20150512,123421
 
 The query for the csv file described above will fail since the column name patientID does not correspond to any allowed column mentioned above. (patientID should be PatientID)
@@ -248,20 +248,45 @@ Using this csv file, the query will retrieve images of the patient with patient 
 
 This csv file will retrieve all the images with ProtocolName starting with BEAT_SelfNav, Modality CT and of Patients whose birthdays are on  11th of June 1992.
 
-# Anonymization 
-## Command line 
-	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable
+
+
+# Anonymization
+
+## Getting pseudonyms from the De-ID API at CHUV (GPCR) 
+
+For patients that have a study declared in the Horus system, you can get consistent pseudonyms using the De-ID API.
+
+### Command line 
+	python get_pseudonyms.py --config my_config_deid.json --queryfile my_query.csv --project_name my_project_name --out_directory ./
+
+ - `my_config_deid.json` is the configuration file for the de-ID API, containing token and service URL.
+ - `my_query.csv` is the PACSMAN query file, listing all PatientIDs to pseudonymise
+ - `my_project_name` Corresponds both to the project name on GPCR and may correspond to the album name on Kheops where the study will be pushed
+
+After running, the output directory will contain a file `new_ids_[my_project_name].json` which can be used directly with
+anonymisation process below
+
+### Docker command-line (Windows)
+
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python get_pseudonyms.py ...
+
+## Anonymizing directly with PACSMAN
+
+### Command line 
+	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable --fuzz_acq_dates
  
  - `files-directory` is the path to the folder that contains all the dicom images.
  - `anonymized-files-directory` is the path to the directory where the anonymized dicom images will be saved.
  - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
+ - `--delete_identifiable` - remove identifiable files (see below)
+ - `--fuzz_acq_dates` - shifts acquisition dates by a random amount, synchronised with birth date fuzzing. Returns a file 'date_offsets.csv'.
 
-## Docker command-line (Windows)
+### Docker command-line (Windows)
 	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python anonymize_Dicoms.py ...
 
 where `...` refers to the same argument as above
 
-## Important Notes 
+### Important Notes 
  - If the anonymized-files-directory is the same as the files-directory the raw dicom images will be deleted and replaced by the anonymized ones (This proved useful when there was no more storage space left for additional images ).
  - The files-directory must contain the following structure : 
  	- The files-directory must contain subject folders with names that start with sub- (e.g. sub-123456). In any other case, the script will run but won't affect the data in any way.
@@ -270,22 +295,32 @@ where `...` refers to the same argument as above
  - The anonymized-files-directory must exist on the computer.
  - The `--delete_identifiable` or `-i` option will *delete* files that have patient identifiers embedded in image data. This is the case for example for screen saves coming from the GE Revolution CT machine, which have the patient name embedded.  This uses the `ImageType` attribute and looks for 'SCREEN SAVE'.
 
-## Examples
+### Examples
 
-### Example 1 
+#### Example 1 
 	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/anonymized_data
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder.
 
-### Example 2 
+#### Example 2 
 	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/data 
 
 Runnning the command above will replace all the images within data folder with anonymized ones.
 
-### Example 3 
+#### Example 3 
 	python anonymize_Dicoms.py --in_folder ~/data --out_folder ~/anonymized_data --delete_identifiable 
 
  Running this command will anonymize the dicom files within the data folder and save them into anonymized_data folder, and delete any identifiable images.
+
+## Anonymizing via the Karnak gateway
+
+### Docker command-line (Windows)
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python add_Karnak_tags.py --new_ids my_new_ids.json --album_name my_album_name
+
+ - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code, same syntax as for direct PACSMAN anonymisation. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
+ - `my_album_name` must match a Kheops album name
+
+
 
 # Converting to NIFTI 
 
