@@ -1,3 +1,4 @@
+import ast
 import sys, os, argparse
 import json, csv, requests
 from typing import Dict, Any
@@ -82,9 +83,22 @@ def main(argv):
     json_data = convert_csv_to_json(args.queryfile, args.project_name)
     response = requests.post(parameters['deid_URL'], headers=head, json=json_data, verify=False)
 
-    print(response.text)
+    tmp = ast.literal_eval(response.text)
+    json_tmp = json.dumps(tmp)
+    print(json_tmp)
+
     with open(os.path.normpath(os.path.join(args.out_directory, "new_ids_{}.json".format(args.project_name))), "w") as f:
-        f.write(response.text)
+        f.write(json_tmp)
+
+    ###Get day shift
+    response = requests.post(parameters['deid_URL']+'_shift', headers=head, json=json_data, verify=False)
+
+    tmp = ast.literal_eval(response.text)
+    json_tmp = json.dumps(tmp)
+    print(json_tmp)
+
+    with open(os.path.normpath(os.path.join(args.out_directory, "day_shift_{}.json".format(args.project_name))), "w") as f:
+        f.write(json_tmp)
 
 
 if __name__ == "__main__":
