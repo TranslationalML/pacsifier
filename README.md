@@ -263,7 +263,7 @@ For patients that have a study declared in the Horus system, you can get consist
  - `my_query.csv` is the PACSMAN query file, listing all PatientIDs to pseudonymise
  - `my_project_name` Corresponds both to the project name on GPCR and may correspond to the album name on Kheops where the study will be pushed
 
-After running, the output directory will contain a file `new_ids_[my_project_name].json` which can be used directly with
+After running, the output directory will contain two files `new_ids_[my_project_name].json` and `day_shift_[my_project_name].json` which can be used directly with
 anonymisation process below
 
 ### Docker command-line (Windows)
@@ -315,9 +315,10 @@ Runnning the command above will replace all the images within data folder with a
 ## Anonymizing via the Karnak gateway
 
 ### Docker command-line (Windows)
-	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python add_Karnak_tags.py --new_ids my_new_ids.json --album_name my_album_name
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python add_Karnak_tags.py --new_ids my_new_ids.json --day_shift day_shift.json --album_name my_album_name
 
  - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code, same syntax as for direct PACSMAN anonymisation. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
+ - `day_shift.json` maps on-disk real patient IDs to a chosen day shift, similar syntax as for direct PACSMAN anonymisation. It is an optional parameter. Example contents: `{'sub-1234':'-1', 'sub-87262':'35'}`
  - `my_album_name` must match a Kheops album name
 
 
