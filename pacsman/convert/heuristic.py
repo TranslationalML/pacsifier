@@ -1,3 +1,11 @@
+"""Custom heuristic file for Heudiconv DICOM to BIDS converter.
+
+Link
+----
+
+*  https://github.com/nipy/heudiconv
+"""
+
 import os
 
 def create_key(template, outtype=('nii.gz',), annotation_classes=None):
