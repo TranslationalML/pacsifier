@@ -1,90 +1,120 @@
-.mypy_cache
+# Setuptools
+dist
+build
+*.egg-info
+
+# Byte-compiled / optimized / DLL files
+__pycache__
+**/__pycache__
+.pytest_cache
+*.py[cod]
+
+# Built documentation
+docs/_build
+docs/api
+
+# Mac DS_Store files
+**.DS_Store
+data/*
+
+# Ignore all PyCharm config files
+**/.idea
+tmp/**
 .idea
-/.coverage
-/.ipynb_checkpoints
-/.pytest_cache
-/__pycache__
-/build
-/code/.coverage
-/code/.mypy_cache/3.5
-/code/.pytest_cache
-/code/__pycache__
-/code/anon.py
-/code/check_institution_name.py
-/code/current.txt
-/code/depannage.py
-/code/dicomdir_reader.py
-/code/example_heuristic.py
-/code/fails.txt
-/code/fails.txt
-/code/fuzz.py
-/code/log.txt
-/code/not_found.txt
-/code/not_found_hihi.txt
-/code/sghipt.py
-/code/special_queries.py
-/code/techa.py
-/code/tests/.coverage
-/code/tests/.hypothesis
-/code/tests/.pytest_cache
-/code/tests/__pycache__
-/code/tests/fails.txt
-/code/tests/log.txt
-/code/tests/mapper.json
-/code/tests/output_sample_image
-/code/tests/sample_image
-/code/tests/test_set
-/code/tests/testing.pyc
-/code/TODO.txt
-/current.txt
-/data
-/execute_commands.py
-/fails.txt
-/files/checks
-/files/class1.csv
-/files/class2.csv
-/files/class3.csv
-/files/class4.csv
-/files/complete_schizo.csv
-/files/config.json
-/files/config_CHUV_RC7.json
-/files/config_CHUV_TRM.json
-/files/elena.csv
-/files/fails.csv
-/files/fixed.csv
-/files/girardet.csv
-/files/id_mapper.json
-/files/julius_popp_all_IPPs_dates.csv
-/files/julius_popp_all_IPPs_dates_missing.csv
-/files/last_hope.csv
-/files/log.txt
-/files/mapper.json
-/files/missing.csv
-/files/missing_keys
-/files/missing_patric.csv
-/files/move_into_folder.py
-/files/mussard.csv
-/files/new_girardet.csv
-/files/new_ids.csv
-/files/new_ids_test.json
-/files/new_missing.csv
-/files/not_found.txt
-/files/november9.py
-/files/one_more.csv
-/files/patients.txt
-/files/protocol.txt
-/files/query_patric.csv
-/files/query_patric_infundi.csv
-/files/query_patric_labeled.csv
-/files/query_rest.csv
-/files/schizo.csv
-/files/techa_old.py
-/files/test.csv
-/files/test_jonas.csv
-/files/valentin.csv
-/important
-/log.txt
-/logs.txt
-/SequenceName
-files/yasser.csv
-protocol.csv
+
+# Ignore all coverage files and datasets created by the pytest suite
+test/report
+*/tmp
+
+# OLD
+
+# .mypy_cache
+# .idea
+# /.coverage
+# /.ipynb_checkpoints
+# /.pytest_cache
+# /__pycache__
+# /build
+# /code/.coverage
+# /code/.mypy_cache/3.5
+# /code/.pytest_cache
+# /code/__pycache__
+# /code/anon.py
+# /code/check_institution_name.py
+# /code/current.txt
+# /code/depannage.py
+# /code/dicomdir_reader.py
+# /code/example_heuristic.py
+# /code/fails.txt
+# /code/fails.txt
+# /code/fuzz.py
+# /code/log.txt
+# /code/not_found.txt
+# /code/not_found_hihi.txt
+# /code/sghipt.py
+# /code/special_queries.py
+# /code/techa.py
+# /code/tests/.coverage
+# /code/tests/.hypothesis
+# /code/tests/.pytest_cache
+# /code/tests/__pycache__
+# /code/tests/fails.txt
+# /code/tests/log.txt
+# /code/tests/mapper.json
+# /code/tests/output_sample_image
+# /code/tests/sample_image
+# /code/tests/test_set
+# /code/tests/testing.pyc
+# /code/TODO.txt
+# /current.txt
+# /data
+# /execute_commands.py
+# /fails.txt
+# /files/checks
+# /files/class1.csv
+# /files/class2.csv
+# /files/class3.csv
+# /files/class4.csv
+# /files/complete_schizo.csv
+# /files/config.json
+# /files/config_CHUV_RC7.json
+# /files/config_CHUV_TRM.json
+# /files/elena.csv
+# /files/fails.csv
+# /files/fixed.csv
+# /files/girardet.csv
+# /files/id_mapper.json
+# /files/julius_popp_all_IPPs_dates.csv
+# /files/julius_popp_all_IPPs_dates_missing.csv
+# /files/last_hope.csv
+# /files/log.txt
+# /files/mapper.json
+# /files/missing.csv
+# /files/missing_keys
+# /files/missing_patric.csv
+# /files/move_into_folder.py
+# /files/mussard.csv
+# /files/new_girardet.csv
+# /files/new_ids.csv
+# /files/new_ids_test.json
+# /files/new_missing.csv
+# /files/not_found.txt
+# /files/november9.py
+# /files/one_more.csv
+# /files/patients.txt
+# /files/protocol.txt
+# /files/query_patric.csv
+# /files/query_patric_infundi.csv
+# /files/query_patric_labeled.csv
+# /files/query_rest.csv
+# /files/schizo.csv
+# /files/techa_old.py
+# /files/test.csv
+# /files/test_jonas.csv
+# /files/valentin.csv
+# /important
+# /log.txt
+# /logs.txt
+# /SequenceName
+# files/yasser.csv
+# protocol.csv
