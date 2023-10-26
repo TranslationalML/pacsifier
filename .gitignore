@@ -23,8 +23,11 @@ tmp/**
 .idea
 
 # Ignore all coverage files and datasets created by the pytest suite
-test/report
+tests/report
 */tmp
+
+*log*
+**/current.txt
 
 # OLD
 
