@@ -7,7 +7,7 @@
 import datetime
 
 
-__version__ = "1.0.0"
+__version__ = "0.3.0"
 
 __current_year__ = datetime.datetime.now().strftime("%Y")
 
@@ -35,10 +35,8 @@ __url__ = "https://github.com/TranslationalML/{name}/tree/{version}".format(
     name=__packagename__, version=__version__
 )
 
-DOWNLOAD_URL = (
-    "https://github.com/TranslationalML/{name}/archive/{ver}.tar.gz".format(
-        name=__packagename__, ver=__version__
-    )
+DOWNLOAD_URL = "https://github.com/TranslationalML/{name}/archive/{ver}.tar.gz".format(
+    name=__packagename__, ver=__version__
 )
 
 DOCKER_HUB = "TO_BE_COMPLETED_ONCE_IT_IS_DEPLOYED"
