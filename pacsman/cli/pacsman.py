@@ -1,4 +1,5 @@
 import re
+import shutil
 import unicodedata
 import sys
 from tqdm import tqdm
@@ -296,7 +297,11 @@ def retrieve_dicoms_using_table(
 
         # check if we can ping the PACS
         echo_res = echo(
-            server_address=pacs_server, port=port, server_AET=server_aet, AET=client_aet
+            server_address=pacs_server,
+            port=port,
+            server_AET=server_aet,
+            AET=client_aet,
+            log_dir=os.path.join(output_dir, "logs"),
         )
         if not echo_res:
             raise RuntimeError(
@@ -326,16 +331,18 @@ def retrieve_dicoms_using_table(
             STUDYDESCRIPTION=tuple_["StudyDescription"],
             ACCESSIONNUMBER=tuple_["AccessionNumber"],
             SEQUENCENAME=tuple_["SequenceName"],
+            log_dir=os.path.join(output_dir, "logs"),
         )
 
-        # TODO: better path for /test/tmp/current.txt
-        if os.path.isfile("/test/tmp/current.txt"):
-            os.remove("/test/tmp/current.txt")
+        # TODO: better path for /tests/tmp/current.txt
+        current_findscu_dump_file = os.path.join(output_dir, "tmp", "current.txt")
+        if os.path.isfile(current_findscu_dump_file):
+            os.remove(current_findscu_dump_file)
 
-        write_file(find_series_res, file="/test/tmp/current.txt")
+        write_file(find_series_res, file=current_findscu_dump_file)
 
         # Extract all series StudyInstanceUIDs etc.
-        series = parse_findscu_dump_file("/test/tmp/current.txt")
+        series = parse_findscu_dump_file(current_findscu_dump_file)
 
         # Pre-compile sanitizing regex for folder renaming
         my_re_clean = re.compile("[^0-9a-zA-Z]+")  # keep only alphanums
@@ -429,7 +436,8 @@ def retrieve_dicoms_using_table(
                     STUDYINSTANCEUID=serie["StudyInstanceUID"],
                     SERIESINSTANCEUID=serie["SeriesInstanceUID"],
                     move_port=move_port,
-                    OUTDIR=patient_serie_output_dir,
+                    output_dir=patient_serie_output_dir,
+                    log_dir=os.path.join(output_dir, "logs"),
                 )
 
             if move:
@@ -443,6 +451,7 @@ def retrieve_dicoms_using_table(
                     STUDYINSTANCEUID=serie["StudyInstanceUID"],
                     SERIESINSTANCEUID=serie["SeriesInstanceUID"],
                     move_AET=move_aet,
+                    log_dir=os.path.join(output_dir, "logs"),
                 )
 
             if info:
@@ -452,10 +461,13 @@ def retrieve_dicoms_using_table(
                     w.writeheader()
                     w.writerow(serie)
 
-            # TODO: better path for /test/tmp/current.txt
-            if os.path.isfile("current.txt"):
-                os.remove("current.txt")
-
+            # TODO: better path for /tests/tmp/current.txt
+            if os.path.isfile(current_findscu_dump_file):
+                os.remove(current_findscu_dump_file)
+    
+    # Clean the tmp folder
+    if os.path.isdir(os.path.join(output_dir, "tmp")):
+        shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)    
 
 ########################################################################################################################
 ##########################################################MAIN##########################################################

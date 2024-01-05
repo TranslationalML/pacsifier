@@ -22,7 +22,7 @@ PATIENTID = '"PAT004"'
 STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = (
     '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.461"',
     '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.462"',
-    "../data",
+    ".",
 )
 
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
@@ -60,17 +60,21 @@ def echo(
     port: int = 104,
     server_AET: str = "theServertAET",
     AET: str = "AET",
+    log_dir: str = os.path.join(OUTDIR, "logs"),
 ) -> str:
     """Checks that the PACS server can be reached and accepts associations.
 
     Args:
-        server_address: PACS server IP address
-        port: PACS server port for incoming requests
-        server_AET: PACS server AET
-        AET: AET of the calling entity
+        server_address: PACS server IP address.
+        port: PACS server port for incoming requests. Default is 104.
+        server_AET: PACS server AET. Default is "theServerAET".
+        AET: AET of the calling entity. Default is "AET".
+        log_dir: Folder for the logs where the log file (log.txt) and
+                    the fails file (fails.txt) produced by run() will be written.
+                    Default is "./logs" e.g. the logs/ folder in the current working directory.
 
     Returns:
-        string: The log lines
+        string: The log lines.
 
     """
     check_server_address(server_address)
@@ -80,7 +84,10 @@ def echo(
 
     command = echo_command.format(server_AET, AET, server_address, port)
 
-    return run(command)
+    return run(
+        query=command,
+        log_dir=log_dir,
+    )
 
 
 def find(
@@ -104,32 +111,38 @@ def find(
     STUDYDESCRIPTION: str = "",
     ACCESSIONNUMBER: str = "",
     SEQUENCENAME: str = "",
+    log_dir: str = os.path.join(OUTDIR, "logs"),
 ) -> str:
     """Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
 
     Args:
-        AET: called AET
-        server_address: PACS server IP address
-        server_AET: PACS server AET
-        port: PACS server port for incoming requests
-        QUERYRETRIVELEVEL: query retrieval level which can only take values in {SERIES, STRUDY, PATIENT, IMAGE}
-        PATIENTID: patient id
-        STUDYUID: study unique idetifier
-        SERIESINSTANCEUID: series Instance UID
-        SERIESDESCRIPTION: series Description
-        PROTOCOLNAME: protocol name
-        ACQUISITIONDATE: acquisition date
-        PATIENTNAME: patient's name
-        PATIENTBIRTHDATE: patient's birth date
-        STUDYDATE: study Date
-        DEVICESERIALNUMBER: MRI device serial number
-        MODALITY: modality
-        IMAGETYPE: image type
-        STUDYDESCRIPTION: description of the study
-        ACCESSIONNUMBER: accession number
+        AET: called AET.
+        server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
+        server_AET: PACS server AET. Default is "theServerAET".
+        port: PACS server port for incoming requests. Default is 104.
+        QUERYRETRIVELEVEL: query retrieval level which can only take values in
+                           {SERIES, STRUDY, PATIENT, IMAGE}. Default is "SERIES".
+        PATIENTID: patient id. Default is "".
+        STUDYUID: study unique identifier. Default is "".
+        SERIESINSTANCEUID: series Instance UID. Default is "".
+        SERIESDESCRIPTION: series Description. Default is "".
+        PROTOCOLNAME: protocol name. Default is "".
+        ACQUISITIONDATE: acquisition date. Default is "".
+        PATIENTNAME: patient's name. Default is "".
+        PATIENTBIRTHDATE: patient's birth date. Default is "".
+        STUDYDATE: study Date. Default is "".
+        DEVICESERIALNUMBER: MRI device serial number. Default is "".
+        MODALITY: modality. Default is "".
+        IMAGETYPE: image type. Default is "".
+        STUDYDESCRIPTION: description of the study. Default is "".
+        ACCESSIONNUMBER: accession number. Default is "".
+        SEQUENCENAME: sequence name. Default is "".
+        log_dir: Folder for the logs where the log file (log.txt) and
+                 the fails file (fails.txt) produced by run() will be written.
+                 Default is "./logs" e.g. the logs/ folder in the current working directory.
 
     Returns:
-        string: The log lines
+        string: The log lines.
 
     """
 
@@ -162,7 +175,10 @@ def find(
         SEQUENCENAME,
     )
 
-    return run(command)
+    return run(
+        query=command,
+        log_dir=log_dir,
+    )
 
 
 def get(
@@ -175,24 +191,30 @@ def get(
     STUDYINSTANCEUID: str = STUDYINSTANCEUID,
     SERIESINSTANCEUID: str = SERIESINSTANCEUID,
     move_port: int = 4006,
-    OUTDIR: str = OUTDIR,
+    output_dir: str = OUTDIR,
+    log_dir: str = os.path.join(OUTDIR, "logs"),
 ) -> str:
     """Builds a query for movescu.
 
     Args:
-        AET: called AET
-        STUDYDATE: study date
-        server_address: PACS server IP address
-        server_AET: PACS server AET
-        port: PACS server port for incoming requests
-        PATIENTID: patient id
-        STUDYINSTANCEUID: study instance unique idetifier
-        SERIESINSTANCEUID: series instance unique identifier
-        move_port: port used for movescu command
-        OUTDIR: directory of output files
+        AET: called AET.
+        STUDYDATE: study date.
+        server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
+        server_AET: PACS server AET. Default is "theServerAET".
+        port: PACS server port for incoming requests. Default is 104.
+        PATIENTID: patient id. Default is pacsman.core.execute_commands.PATIENTID.
+        STUDYINSTANCEUID: study instance unique idetifier. Default is
+                          pacsman.core.execute_commands.STUDYINSTANCEUID.
+        SERIESINSTANCEUID: series instance unique identifier. Default is
+                           pacsman.core.execute_commands.SERIESINSTANCEUID.
+        move_port: port used for movescu command. Default is 4006.
+        output_dir: directory of output files. Default is "." e.g. the current working directory.
+        log_dir: Folder for the logs where the log file (log.txt) and
+                 the fails file (fails.txt) produced by run() will be written.
+                 Default is "./logs" e.g. the logs/ folder in the current working directory.
 
     Returns:
-        string: The log lines
+        string: The log lines.
 
     """
     check_ids(PATIENTID)
@@ -212,9 +234,12 @@ def get(
         SERIESINSTANCEUID,
         STUDYDATE,
         move_port,
-        OUTDIR,
+        output_dir,
     )
-    return run(command)
+    return run(
+        query=command,
+        log_dir=log_dir,
+    )
 
 
 def move_remote(
@@ -227,19 +252,25 @@ def move_remote(
     STUDYINSTANCEUID: str = STUDYINSTANCEUID,
     SERIESINSTANCEUID: str = SERIESINSTANCEUID,
     move_AET: str = "theMoveAET",
+    log_dir: str = os.path.join(OUTDIR, "logs"),
 ) -> str:
     """Builds a query for movescu.
 
     Args:
-        AET: called AET
+        AET: called AET.
         STUDYDATE: study date.
-        server_address: PACS server IP address
-        server_AET: PACS server AET
-        port: PACS server port for incoming requests
-        PATIENTID: patient id
-        STUDYINSTANCEUID: study instance unique idetifier.
-        SERIESINSTANCEUID: series instance unique identifier
-        move_AET: AET where to move the images
+        server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
+        server_AET: PACS server AET. Default is "theServerAET".
+        port: PACS server port for incoming requests. Default is 104.
+        PATIENTID: patient id. Default is pacsman.core.execute_commands.PATIENTID.
+        STUDYINSTANCEUID: study instance unique idetifier. Default is
+                          pacsman.core.execute_commands.STUDYINSTANCEUID.
+        SERIESINSTANCEUID: series instance unique identifier. Default is
+                           pacsman.core.execute_commands.SERIESINSTANCEUID.
+        move_AET: AET where to move the images. Default is "theMoveAET".
+        log_dir: Folder for the logs where the log file (log.txt) and
+                 the fails file (fails.txt) produced by run() will be written.
+                 Default is "./logs" e.g. the logs/ folder in the current working directory.
 
     Returns:
         string: The log lines.
@@ -263,7 +294,10 @@ def move_remote(
         STUDYDATE,
     )
 
-    return run(command)
+    return run(
+        query=command,
+        log_dir=log_dir,
+    )
 
 
 def write_file(results: str, file: str = "output.txt") -> None:
@@ -274,6 +308,12 @@ def write_file(results: str, file: str = "output.txt") -> None:
         file: path to text file where the log lines in results will be written
 
     """
+
+    file = os.path.abspath(file)
+
+    # Create containing directories if they do not exist
+    if not os.path.exists(os.path.dirname(file)):
+        os.makedirs(os.path.dirname(file), exist_ok=True)
 
     if not os.path.exists(file):
         # os.mknod(file) # not cross-platform - unsupported on os X without root
@@ -310,20 +350,27 @@ def replace_default_params(
     )
 
 
-def run(query: str) -> str:
+def run(query: str, log_dir: str = ".") -> str:
     """Runs the command passed as parameter.
 
     Args:
-        query: query command line to be executed
+        query: Query command line to be executed.
+        log_dir: Directory where the log file (log.txt) and
+                 the fails file (fails.txt) will be written.
+                 Default is "." e.g. the current working directory.
 
     Returns:
-        string: The log lines
+        string: The log lines.
 
     """
+    # Create output directory if it does not exist
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir, exist_ok=True)
+
     try:
         # The replace in the line below is necessary for the windows deployment.
         cmd = shlex.split(query.replace("\\", "\\\\"))
-        with open("log.txt", "a") as f:
+        with open(os.path.join(log_dir, "log.txt"), "a") as f:
             f.write(query + "\n")
     except ValueError as e:
         print("* Command parsing error: {}".format(" ".join(cmd)))
@@ -347,7 +394,7 @@ def run(query: str) -> str:
         )
         print("* Output: {}".format(e.stderr))
 
-        with open("fails.txt", "a") as f:
+        with open(os.path.join(log_dir, "fails.txt"), "a") as f:
             f.write(query + "\n")
 
         print(e.returncode)
