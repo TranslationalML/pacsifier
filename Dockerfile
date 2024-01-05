@@ -66,10 +66,14 @@ RUN echo "${VERSION}" > /app/pacsman/pacsman/VERSION \
 ###############################################################################
 
 # Create directories for reporting tests and code coverage
+# with correct permissions
 RUN mkdir -p "/tests/report" && chmod -R 775 "/tests"
 
-# Create directories for reporting tests and code coverage
-RUN mkdir -p "/test/tmp/SCU_STORE" && chmod -R 775 "/test/tmp/SCU_STORE"
+# Create directory for storing DICOM files (SCU_STORE) with correct permissions
+RUN mkdir -p "/tmp/SCU_STORE" && chmod -R 775 "/tmp/SCU_STORE"
+
+# Create directory for pytest cache with correct permissions
+RUN mkdir -p "/app/pacsman/.pytest_cache" && chmod -R 775 "/app/pacsman/.pytest_cache"
 
 ###############################################################################
 # Set environment variables
@@ -79,7 +83,7 @@ RUN mkdir -p "/test/tmp/SCU_STORE" && chmod -R 775 "/test/tmp/SCU_STORE"
 # ENV QT_QPA_PLATFORM offscreen
 
 # Set the environment variable for .coverage file
-ENV COVERAGE_FILE="/test/report/.coverage"
+ENV COVERAGE_FILE="/tests/report/.coverage"
 
 ###############################################################################
 # Configure the entrypoint scripts
