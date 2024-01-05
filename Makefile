@@ -58,11 +58,12 @@ test:
 	    --name docker-pytest \
 		--entrypoint "/entrypoint_pytest.sh" \
 		-v $(PROJECT_DIR)/tests:/tests \
-		-v $(PROJECT_DIR)/pacsman:/app/pacsman/pacsman \
 		$(IMAGE_TAG) \
 		/tests
 	@echo "Stopping dcmqrscp instance..."
 	make kill-dcmqrscp
+	@echo "Fix ownership in tests..."
+	sudo chown -R $(USER_ID):$(GROUP_ID) $(PROJECT_DIR)/tests
 	@echo "Fix path in coverage xml report..."
 	sed -i -r  \
 		"s|/app/pacsman/pacsman|$(PROJECT_DIR)/pacsman|g" \
