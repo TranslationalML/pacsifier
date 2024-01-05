@@ -22,7 +22,7 @@ from pacsman.cli import (
 from pacsman.cli.pacsman import retrieve_dicoms_using_table
 
 
-def test_process_findscu_dump_file():
+def test_process_findscu_dump_file(test_dir):
     res = [
         {
             "SeriesInstanceUID": "1.2.840.114358.359.1.20171101170336.3712639202739",
@@ -62,7 +62,9 @@ def test_process_findscu_dump_file():
 
     # Testing all the dictionaries in the list are identical.
     dict_list = parse_findscu_dump_file(
-        filename="/tests/test_data/dump/findscu_dump_file_example.txt"
+        filename=os.path.join(
+            test_dir, "test_data", "dump", "findscu_dump_file_example.txt"
+        )
     )
     for i, dict_ in enumerate(dict_list):
         shared_items = {
@@ -71,17 +73,23 @@ def test_process_findscu_dump_file():
         assert len(shared_items) == len(res[i])
 
 
-def test_check_table():
-    table = read_csv("/tests/test_data/query/query_file_invalid.csv").fillna("")
+def test_check_table(test_dir):
+    table = read_csv(
+        os.path.join(test_dir, "test_data", "query", "query_file_invalid.csv")
+    ).fillna("")
     with pytest.raises(ValueError):
         check_query_table_allowed_filters(table)
 
-    valid_table = read_csv("/tests/test_data/query/query_file_valid.csv").fillna("")
+    valid_table = read_csv(
+        os.path.join(test_dir, "test_data", "query", "query_file_valid.csv")
+    ).fillna("")
     assert check_query_table_allowed_filters(valid_table) == None
 
 
-def test_parse_table():
-    table = read_csv("/tests/test_data/query/query_file_valid.csv")
+def test_parse_table(test_dir):
+    table = read_csv(
+        os.path.join(test_dir, "test_data", "query", "query_file_valid.csv")
+    )
     parsed_table = parse_query_table(table)
 
     expected = [
@@ -115,10 +123,10 @@ def test_parse_table():
         assert len(shared_items) == len(expected[i])
 
 
-def test_read_line_by_line():
-    lines = list(readLineByLine("/tests/test_data/dump/findscu_dump_file_example.txt"))[
-        :4
-    ]
+def test_read_line_by_line(test_dir):
+    lines = list(
+        readLineByLine(os.path.join(test_dir, "test_data", "dump", "findscu_dump_file_example.txt"))
+    )[:4]
     assert lines == [
         "I: Requesting Association",
         "I: Association Accepted (Max Send PDV: 32756)",
@@ -160,14 +168,17 @@ def test_add_or_retrieve_name():
     )
 
 
-def test_retrieve_dicoms_using_table():
-    table = read_csv("/tests/test_data/query/query_dicom.csv", dtype=str).fillna("")
+def test_retrieve_dicoms_using_table(test_dir):
+    table = read_csv(
+        os.path.join(test_dir, "test_data", "query", "query_dicom.csv"),
+        dtype=str
+    ).fillna("")
     config_path = os.path.join("/tests/config/config.json")
 
     with open(config_path) as f:
         parameters = json.load(f)
 
-    out_directory = os.path.join("/tests", "tmp", "test_set")
+    out_directory = os.path.join(test_dir, "tmp", "test_set")
 
     # Test retrieve DICOM series
 
@@ -179,16 +190,21 @@ def test_retrieve_dicoms_using_table():
 
     retrieve_dicoms_using_table(table, parameters, out_directory, True, True, False)
 
-    # Assert list of retrieved files is correct
-    output_files = glob("/tests/tmp/test_set/sub-*/ses-*/*/*")
-    known_files = [
-        "/tests/tmp/test_set/sub-PACSMAN1/ses-20231016/00000-No_series_description/MR.1.2.826.0.1.3680043.8.498.10078350936423615213975808998561561261",
-        "/tests/tmp/test_set/sub-PACSMAN1/ses-20231016/00000-No_series_description/MR.1.2.826.0.1.3680043.8.498.10079063413960953608145500849488605317",
-        "/tests/tmp/test_set/sub-PACSMAN1/ses-20231016/00000-No_series_description/MR.1.2.826.0.1.3680043.8.498.10254832511701611336169372822417032099",
-        "/tests/tmp/test_set/sub-PACSMAN1/ses-20231016/00000-No_series_description/MR.1.2.826.0.1.3680043.8.498.10297714540640569882794200001611356979",
-        "/tests/tmp/test_set/sub-PACSMAN1/ses-20231016/00000-No_series_description/MR.1.2.826.0.1.3680043.8.498.10299592168011030062855381217267705761",
-        "/tests/tmp/test_set/sub-PACSMAN1/ses-20231016/00000-No_series_description/MR.1.2.826.0.1.3680043.8.498.10773050947549757012436832094131147157",
+    # Assert the first six files of the list are correct
+    output_files = glob(
+        os.path.join(test_dir, "tmp", "test_set", "sub-*/ses-*/*/*")
+    )
+    known_files_dir = os.path.join(test_dir, "tmp", "test_set", "sub-PACSMAN1", "ses-20231016")
+    known_files_dir = os.path.join(known_files_dir, "00000-No_series_description")
+    known_filenames = [
+        "MR.1.2.826.0.1.3680043.8.498.10078350936423615213975808998561561261",
+        "MR.1.2.826.0.1.3680043.8.498.10079063413960953608145500849488605317",
+        "MR.1.2.826.0.1.3680043.8.498.10254832511701611336169372822417032099",
+        "MR.1.2.826.0.1.3680043.8.498.10297714540640569882794200001611356979",
+        "MR.1.2.826.0.1.3680043.8.498.10299592168011030062855381217267705761",
+        "MR.1.2.826.0.1.3680043.8.498.10773050947549757012436832094131147157",
     ]
+    known_files = [os.path.join(known_files_dir, file) for file in known_filenames]
     assert sorted(output_files)[:6] == sorted(known_files)[:6]
 
 
