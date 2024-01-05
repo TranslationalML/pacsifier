@@ -1,6 +1,8 @@
+"""Pytest configuration file with declarations of fixtures shared across all tests."""
+
 import os
-import subprocess
 import pytest
+
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
