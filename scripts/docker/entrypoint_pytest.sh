@@ -6,9 +6,9 @@
 
 conda run -n pacsman_minimal pytest \
     --cov-config "/app/pacsman/.coveragerc" \
-    --cov-report html:"/test/report/cov_html" \
-    --cov-report xml:"/test/report/cov.xml" \
-    --cov-report lcov:"/test/report/cov.info" \
+    --cov-report html:"/tests/report/cov_html" \
+    --cov-report xml:"/tests/report/cov.xml" \
+    --cov-report lcov:"/tests/report/cov.info" \
     --cov=pacsman \
     -s \
     "${@}"
