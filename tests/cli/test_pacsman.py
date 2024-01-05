@@ -16,7 +16,6 @@ from pacsman.cli import (
     check_query_table_allowed_filters,
     parse_query_table,
     process_person_names,
-    run,
     generate_new_folder_name,
     add_or_retrieve_name,
 )
@@ -141,10 +140,6 @@ def test_check_date_input(s):
         assert processed == ""
     else:
         assert process_person_names(s) == "*" + s.split(" ")[-1].upper()
-
-
-def test_run():
-    assert [] == run("echo California Dreaming.")
 
 
 def test_generate_new_folder_name():

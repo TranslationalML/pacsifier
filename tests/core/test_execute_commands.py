@@ -2,7 +2,7 @@
 
 import pytest
 
-from pacsman.core.execute_commands import echo, find, get, replace_default_params
+from pacsman.core.execute_commands import echo, find, get, replace_default_params, run
 
 
 def test_echo_invalid_inputs():
@@ -166,3 +166,7 @@ def test_replace_default_parameters():
 
     with pytest.raises(ValueError):
         replace_default_params(PARAMETERS, "AET", "214.54.1.1", "", 80)
+
+
+def test_run():
+    assert [] == run("echo California Dreaming.", log_dir="/tests/logs")
