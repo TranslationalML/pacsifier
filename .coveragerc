@@ -1,2 +1,7 @@
 [run]
-omit = /code/heuristic.py
+omit =
+        *__init__*
+        pacsman/info.py
+        pacsman/convert/convertall.py
+        pacsman/convert/heuristic.py
+        pacsman/cli/convert.py
