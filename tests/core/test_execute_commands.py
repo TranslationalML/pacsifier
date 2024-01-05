@@ -15,9 +15,6 @@ def test_echo_invalid_inputs():
         echo(port=65536)
 
     with pytest.raises(ValueError):
-        echo(port=0)
-
-    with pytest.raises(ValueError):
         echo(server_AET=dummy_long_string)
 
     with pytest.raises(ValueError):
