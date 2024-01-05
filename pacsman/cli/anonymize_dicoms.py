@@ -340,7 +340,7 @@ def anonymize_all_dicoms_within_root_folder(
 
     if new_ids is None:
         new_ids = {
-            patients_folders[i]: str(i).zfill(6) for i in range(len(patients_folders))
+            patients_folders[i]: str(i+1).zfill(6) for i in range(len(patients_folders))
         }
 
     all_date_offsets = np.zeros(len(patients_folders), dtype=np.int16)
