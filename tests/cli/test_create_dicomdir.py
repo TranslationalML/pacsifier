@@ -1,9 +1,6 @@
 """Tests for the function of the create_dicomdir script."""
 
 import os
-import shutil
-import pytest
-import argparse
 from glob import glob
 
 from pacsman.cli.create_dicomdir import (
