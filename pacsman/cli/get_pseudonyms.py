@@ -100,7 +100,8 @@ def main():
 
     # TODO should enable reading IDs from json file too, or scan from disk.
 
-    # Check the case where the queryfile, config, or project_name is missing. If it is the case print help.
+    # Check the case where the queryfile, config, or project_name is missing.
+    # If it is the case print help.
     if args.queryfile is None or args.config is None or args.project_name is None:
         print("Missing mandatory parameter --queryfile or --config or --project_name!")
         parser.print_help()
