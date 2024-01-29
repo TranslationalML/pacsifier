@@ -54,6 +54,64 @@ def convert_csv_to_deid_json(queryfile: str, project_name: str) -> Any:
     return json.loads(json_new_str)
 
 
+def get_deid_pseudonyms(deid_parameters: dict, query_json: dict) -> None:
+    """Run the de-ID request and return the response as a json.
+
+    Args:
+        deid_parameters: dictionary containing the de-ID URL and token in the following format::
+            
+            {
+                "deid_URL": "https://deid.gpcr-project.org",
+                "deid_token": "1234567890"
+            }
+        
+        query_json: the PACSMAN query formatted as a dictionary
+
+    Returns:
+        JSON object containing the new pseudonyms for each patient
+
+    """
+    head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
+
+    response = requests.post(
+        deid_parameters["deid_URL"], headers=head, json=query_json, verify=False
+    )
+
+    resp = ast.literal_eval(response.text)
+    json_resp = json.dumps(resp)
+
+    return json_resp
+
+
+def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
+    """Run the de-ID request for day shifts and return the response as a json.
+
+    Args:
+        deid_parameters: dictionary containing the de-ID URL and token in the following format::
+            
+            {
+                "deid_URL": "https://deid.gpcr-project.org",
+                "deid_token": "1234567890"
+            }
+        
+        query_json: the PACSMAN query formatted as a dictionary
+
+    Returns:
+        JSON object containing the day shifts for each patient
+
+    """
+    head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
+
+    response = requests.post(
+        deid_parameters["deid_URL"] + "_shift", headers=head, json=query_json, verify=False
+    )
+
+    resp = ast.literal_eval(response.text)
+    json_resp = json.dumps(resp)
+    
+    return json_resp
+
+
 def get_parser() -> argparse.ArgumentParser:
     """Get parser for command line arguments."""
     parser = argparse.ArgumentParser(
@@ -90,63 +148,70 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    config_path = args.config
-    # Reading config file.
-    with open(config_path) as f:
-        parameters = json.load(f)
-        check_config_file_deid(parameters)
-
-    output_dir = args.out_directory
-
-    # TODO should enable reading IDs from json file too, or scan from disk.
-
     # Check the case where the queryfile, config, or project_name is missing.
     # If it is the case print help.
+    # TODO: Can be directly done with argparse with the required=True option.
     if args.queryfile is None or args.config is None or args.project_name is None:
         print("Missing mandatory parameter --queryfile or --config or --project_name!")
         parser.print_help()
+        sys.exit()
+
+    # Check if the config file exists.
+    config_path = os.path.abspath(args.config)
+    if not os.path.isfile(config_path):
+        print(f"Config file {config_path} does not exist!")
+        sys.exit()
+    
+    # Check if the output directory exists. If not, create it.
+    output_dir = os.path.abspath(args.out_directory)
+    if not os.path.isdir(output_dir):
+        print(f"Output directory {output_dir} does not exist! Creating...")
+        os.makedirs(output_dir, exist_ok=True)
+
+    # Check if the queryfile exists.
+    query_file = os.path.abspath(args.queryfile)
+    if not os.path.isfile(query_file):
+        print(f"Query file {query_file} does not exist!")
         sys.exit()
 
     # Read and validate the queryfile.
     table = read_csv(args.queryfile, dtype=str).fillna("")
     check_query_table_allowed_filters(table)
 
-    # build POST request
-    head = {"Authorization": f'token {parameters["deid_token"]}'}
+    # Reading config file for deid parameters.
+    with open(config_path) as f:
+        deid_parameters = json.load(f)
+        check_config_file_deid(deid_parameters)
+    
+    # TODO should enable reading IDs from json file too, or scan from disk.
 
-    json_data = convert_csv_to_deid_json(args.queryfile, args.project_name)
-    response = requests.post(
-        parameters["deid_URL"], headers=head, json=json_data, verify=False
-    )
+    # Convert the queryfile to json format.
+    query_json = convert_csv_to_deid_json(query_file, args.project_name)
 
-    tmp = ast.literal_eval(response.text)
-    json_tmp = json.dumps(tmp)
-    print(json_tmp)
-
-    with open(
-        os.path.normpath(
-            os.path.join(args.out_directory, f"new_ids_{args.project_name}.json")
-        ),
-        "w",
-    ) as f:
-        f.write(json_tmp)
-
-    ###Get day shift
-    response = requests.post(
-        parameters["deid_URL"] + "_shift", headers=head, json=json_data, verify=False
-    )
-
-    tmp = ast.literal_eval(response.text)
-    json_tmp = json.dumps(tmp)
-    print(json_tmp)
+    # Get the new pseudonyms
+    json_response = get_deid_pseudonyms(deid_parameters, query_json)
+    print(json_response)
 
     with open(
         os.path.normpath(
-            os.path.join(args.out_directory, f"day_shift_{args.project_name}.json")
+            os.path.join(output_dir, f"new_ids_{args.project_name}.json")
         ),
         "w",
     ) as f:
-        f.write(json_tmp)
+        f.write(json_response)
+
+    # Get day shift
+    json_response = get_deid_day_shifts(deid_parameters, query_json)
+
+    with open(
+        os.path.normpath(
+            os.path.join(output_dir, f"day_shift_{args.project_name}.json")
+        ),
+        "w",
+    ) as f:
+        f.write(json_response)
+
+    print("Done!")
 
 
 if __name__ == "__main__":
