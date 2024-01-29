@@ -18,8 +18,8 @@ from pacsman.core.sanity_checks import (
 warnings.filterwarnings("ignore")
 
 # Query default parameters
-PATIENTID = '"PAT004"'
-STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = (
+PATIENT_ID = '"PAT004"'
+STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, OUTPUT_DIR = (
     '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.461"',
     '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.462"',
     ".",
@@ -28,25 +28,28 @@ STUDYINSTANCEUID, SERIESINSTANCEUID, OUTDIR = (
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
 
 # Query squeletons.
-echo_command = (
-    'echoscu -ll trace -aec "{}" -aet "{}" {} {}'  # server_AET MY_AET IP port
+ECHO_COMMAND = (
+    'echoscu -ll trace -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
 )
-find_command = (
-    "findscu -v {} --study -k QueryRetrieveLevel={} -k 0010,0020={} "
-    "-k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={} --key 0020,000e={} "
-    "--key 0008,103E={} --key 18,1030={} --key 8,22={} "
-    "--key 0008,0020={} --key 0010,0010={} --key 10,30={} "
-    "--key 8,30 --key 18,1000={} --key 8,60={} --key 8,8={} "
-    "--key 8,1030={} --key 8,50={} --key 18,24={}"
+FIND_COMMAND = (
+    "findscu -v {modified_params} --study "
+    "-k QueryRetrieveLevel={query_retrieval_level} -k 0010,0020={patient_id} "
+    "-k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={study_uid} --key 0020,000e={series_instance_uid} "
+    "--key 0008,103E={series_description} --key 18,1030={protocol_name} --key 8,22={acquisition_date} "
+    "--key 0008,0020={study_date} --key 0010,0010={patient_name} --key 10,30={patient_birthdate} "
+    "--key 8,30 --key 18,1000={device_serial_number} --key 8,60={modality} --key 8,8={image_type} "
+    "--key 8,1030={study_description} --key 8,50={accession_number} --key 18,24={sequence_name}"
 )
-move_command = (
-    'movescu -ll debug {} -aem "{}" -k 0008,0052="PATIENT" --patient '
-    "--key 0010,0020={} --key 0020,000d={} --key 0020,000e={} "
-    "--key 0008,0020={} --port {} -od {}"
+MOVE_COMMAND = (
+    'movescu -ll debug {modified_params} -aem "{aet}" -k 0008,0052="PATIENT" --patient '
+    "--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
+    "--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
+    "--port {move_port} -od {output_dir}"
 )
-move_remote_command = (
-    'movescu -ll debug {} -aem "{}" -k 0008,0052="PATIENT" --patient '
-    "--key 0010,0020={} --key 0020,000d={} --key 0020,000e={} --key 0008,0020={}"
+MOVE_REMOTE_COMMAND = (
+    'movescu -ll debug {modified_params} -aem "{move_aet}" -k 0008,0052="PATIENT" --patient '
+    "--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
+    "--key 0020,000e={series_instance_uid} --key 0008,0020={study_date}"
 )
 
 
@@ -58,17 +61,17 @@ move_remote_command = (
 def echo(
     server_address: str = "www.dicomserver.co.uk",
     port: int = 104,
-    server_AET: str = "theServertAET",
-    AET: str = "AET",
-    log_dir: str = os.path.join(OUTDIR, "logs"),
+    server_aet: str = "theServertAET",
+    aet: str = "AET",
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
 ) -> str:
     """Checks that the PACS server can be reached and accepts associations.
 
     Args:
         server_address: PACS server IP address.
         port: PACS server port for incoming requests. Default is 104.
-        server_AET: PACS server AET. Default is "theServerAET".
-        AET: AET of the calling entity. Default is "AET".
+        server_aet: PACS server AET. Default is "theServerAET".
+        aet: AET of the calling entity. Default is "AET".
         log_dir: Folder for the logs where the log file (log.txt) and
                     the fails file (fails.txt) produced by run() will be written.
                     Default is "./logs" e.g. the logs/ folder in the current working directory.
@@ -79,10 +82,12 @@ def echo(
     """
     check_server_address(server_address)
     check_port(port)
-    check_AET(server_AET, server=True)
-    check_AET(AET)
+    check_AET(server_aet, server=True)
+    check_AET(aet)
 
-    command = echo_command.format(server_AET, AET, server_address, port)
+    command = ECHO_COMMAND.format(
+        server_aet=server_aet, aet=aet, server_address=server_address, port=port
+    )
 
     return run(
         query=command,
@@ -91,52 +96,52 @@ def echo(
 
 
 def find(
-    AET: str,
+    aet: str,
     server_address: str = "www.dicomserver.co.uk",
-    server_AET: str = "theServerAET",
+    server_aet: str = "theServerAET",
     port: int = 104,
-    QUERYRETRIVELEVEL: str = "SERIES",
-    PATIENTID: str = "",
-    STUDYUID: str = "",
-    SERIESINSTANCEUID: str = "",
-    SERIESDESCRIPTION: str = "",
-    PROTOCOLNAME: str = "",
-    ACQUISITIONDATE: str = "",
-    PATIENTNAME: str = "",
-    PATIENTBIRTHDATE: str = "",
-    STUDYDATE: str = "",
-    DEVICESERIALNUMBER: str = "",
-    MODALITY: str = "",
-    IMAGETYPE: str = "",
-    STUDYDESCRIPTION: str = "",
-    ACCESSIONNUMBER: str = "",
-    SEQUENCENAME: str = "",
-    log_dir: str = os.path.join(OUTDIR, "logs"),
+    query_retrieval_level: str = "SERIES",
+    patient_id: str = "",
+    study_uid: str = "",
+    series_instance_uid: str = "",
+    series_description: str = "",
+    protocol_name: str = "",
+    acquisition_date: str = "",
+    patient_name: str = "",
+    patient_birthdate: str = "",
+    study_date: str = "",
+    device_serial_number: str = "",
+    modality: str = "",
+    image_type: str = "",
+    study_description: str = "",
+    accession_number: str = "",
+    sequence_name: str = "",
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
 ) -> str:
     """Builds a query for findscu of QueryRetrieveLevel of series using the parameters passed as arguments.
 
     Args:
-        AET: called AET.
+        aet: called AET.
         server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
-        server_AET: PACS server AET. Default is "theServerAET".
+        server_aet: PACS server AET. Default is "theServerAET".
         port: PACS server port for incoming requests. Default is 104.
-        QUERYRETRIVELEVEL: query retrieval level which can only take values in
+        query_retrieval_level: query retrieval level which can only take values in
                            {SERIES, STRUDY, PATIENT, IMAGE}. Default is "SERIES".
-        PATIENTID: patient id. Default is "".
-        STUDYUID: study unique identifier. Default is "".
-        SERIESINSTANCEUID: series Instance UID. Default is "".
-        SERIESDESCRIPTION: series Description. Default is "".
-        PROTOCOLNAME: protocol name. Default is "".
-        ACQUISITIONDATE: acquisition date. Default is "".
-        PATIENTNAME: patient's name. Default is "".
-        PATIENTBIRTHDATE: patient's birth date. Default is "".
-        STUDYDATE: study Date. Default is "".
-        DEVICESERIALNUMBER: MRI device serial number. Default is "".
-        MODALITY: modality. Default is "".
-        IMAGETYPE: image type. Default is "".
-        STUDYDESCRIPTION: description of the study. Default is "".
-        ACCESSIONNUMBER: accession number. Default is "".
-        SEQUENCENAME: sequence name. Default is "".
+        patient_id: patient id. Default is "".
+        study_uid: study unique identifier. Default is "".
+        series_instance_uid: series Instance UID. Default is "".
+        series_description: series Description. Default is "".
+        protocol_name: protocol name. Default is "".
+        acquisition_date: acquisition date. Default is "".
+        patient_name: patient's name. Default is "".
+        patient_birthdate: patient's birth date. Default is "".
+        study_date: study Date. Default is "".
+        device_serial_number: MRI device serial number. Default is "".
+        modality: modality. Default is "".
+        image_type: image type. Default is "".
+        study_description: description of the study. Default is "".
+        accession_number: accession number. Default is "".
+        sequence_name: sequence name. Default is "".
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
@@ -146,33 +151,33 @@ def find(
 
     """
 
-    check_ids(PATIENTID)
-    check_ids(STUDYUID, attribute="Study instance UID")
-    check_ids(SERIESINSTANCEUID, attribute="Series instance UID")
+    check_ids(patient_id)
+    check_ids(study_uid, attribute="Study instance UID")
+    check_ids(series_instance_uid, attribute="Series instance UID")
     check_port(port)
-    check_query_retrieval_level(QUERYRETRIVELEVEL)
+    check_query_retrieval_level(query_retrieval_level)
 
     modified_params = replace_default_params(
-        PARAMETERS, AET, server_address, server_AET, port
+        PARAMETERS, aet, server_address, server_aet, port
     )
-    command = find_command.format(
-        modified_params,
-        QUERYRETRIVELEVEL,
-        PATIENTID,
-        STUDYUID,
-        SERIESINSTANCEUID,
-        SERIESDESCRIPTION,
-        PROTOCOLNAME,
-        ACQUISITIONDATE,
-        STUDYDATE,
-        PATIENTNAME,
-        PATIENTBIRTHDATE,
-        DEVICESERIALNUMBER,
-        MODALITY,
-        IMAGETYPE,
-        STUDYDESCRIPTION,
-        ACCESSIONNUMBER,
-        SEQUENCENAME,
+    command = FIND_COMMAND.format(
+        modified_params=modified_params,
+        query_retrieval_level=query_retrieval_level,
+        patient_id=patient_id,
+        study_uid=study_uid,
+        series_instance_uid=series_instance_uid,
+        series_description=series_description,
+        protocol_name=protocol_name,
+        acquisition_date=acquisition_date,
+        study_date=study_date,
+        patient_name=patient_name,
+        patient_birthdate=patient_birthdate,
+        device_serial_number=device_serial_number,
+        modality=modality,
+        image_type=image_type,
+        study_description=study_description,
+        accession_number=accession_number,
+        sequence_name=sequence_name,
     )
 
     return run(
@@ -182,31 +187,31 @@ def find(
 
 
 def get(
-    AET: str,
-    STUDYDATE: str,
+    aet: str,
+    study_date: str,
     server_address: str = "www.dicomserver.co.uk",
-    server_AET: str = "theServerAET",
+    server_aet: str = "theServerAET",
     port: int = 104,
-    PATIENTID: str = PATIENTID,
-    STUDYINSTANCEUID: str = STUDYINSTANCEUID,
-    SERIESINSTANCEUID: str = SERIESINSTANCEUID,
+    patient_id: str = PATIENT_ID,
+    study_instance_uid: str = STUDY_INSTANCE_UID,
+    series_instance_uid: str = SERIES_INSTANCE_UID,
     move_port: int = 4006,
-    output_dir: str = OUTDIR,
-    log_dir: str = os.path.join(OUTDIR, "logs"),
+    output_dir: str = OUTPUT_DIR,
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
 ) -> str:
     """Builds a query for movescu.
 
     Args:
-        AET: called AET.
-        STUDYDATE: study date.
+        aet: called AET.
+        study_date: study date.
         server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
-        server_AET: PACS server AET. Default is "theServerAET".
+        server_aet: PACS server AET. Default is "theServerAET".
         port: PACS server port for incoming requests. Default is 104.
-        PATIENTID: patient id. Default is pacsman.core.execute_commands.PATIENTID.
-        STUDYINSTANCEUID: study instance unique idetifier. Default is
-                          pacsman.core.execute_commands.STUDYINSTANCEUID.
-        SERIESINSTANCEUID: series instance unique identifier. Default is
-                           pacsman.core.execute_commands.SERIESINSTANCEUID.
+        patient_id: patient id. Default is pacsman.core.execute_commands.patient_id.
+        study_instance_uid: study instance unique idetifier. Default is
+                          pacsman.core.execute_commands.study_instance_uid.
+        series_instance_uid: series instance unique identifier. Default is
+                           pacsman.core.execute_commands.series_instance_uid.
         move_port: port used for movescu command. Default is 4006.
         output_dir: directory of output files. Default is "." e.g. the current working directory.
         log_dir: Folder for the logs where the log file (log.txt) and
@@ -217,24 +222,24 @@ def get(
         string: The log lines.
 
     """
-    check_ids(PATIENTID)
-    check_ids(SERIESINSTANCEUID, attribute="Series instance UID")
-    check_ids(STUDYINSTANCEUID, attribute="Study instance UID")
+    check_ids(patient_id)
+    check_ids(series_instance_uid, attribute="Series instance UID")
+    check_ids(study_instance_uid, attribute="Study instance UID")
     check_port(move_port)
     check_port(port)
 
     modified_params = replace_default_params(
-        PARAMETERS, AET, server_address, server_AET, port
+        PARAMETERS, aet, server_address, server_aet, port
     )
-    command = move_command.format(
-        modified_params,
-        AET,
-        PATIENTID,
-        STUDYINSTANCEUID,
-        SERIESINSTANCEUID,
-        STUDYDATE,
-        move_port,
-        output_dir,
+    command = MOVE_COMMAND.format(
+        modified_params=modified_params,
+        aet=aet,
+        patient_id=patient_id,
+        study_instance_uid=study_instance_uid,
+        series_instance_uid=series_instance_uid,
+        study_date=study_date,
+        move_port=move_port,
+        output_dir=output_dir,
     )
     return run(
         query=command,
@@ -243,31 +248,31 @@ def get(
 
 
 def move_remote(
-    AET: str,
-    STUDYDATE: str,
+    aet: str,
+    study_date: str,
     server_address: str = "www.dicomserver.co.uk",
-    server_AET: str = "theServerAET",
+    server_aet: str = "theServerAET",
     port: int = 104,
-    PATIENTID: str = PATIENTID,
-    STUDYINSTANCEUID: str = STUDYINSTANCEUID,
-    SERIESINSTANCEUID: str = SERIESINSTANCEUID,
-    move_AET: str = "theMoveAET",
-    log_dir: str = os.path.join(OUTDIR, "logs"),
+    patient_id: str = PATIENT_ID,
+    study_instance_uid: str = STUDY_INSTANCE_UID,
+    series_instance_uid: str = SERIES_INSTANCE_UID,
+    move_aet: str = "theMoveAET",
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
 ) -> str:
     """Builds a query for movescu.
 
     Args:
-        AET: called AET.
-        STUDYDATE: study date.
+        aet: called AET.
+        study_date: study date.
         server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
-        server_AET: PACS server AET. Default is "theServerAET".
+        server_aet: PACS server AET. Default is "theServerAET".
         port: PACS server port for incoming requests. Default is 104.
-        PATIENTID: patient id. Default is pacsman.core.execute_commands.PATIENTID.
-        STUDYINSTANCEUID: study instance unique idetifier. Default is
-                          pacsman.core.execute_commands.STUDYINSTANCEUID.
-        SERIESINSTANCEUID: series instance unique identifier. Default is
-                           pacsman.core.execute_commands.SERIESINSTANCEUID.
-        move_AET: AET where to move the images. Default is "theMoveAET".
+        patient_id: patient id. Default is pacsman.core.execute_commands.patient_id.
+        study_instance_uid: study instance unique idetifier. Default is
+                          pacsman.core.execute_commands.study_instance_uid.
+        series_instance_uid: series instance unique identifier. Default is
+                           pacsman.core.execute_commands.series_instance_uid.
+        move_aet: AET where to move the images. Default is "theMoveAET".
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
@@ -276,22 +281,22 @@ def move_remote(
         string: The log lines.
 
     """
-    check_ids(PATIENTID)
-    check_ids(SERIESINSTANCEUID, attribute="Series instance UID")
-    check_ids(STUDYINSTANCEUID, attribute="Study instance UID")
+    check_ids(patient_id)
+    check_ids(series_instance_uid, attribute="Series instance UID")
+    check_ids(study_instance_uid, attribute="Study instance UID")
     check_port(port)
-    check_AET(move_AET)
+    check_AET(move_aet)
 
     modified_params = replace_default_params(
-        PARAMETERS, AET, server_address, server_AET, port
+        PARAMETERS, aet, server_address, server_aet, port
     )
-    command = move_remote_command.format(
+    command = MOVE_REMOTE_COMMAND.format(
         modified_params,
-        move_AET,
-        PATIENTID,
-        STUDYINSTANCEUID,
-        SERIESINSTANCEUID,
-        STUDYDATE,
+        move_aet,
+        patient_id,
+        study_instance_uid,
+        series_instance_uid,
+        study_date,
     )
 
     return run(
@@ -326,24 +331,24 @@ def write_file(results: str, file: str = "output.txt") -> None:
 
 
 def replace_default_params(
-    PARAMETERS: str, AET: str, server_address: str, server_AET: str, port: int
+    parameters: str, AET: str, server_address: str, server_aet: str, port: int
 ) -> str:
     """Helper function to replace default parameters in queries by new parameters.
 
     Args:
-        PARAMETERS: The string containing default parameters for dicomserver
+        parameters: The string containing default parameters for dicomserver
         AET: Called AET
         server_address: PACS server IP address
-        server_AET: PACS server AET
+        server_aet: PACS server AET
         port: PACS server port for incoming requests
     Returns:
         string: modified parameters with input values.
 
     """
-    check_parameters_inputs(AET, server_address, server_AET, port)
+    check_parameters_inputs(AET, server_address, server_aet, port)
 
     return (
-        PARAMETERS.replace("theServerAET", server_AET)
+        parameters.replace("theServerAET", server_aet)
         .replace(" 104", " " + str(port))
         .replace("88.202.185.144", server_address)
         .replace("MY_AET", AET)

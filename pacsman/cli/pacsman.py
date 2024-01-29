@@ -17,7 +17,7 @@ from pacsman.core.execute_commands import echo, find, get, move_remote, write_fi
 from pacsman.core.sanity_checks import (
     check_date,
     check_date_range,
-    check_tuple,
+    check_query_attributes,
     check_config_file,
 )
 
@@ -257,27 +257,27 @@ def retrieve_dicoms_using_table(
 
     validator = Validator(schema)
     counter = 0
-    for i, tuple_ in enumerate(attributes_list):
+    for i, query_attributes in enumerate(attributes_list):
         # print("Retrieving images for element number ", i+1)
 
-        check_tuple(tuple_)
+        check_query_attributes(query_attributes)
 
-        tuple_["PatientName"] = process_person_names(tuple_["PatientName"])
+        query_attributes["PatientName"] = process_person_names(query_attributes["PatientName"])
 
-        if len(tuple_["StudyDate"]) > 0:
+        if len(query_attributes["StudyDate"]) > 0:
             print(
                 "Retrieving images for element number {0}: sub-{1}_ses-{2}".format(
-                    i + 1, tuple_["PatientID"], tuple_["StudyDate"]
+                    i + 1, query_attributes["PatientID"], query_attributes["StudyDate"]
                 )
             )
         else:
             print(
                 "Retrieving images for element number {0}: sub-{1}".format(
-                    i + 1, tuple_["PatientID"]
+                    i + 1, query_attributes["PatientID"]
                 )
             )
 
-        inputs = {k: tuple_[k] for k in schema.keys()}
+        inputs = {k: query_attributes[k] for k in schema.keys()}
 
         if not validator.validate(inputs):
             raise ValueError(
@@ -287,20 +287,20 @@ def retrieve_dicoms_using_table(
                 + str(validator.errors)
             )
 
-        check_date_range(tuple_["StudyDate"])
-        check_date_range(tuple_["AcquisitionDate"])
-        check_date(tuple_["PatientBirthDate"])
+        check_date_range(query_attributes["StudyDate"])
+        check_date_range(query_attributes["AcquisitionDate"])
+        check_date(query_attributes["PatientBirthDate"])
 
-        QUERYRETRIVELEVEL = "SERIES"
-        if tuple_["ImageType"] != "":
-            QUERYRETRIVELEVEL = "IMAGE"
+        query_retrieval_level = "SERIES"
+        if query_attributes["ImageType"] != "":
+            query_retrieval_level = "IMAGE"
 
         # check if we can ping the PACS
         echo_res = echo(
             server_address=pacs_server,
             port=port,
-            server_AET=server_aet,
-            AET=client_aet,
+            server_aet=server_aet,
+            aet=client_aet,
             log_dir=os.path.join(output_dir, "logs"),
         )
         if not echo_res:
@@ -313,24 +313,24 @@ def retrieve_dicoms_using_table(
         find_series_res = find(
             client_aet,
             server_address=pacs_server,
-            server_AET=server_aet,
+            server_aet=server_aet,
             port=port,
-            QUERYRETRIVELEVEL=QUERYRETRIVELEVEL,
-            PATIENTID=tuple_["PatientID"],
-            STUDYUID=tuple_["StudyInstanceUID"],
-            SERIESINSTANCEUID=tuple_["SeriesInstanceUID"],
-            SERIESDESCRIPTION=tuple_["SeriesDescription"],
-            PROTOCOLNAME=tuple_["ProtocolName"],
-            ACQUISITIONDATE=tuple_["AcquisitionDate"],
-            STUDYDATE=tuple_["StudyDate"],
-            PATIENTNAME=tuple_["PatientName"],
-            PATIENTBIRTHDATE=tuple_["PatientBirthDate"],
-            DEVICESERIALNUMBER=tuple_["DeviceSerialNumber"],
-            MODALITY=tuple_["Modality"],
-            IMAGETYPE=tuple_["ImageType"],
-            STUDYDESCRIPTION=tuple_["StudyDescription"],
-            ACCESSIONNUMBER=tuple_["AccessionNumber"],
-            SEQUENCENAME=tuple_["SequenceName"],
+            query_retrieval_level=query_retrieval_level,
+            patient_id=query_attributes["PatientID"],
+            study_uid=query_attributes["StudyInstanceUID"],
+            series_instance_uid=query_attributes["SeriesInstanceUID"],
+            series_description=query_attributes["SeriesDescription"],
+            protocol_name=query_attributes["ProtocolName"],
+            acquisition_date=query_attributes["AcquisitionDate"],
+            study_date=query_attributes["StudyDate"],
+            patient_name=query_attributes["PatientName"],
+            patient_birthdate=query_attributes["PatientBirthDate"],
+            device_serial_number=query_attributes["DeviceSerialNumber"],
+            modality=query_attributes["Modality"],
+            image_type=query_attributes["ImageType"],
+            study_description=query_attributes["StudyDescription"],
+            accession_number=query_attributes["AccessionNumber"],
+            sequence_name=query_attributes["SequenceName"],
             log_dir=os.path.join(output_dir, "logs"),
         )
 
@@ -361,7 +361,7 @@ def retrieve_dicoms_using_table(
             if patientID_sanitized == "":
                 patientID_sanitized = my_re_clean.sub(
                     "_",
-                    unicodedata.normalize("NFD", tuple_["PatientID"])
+                    unicodedata.normalize("NFD", query_attributes["PatientID"])
                     .encode("ascii", "ignore")
                     .decode("ascii"),
                 )
@@ -377,9 +377,9 @@ def retrieve_dicoms_using_table(
             #     print("Creating directory " + patient_dir)
             #     os.makedirs(patient_dir, exist_ok=True)
 
-            if tuple_["new_ids"] != "":
+            if query_attributes["new_ids"] != "":
                 with open(os.path.join(patient_dir, "new_id.txt"), "w") as file:
-                    file.write(str(tuple_["new_ids"]))
+                    file.write(str(query_attributes["new_ids"]))
 
             # Make a session folder for the study if the StudyDate and StudyTime are not empty
             if len(serie["StudyDate"]) > 0 and len(serie["StudyTime"]) > 0:
@@ -428,13 +428,13 @@ def retrieve_dicoms_using_table(
             if save:
                 get_res = get(
                     client_aet,
-                    tuple_["StudyDate"],  # serie["StudyDate"],
+                    query_attributes["StudyDate"],  # serie["StudyDate"],
                     server_address=pacs_server,
-                    server_AET=server_aet,
+                    server_aet=server_aet,
                     port=port,
-                    PATIENTID=tuple_["PatientID"],  # serie["PatientID"],
-                    STUDYINSTANCEUID=serie["StudyInstanceUID"],
-                    SERIESINSTANCEUID=serie["SeriesInstanceUID"],
+                    patient_id=query_attributes["PatientID"],  # serie["PatientID"],
+                    study_instance_uid=serie["StudyInstanceUID"],
+                    series_instance_uid=serie["SeriesInstanceUID"],
                     move_port=move_port,
                     output_dir=patient_serie_output_dir,
                     log_dir=os.path.join(output_dir, "logs"),
@@ -443,14 +443,14 @@ def retrieve_dicoms_using_table(
             if move:
                 move_res = move_remote(
                     client_aet,
-                    tuple_["StudyDate"],  # serie["StudyDate"],
+                    query_attributes["StudyDate"],  # serie["StudyDate"],
                     server_address=pacs_server,
-                    server_AET=server_aet,
+                    server_aet=server_aet,
                     port=port,
-                    PATIENTID=tuple_["PatientID"],  # serie["PatientID"],
-                    STUDYINSTANCEUID=serie["StudyInstanceUID"],
-                    SERIESINSTANCEUID=serie["SeriesInstanceUID"],
-                    move_AET=move_aet,
+                    patient_id=query_attributes["PatientID"],  # serie["PatientID"],
+                    study_instance_uid=serie["StudyInstanceUID"],
+                    series_instance_uid=serie["SeriesInstanceUID"],
+                    move_aet=move_aet,
                     log_dir=os.path.join(output_dir, "logs"),
                 )
 

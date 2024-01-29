@@ -102,14 +102,14 @@ def check_AET(AET: str, server=False) -> None:
 
 
 def check_parameters_inputs(
-    AET: str, server_address: str, server_AET: str, port: int
+    AET: str, server_address: str, server_aet: str, port: int
 ) -> None:
     """Check if the parameters are valid using helper functions.
 
     Args:
             AET: called AET
             server_address: PACS server IP address
-            server_AET: PACS server AET
+            server_aet: PACS server AET
             port: port
 
     Raises:
@@ -117,7 +117,7 @@ def check_parameters_inputs(
 
     """
     check_AET(AET)
-    check_AET(server_AET, server=True)
+    check_AET(server_aet, server=True)
     check_port(port)
     check_server_address(server_address)
 
@@ -152,15 +152,15 @@ def check_filter(filter_text: str) -> None:
         raise ValueError("Invalid filter input.")
 
 
-def check_tuple(tuple_: Dict[str, str]) -> None:
+def check_query_attributes(query_attributes: Dict[str, str]) -> None:
     """Check that the table has an acceptable input parameters.
 
     Args:
-        tuple_: dictionary that contains all parameters for query
+        query_attributes: dictionary that contains all parameters for query
 
     """
     empty = True
-    for item in tuple_.values():
+    for item in query_attributes.values():
         if str(item) == "*":
             raise ValueError("Can't use * for inputs !")
         if len(str(item)) > 0:
