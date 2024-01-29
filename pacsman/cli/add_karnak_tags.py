@@ -40,7 +40,6 @@ def tag_dicom_file(
 
 
 def tag_all_dicoms_within_root_folder(
-    *,
     data_path: str,
     new_ids: Dict[str, str],
     day_shift: Dict[str, str],
