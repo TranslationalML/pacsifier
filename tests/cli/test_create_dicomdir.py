@@ -2,6 +2,7 @@
 
 import os
 from glob import glob
+import pydicom
 
 from pacsman.cli.create_dicomdir import (
     generate_new_folder_name,
@@ -44,6 +45,19 @@ def test_add_or_retrieve_name():
 
 def test_move_and_rename_files(test_dir):
     dicom_path = os.path.join(test_dir, "tmp", "test_data", "dicomseries_structured")
+    # Add StudyID, StudyTime and SeriesNumber to the DICOM files
+    # SeriesNumber is taken from the dicom name (slice0.dcm, slice1.dcm, etc.) incremented by 1
+    # Such that the first file has SeriesNumber 1
+    # This is required for the DICOMDIR creation. Otherwise dcmmkdir --recurse ./ will fail.
+    # StudyID and StudyTime are set arbitrarily.
+    series_path = os.path.join(dicom_path, "sub-PACSMAN1", "ses-20232016", "00000-No_series_description")
+    for i, file in enumerate(sorted(glob(os.path.join(series_path, "*.dcm")))):
+        dataset = pydicom.read_file(file)
+        dataset.StudyID = "12345678"
+        dataset.StudyTime = "101601.934000"
+        dataset.SeriesNumber = str(i)
+        dataset.save_as(file)
+
     output_path = os.path.join(test_dir, "tmp", "test_data", "dicomseries_move_and_rename")
     if not os.path.exists(output_path):
         os.makedirs(output_path, exist_ok=True)
