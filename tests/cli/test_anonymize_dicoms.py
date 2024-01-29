@@ -29,22 +29,41 @@ def test_anonymize(test_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)
     out_file = os.path.join(out_dir, "slice0.dcm")
+    
+    # Get StudyInstanceUID, SeriesInstanceUID and SOPInstanceUID from the original file
+    # to increment them by 1 in the anonymized file
+    dataset = pydicom.read_file(in_file)
+    StudyInstanceUID = dataset.StudyInstanceUID
+    SeriesInstanceUID = dataset.SeriesInstanceUID
+    SOPInstanceUID = dataset.SOPInstanceUID
+    new_StudyInstanceUID = StudyInstanceUID.split(".")
+    new_StudyInstanceUID[-1] = str(int(new_StudyInstanceUID[-1]) + 1)
+    new_StudyInstanceUID = ".".join(new_StudyInstanceUID)
+    new_SeriesInstanceUID = SeriesInstanceUID.split(".")
+    new_SeriesInstanceUID[-1] = str(int(new_SeriesInstanceUID[-1]) + 1)
+    new_SeriesInstanceUID = ".".join(new_SeriesInstanceUID)
+    new_SOPInstanceUID = SOPInstanceUID.split(".")
+    new_SOPInstanceUID[-1] = str(int(new_SOPInstanceUID[-1]) + 1)
+    new_SOPInstanceUID = ".".join(new_SOPInstanceUID)
+    
+    # Test if the anonymization works
     anonymize_dicom_file(
         in_file,
         out_file,
         PatientID="PACSMAN2",
-        new_StudyInstanceUID="0000001.01",
-        new_SeriesInstanceUID="000012.01",
-        new_SOPInstanceUID="000000010.101",
+        new_StudyInstanceUID=new_StudyInstanceUID,
+        new_SeriesInstanceUID=new_SeriesInstanceUID,
+        new_SOPInstanceUID=new_SOPInstanceUID,
         fuzz_birthdate=True,
         fuzz_acqdates=True,
         fuzz_days_shift=10,
         delete_identifiable_files=True,
         remove_private_tags=False,
     )
+ 
     dataset = pydicom.read_file(out_file)
     attributes = dataset.dir("")
-
+ 
     assert dataset.PatientID == "PACSMAN2"
     assert dataset.PatientName == "PACSMAN2^sub"
     if "InstitutionAddress" in attributes:
@@ -66,73 +85,50 @@ def test_anonymize(test_dir):
         assert dataset.OrderCallbackPhoneNumber == ""
     if "InstitutionName" in attributes:
         assert dataset.InstitutionName == ""
-
     if "ReferringPhysiciansAddress" in attributes:
         assert dataset.ReferringPhysiciansAddress == ""
-
     if "ReferringPhysicianIDSequence" in attributes:
         assert dataset.ReferringPhysicianIDSequence == ""
-
     if "InstitutionalDepartmentName" in attributes:
         assert dataset.InstitutionalDepartmentName == ""
-
     if "PhysicianOfRecord" in attributes:
         assert dataset.PhysicianOfRecord == ""
-
     if "PerformingPhysicianName" in attributes:
         assert dataset.PerformingPhysicianName == ""
-
     if "ReferringPhysiciansAddress" in attributes:
         assert dataset.ReferringPhysiciansAddress == ""
-
     if "ReferringPhysiciansTelephoneNumber" in attributes:
         assert dataset.ReferringPhysiciansTelephoneNumber == ""
-
     if "PerformingPhysicianIDSequence" in attributes:
         assert dataset.PerformingPhysicianIDSequence == ""
-
     if "NameOfPhysicianReadingStudy" in attributes:
         assert dataset.NameOfPhysicianReadingStudy == ""
-
     if "PhysicianReadingStudyIDSequence" in attributes:
         assert dataset.PhysicianReadingStudyIDSequence == ""
-
     if "OperatorsName" in attributes:
         assert dataset.OperatorsName == ""
-
     if "IssuerOfPatientID" in attributes:
         assert dataset.IssuerOfPatientID == ""
-
     if "PatientsBirthTime" in attributes:
         assert dataset.PatientsBirthTime == ""
-
     if "OtherPatientIDs" in attributes:
         assert dataset.OtherPatientIDs == ""
-
     if "OtherPatientNames" in attributes:
         assert dataset.OtherPatientNames == ""
-
     if "PatientBirthName" in attributes:
         assert dataset.PatientBirthName == ""
-
     if "PersonAddress" in attributes:
         assert dataset.PersonAddress == ""
-
     if "PatientMotherBirthName" in attributes:
         assert dataset.PatientMotherBirthName == ""
-
     if "CountryOfResidence" in attributes:
         assert dataset.CountryOfResidence == ""
-
     if "RegionOfResidence" in attributes:
         assert dataset.RegionOfResidence == ""
-
     if "CurrentPatientLocation" in attributes:
         assert dataset.CurrentPatientLocation == ""
-
     if "PatientInstitutionResidence" in attributes:
         assert dataset.PatientsInstitutionResidence == ""
-
     if "PersonName" in attributes:
         assert dataset.PersonName == ""
 
@@ -156,9 +152,9 @@ def test_anonymize(test_dir):
         in_file_new_age,
         out_file_new_age,
         PatientID="PACSMAN2",
-        new_StudyInstanceUID="0000001.01",
-        new_SeriesInstanceUID="000012.01",
-        new_SOPInstanceUID="000000010.101",
+        new_StudyInstanceUID=new_StudyInstanceUID,
+        new_SeriesInstanceUID=new_SeriesInstanceUID,
+        new_SOPInstanceUID=new_SOPInstanceUID,
         fuzz_birthdate=True,
         fuzz_acqdates=False,
         fuzz_days_shift=5,
