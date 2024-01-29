@@ -15,16 +15,16 @@ def test_echo_invalid_inputs():
         echo(port=65536)
 
     with pytest.raises(ValueError):
-        echo(server_AET=dummy_long_string)
+        echo(server_aet=dummy_long_string)
 
     with pytest.raises(ValueError):
-        echo(server_AET="")
+        echo(server_aet="")
 
     with pytest.raises(ValueError):
-        echo(AET=dummy_long_string)
+        echo(aet=dummy_long_string)
 
     with pytest.raises(ValueError):
-        echo(AET="")
+        echo(aet="")
 
     with pytest.raises(ValueError):
         echo(server_address="128.132.185.16.1")
@@ -55,31 +55,31 @@ def test_find_invalid_inputs():
         find("AET", "19930911", port=0)
 
     with pytest.raises(ValueError):
-        find("AET", "19930911", PATIENTID=dummy_long_string)
+        find("AET", "19930911", patient_id=dummy_long_string)
 
     with pytest.raises(ValueError):
-        find("AET", "19930911", STUDYUID=dummy_long_string, PATIENTID="PAT004")
+        find("AET", "19930911", study_uid=dummy_long_string, patient_id="PAT004")
 
     with pytest.raises(ValueError):
-        find("AET", "19930911", server_AET="dummyserverAETdummyserverAETdummyserverAET")
+        find("AET", "19930911", server_aet="dummyserverAETdummyserverAETdummyserverAET")
 
     with pytest.raises(ValueError):
-        find("AET", "19930911", server_AET="")
+        find("AET", "19930911", server_aet="")
 
     with pytest.raises(ValueError):
         find("dummyAETdummyAETdummyAET", "19930911")
 
     with pytest.raises(ValueError):
-        find("AET", STUDYDATE="19930911", server_address="128.132.185.16.1")
+        find("AET", study_date="19930911", server_address="128.132.185.16.1")
 
     with pytest.raises(ValueError):
-        find("AET", STUDYDATE="19930911", server_address="128.s132.185.16")
+        find("AET", study_date="19930911", server_address="128.s132.185.16")
 
     with pytest.raises(ValueError):
-        find("AET", STUDYDATE="19930911", server_address="128.132..16")
+        find("AET", study_date="19930911", server_address="128.132..16")
 
     with pytest.raises(ValueError):
-        find("AET", STUDYDATE="19930911", server_address="128.132.1855.16")
+        find("AET", study_date="19930911", server_address="128.132.1855.16")
 
 
 def test_get_invalid_inputs():
@@ -98,19 +98,19 @@ def test_get_invalid_inputs():
         get("AET", "19930911", port=0)
 
     with pytest.raises(ValueError):
-        get("AET", "19930911", PATIENTID=dummy_long_string)
+        get("AET", "19930911", patient_id=dummy_long_string)
 
     with pytest.raises(ValueError):
-        get("AET", "19930911", server_AET="dummyserverAETdummyserverAETdummyserverAET")
+        get("AET", "19930911", server_aet="dummyserverAETdummyserverAETdummyserverAET")
 
     with pytest.raises(ValueError):
-        get("AET", "19930911", server_AET="")
+        get("AET", "19930911", server_aet="")
 
     with pytest.raises(ValueError):
-        get("AET", "19930911", STUDYINSTANCEUID=dummy_long_string)
+        get("AET", "19930911", study_instance_uid=dummy_long_string)
 
     with pytest.raises(ValueError):
-        get("AET", "19930911", SERIESINSTANCEUID=dummy_long_string)
+        get("AET", "19930911", series_instance_uid=dummy_long_string)
 
     with pytest.raises(ValueError):
         get("dummyAETdummyAETdummyAET", "19930911")
@@ -130,39 +130,39 @@ def test_get_invalid_inputs():
 
 def test_replace_default_parameters():
     dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-    PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
+    parameters = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
     modified = "127.0.0.1 80 -aec Hello -aet Hello_Back"
 
     assert (
-        replace_default_params(PARAMETERS, "Hello_Back", "127.0.0.1", "Hello", 80)
+        replace_default_params(parameters, "Hello_Back", "127.0.0.1", "Hello", 80)
         == modified
     )
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, dummy_long_string, "127.0.0.1", "Hello", 80)
+        replace_default_params(parameters, dummy_long_string, "127.0.0.1", "Hello", 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, dummy_long_string, "127.0.0.1", "Hello", -1)
+        replace_default_params(parameters, dummy_long_string, "127.0.0.1", "Hello", -1)
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "AET", "127.0.0.1", dummy_long_string, 80)
+        replace_default_params(parameters, "AET", "127.0.0.1", dummy_long_string, 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "AET", "127.0.0554.1", "Hello", 80)
+        replace_default_params(parameters, "AET", "127.0.0554.1", "Hello", 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "AET", "California Dreaming", "Hello", 80)
+        replace_default_params(parameters, "AET", "California Dreaming", "Hello", 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "AET", "124.20.564.45.45", "Hello", 80)
+        replace_default_params(parameters, "AET", "124.20.564.45.45", "Hello", 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "AET", "214..54.454", "Hello", 80)
+        replace_default_params(parameters, "AET", "214..54.454", "Hello", 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "", "214.1.54.454", "Hello", 80)
+        replace_default_params(parameters, "", "214.1.54.454", "Hello", 80)
 
     with pytest.raises(ValueError):
-        replace_default_params(PARAMETERS, "AET", "214.54.1.1", "", 80)
+        replace_default_params(parameters, "AET", "214.54.1.1", "", 80)
 
 
 def test_run():
