@@ -145,7 +145,7 @@ def test_anonymize(test_dir):
     if os.path.exists(out_file_new_age):
         os.remove(out_file_new_age)
 
-    dataset.PatientAge = "091"
+    dataset.PatientAge = "091Y"
     dataset.save_as(in_file_new_age)
 
     anonymize_dicom_file(
@@ -163,6 +163,10 @@ def test_anonymize(test_dir):
     )
 
     dataset = pydicom.read_file(out_file_new_age)
+    # WARNING: 90+Y is not a valid DICOM age value
+    # This might have to be fixed in anonymize_dicom_file()
+    # in the future.
+    # For now, this raises a Warning in the test.
     assert dataset.PatientAge == "90+Y"
 
 
