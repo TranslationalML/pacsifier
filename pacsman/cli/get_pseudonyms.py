@@ -22,7 +22,7 @@ def check_config_file_deid(config_file: Dict[str, str]) -> None:
         )
 
 
-def convert_csv_to_json(queryfile: str, project_name: str) -> Any:
+def convert_csv_to_deid_json(queryfile: str, project_name: str) -> Any:
     """Convert PACSMAN query to json format the de-ID API can understand.
 
     Args:
@@ -113,7 +113,7 @@ def main():
     # build POST request
     head = {"Authorization": f'token {parameters["deid_token"]}'}
 
-    json_data = convert_csv_to_json(args.queryfile, args.project_name)
+    json_data = convert_csv_to_deid_json(args.queryfile, args.project_name)
     response = requests.post(
         parameters["deid_URL"], headers=head, json=json_data, verify=False
     )
