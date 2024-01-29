@@ -50,6 +50,7 @@ def tag_all_dicoms_within_root_folder(
     Args:
         data_path: path to the dicom images
         new_ids: real:code mapping to be used after de-identifying the original ids
+        day_shift: day shift per patient
         album_name: name of the Kheops album
 
     """
