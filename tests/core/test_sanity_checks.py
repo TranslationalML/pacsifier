@@ -9,7 +9,7 @@ from pacsman.core.sanity_checks import (
     check_parameters_inputs,
     check_ids,
     check_filter,
-    check_tuple,
+    check_query_attributes,
     check_date,
     check_date_range,
 )
@@ -85,10 +85,10 @@ def test_sanity_checks():
         check_filter("hello")
 
     with pytest.raises(ValueError):
-        check_tuple({"California": "*", "Dreaming": 1})
+        check_query_attributes({"California": "*", "Dreaming": 1})
 
     with pytest.raises(ValueError):
-        check_tuple({"California": "", "Dreaming": ""})
+        check_query_attributes({"California": "", "Dreaming": ""})
 
     with pytest.raises(ValueError):
         check_date("18930402")
