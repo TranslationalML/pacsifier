@@ -1,13 +1,13 @@
-# Copyright (C) 2018-2023, University Hospital Center and University of Lausanne (UNIL-CHUV)
-# and Contributors, All rights reserved.
-#  This software is distributed under the open-source Apache 2.0 license.
+# Copyright (C) 2018-2024, University Hospital Center and University of Lausanne (UNIL-CHUV),
+# Switzerland & Contributors, All rights reserved.
+# This software is distributed under the open-source Apache 2.0 license.
 
-"""This file contains pacsman package information."""
+"""This module contains pacsman package information."""
 
 import datetime
 
 
-__version__ = "0.3.0"
+__version__ = "1.0.0"
 
 __current_year__ = datetime.datetime.now().strftime("%Y")
 

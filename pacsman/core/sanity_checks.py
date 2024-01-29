@@ -1,12 +1,11 @@
+# Copyright (C) 2018-2024, University Hospital Center and University of Lausanne (UNIL-CHUV),
+# Switzerland & Contributors, All rights reserved.
+# This software is distributed under the open-source Apache 2.0 license.
+
+"""This module contains sanity checks for the functions employed in the pacsman script."""
+
 from datetime import datetime
 from typing import Dict
-
-# from urllib.parse import urlparse
-# from urllib.request import urlopen
-# from urllib.error import URLError, HTTPError
-# import requests
-# from ipaddress import ip_address
-# import re
 
 
 def check_ip(ip_address: str) -> None:

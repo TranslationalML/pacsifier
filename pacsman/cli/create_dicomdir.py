@@ -1,3 +1,9 @@
+# Copyright (C) 2018-2024, University Hospital Center and University of Lausanne (UNIL-CHUV),
+# Switzerland & Contributors, All rights reserved.
+# This software is distributed under the open-source Apache 2.0 license.
+
+"""Script to create a DICOMDIR of all dicoms within a folder."""
+
 import os
 import warnings
 import argparse

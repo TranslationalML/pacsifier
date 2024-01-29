@@ -1,3 +1,7 @@
+# Copyright (C) 2018-2024, University Hospital Center and University of Lausanne (UNIL-CHUV),
+# Switzerland & Contributors, All rights reserved.
+# This software is distributed under the open-source Apache 2.0 license.
+
 """Tests for the functions in pacsman.cli.pacsman script."""
 
 from glob import glob
