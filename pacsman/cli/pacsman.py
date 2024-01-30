@@ -64,11 +64,6 @@ ALLOWED_FILTERS = list(TAG_TO_KEYWORD.values())
 ALLOWED_FILTERS.append("new_ids")
 
 
-# ######################################################################################################################
-# #######################################################FUNCTIONS######################################################
-# ######################################################################################################################
-
-
 def readLineByLine(filename: str) -> Iterator[str]:
     """Return a list of lines of a text file located at the path filename.
 
@@ -351,7 +346,6 @@ def retrieve_dicoms_using_table(
             log_dir=os.path.join(output_dir, "logs"),
         )
 
-        # TODO: better path for /tests/tmp/current.txt
         current_findscu_dump_file = os.path.join(output_dir, "tmp", "current.txt")
         if os.path.isfile(current_findscu_dump_file):
             os.remove(current_findscu_dump_file)
@@ -478,17 +472,12 @@ def retrieve_dicoms_using_table(
                     w.writeheader()
                     w.writerow(serie)
 
-            # TODO: better path for /tests/tmp/current.txt
             if os.path.isfile(current_findscu_dump_file):
                 os.remove(current_findscu_dump_file)
     
     # Clean the tmp folder
     if os.path.isdir(os.path.join(output_dir, "tmp")):
         shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)    
-
-########################################################################################################################
-##########################################################MAIN##########################################################
-########################################################################################################################
 
 
 def get_parser() -> argparse.ArgumentParser:
