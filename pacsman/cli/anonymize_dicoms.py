@@ -15,6 +15,7 @@
 
 """Script to anonymize DICOM files for subsequent upload to Kheops."""
 
+import sys
 import warnings
 
 import numpy as np
@@ -609,6 +610,7 @@ def main():
 
     data_path = os.path.normcase(os.path.abspath(args.in_folder))
     output_folder = os.path.normcase(os.path.abspath(args.out_folder))
+    new_ids_path = os.path.normcase(os.path.abspath(args.new_ids))
     delete_identifiable_files = args.delete_identifiable
     remove_private_tags = args.remove_private_tags
     fuzz_acq_dates = args.fuzz_acq_dates
@@ -616,7 +618,18 @@ def main():
     rename_patient_directories = not args.keep_patient_dir_names
 
     if args.new_ids:
-        new_ids = json.load(open(args.new_ids, "r"))
+        if not os.path.isfile(new_ids_path):
+            print(f"New ids file ({new_ids_path}) does not exist. Please check!")
+            sys.exit(1)
+        
+        try:
+            new_ids = json.load(open(new_ids_path, "r"))
+        except json.JSONDecodeError as e:
+            print(
+                f"New IDs file ({new_ids_path}) is not a valid JSON file. "
+                "Please check it! \n {e}"
+            )
+            sys.exit(1)
 
     if not os.path.isdir(output_folder):
         raise NotADirectoryError(
