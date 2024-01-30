@@ -198,7 +198,7 @@ def main():
             f"New IDs file ({new_ids_path}) is not a valid JSON file. "
             "Please check it! \n {e}"
         )
-        sys.exit()
+        sys.exit(1)
 
     if args.day_shift is not None:
         day_shift = json.load(open(args.day_shift, "r"))
