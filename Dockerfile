@@ -35,11 +35,11 @@ RUN mkdir -p /opt/conda && \
 ###############################################################################
 
 # Copy the conda environment file to the image
-COPY ./environment/environment_minimal_202301.yml .
+COPY ./environment/environment_minimal_202401.yml .
 
 # Install the environment
-RUN conda env create -f environment_minimal_202301.yml && \
-    rm environment_minimal_202301.yml
+RUN conda env create -f environment_minimal_202401.yml && \
+    rm environment_minimal_202401.yml
 
 ###############################################################################
 # Install PACSMAN
