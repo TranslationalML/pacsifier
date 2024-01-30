@@ -15,6 +15,7 @@
 
 """Add private DICOM tags to several studies so that Karnak can de-identify them using provided patient codes and route them to the appropriate Kheops album."""
 
+import sys
 import pydicom
 from glob import glob
 import os
@@ -179,8 +180,26 @@ def main():
     args = parser.parse_args()
 
     data_path = os.path.normcase(os.path.abspath(args.in_folder))
+    new_ids_path = os.path.normcase(os.path.abspath(args.new_ids))
     album_name = args.album_name
-    new_ids = json.load(open(args.new_ids, "r"))
+
+    if not os.path.isdir(data_path):
+        print(f"Input directory ({data_path}) does not exist. Please check!")
+        sys.exit()
+
+    if not os.path.isfile(new_ids_path):
+        print(f"New IDs file ({new_ids_path}) not found. Please check!")
+        sys.exit()
+    
+    try:
+        new_ids = json.load(open(new_ids_path, "r"))
+    except json.JSONDecodeError as e:
+        print(
+            f"New IDs file ({new_ids_path}) is not a valid JSON file. "
+            "Please check it! \n {e}"
+        )
+        sys.exit()
+
     if args.day_shift is not None:
         day_shift = json.load(open(args.day_shift, "r"))
     else:
