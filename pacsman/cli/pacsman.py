@@ -23,6 +23,7 @@ from tqdm import tqdm
 import os
 import warnings
 from pandas import read_csv, DataFrame
+from pandas.errors import ParserError
 import json
 from typing import Iterator, Dict, List
 from cerberus import Validator
@@ -557,8 +558,12 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    # Read the query file.
-    table = read_csv(args.queryfile, dtype=str).fillna("")
+    # Read / parse the query file.
+    try:
+        table = read_csv(args.queryfile, dtype=str).fillna("")
+    except ParserError:
+        print("Invalid query file! Please check!")
+        sys.exit(1)
 
     check_query_table_allowed_filters(table)
 
