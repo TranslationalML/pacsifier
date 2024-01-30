@@ -549,13 +549,13 @@ def main():
             "You must select either '--save' to save locally or '--move' to define a remote destination, not both!"
         )
         parser.print_help()
-        sys.exit()
+        sys.exit(1)
 
     # Check the case where the queryfile option is missing. If it is the case print help.
     if args.queryfile is None or args.config is None:
         print("Missing mandatory parameter --queryfile or --config!")
         parser.print_help()
-        sys.exit()
+        sys.exit(1)
 
     # Read the query file.
     table = read_csv(args.queryfile, dtype=str).fillna("")
