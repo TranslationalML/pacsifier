@@ -185,11 +185,11 @@ def main():
 
     if not os.path.isdir(data_path):
         print(f"Input directory ({data_path}) does not exist. Please check!")
-        sys.exit()
+        sys.exit(1)
 
     if not os.path.isfile(new_ids_path):
         print(f"New IDs file ({new_ids_path}) not found. Please check!")
-        sys.exit()
+        sys.exit(1)
     
     try:
         new_ids = json.load(open(new_ids_path, "r"))
