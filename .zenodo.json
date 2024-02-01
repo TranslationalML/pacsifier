@@ -1,0 +1,58 @@
+{
+    "license": "Apache-2.0",
+    "keywords": [
+      "medical",
+      "imaging",
+      "pacs",
+      "dicom",
+      "software",
+      "data-retrieval",
+      "data-upload"
+    ],
+    "creators": [
+      {
+        "name": "Tourbier, Sebastien",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Ben Othman, Firas",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Di Noto, Tommaso",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Wetzel, Alexandre",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Fischi Gomez, Elda",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Mahdi, Mazen",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Pedron, Frederic",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Schaer, Roger",
+        "affiliation": "eHealth Unit, HES-SO Valais-Wallis, Switzerland"
+      },
+      {
+        "name": "Ravano, Veronica",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      },
+      {
+        "name": "Richiardi, Jonas",
+        "affiliation": "Radiology Department, Centre Hospitalier Universitaire Vaudois and University of Lausanne (CHUV-UNIL), Switzerland"
+      }
+    ],
+    "access_right": "open",
+    "upload_type": "software",
+    "title": "PACSMAN",
+    "description": "Open-source software for batch DICOM data retrieval and upload to a PACS (picture archiving and communication system)"
+}
