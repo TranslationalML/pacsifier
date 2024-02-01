@@ -31,7 +31,7 @@ import csv
 import time
 import argparse
 
-from pacsman.core.execute_commands import echo, find, get, move_remote, write_file
+from pacsman.core.dcmtk.commands import echo, find, get, move_remote, write_file
 from pacsman.core.sanity_checks import (
     check_date,
     check_date_range,
