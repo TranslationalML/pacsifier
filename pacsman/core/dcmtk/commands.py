@@ -282,6 +282,43 @@ def move_remote(
     )
 
 
+def upload(
+   aet: str,
+   dicom_dir: str,
+   server_address: str = "www.dicomserver.co.uk",
+   server_aet: str = "theServerAET",
+   port: int = 4242,
+   log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+):
+    """Build a query for storescu to upload dicom files to a PACS server.
+    
+    Args:
+        aet: called AET.
+        dicom_dir: directory of dicom files to upload.
+        server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
+        server_aet: PACS server AET. Default is "theServerAET".
+        port: PACS server port for incoming requests. Default is 4242.
+        log_dir: Folder for the logs where the log file (log.txt) and
+                 the fails file (fails.txt) produced by run() will be written.
+                 Default is "./logs" e.g. the logs/ folder in the current working directory.
+    """
+    check_port(port)
+    check_AET(aet)
+    check_server_address(server_address)
+    check_AET(server_aet, server=True)
+
+    upload_command = (
+        f"storescu -ll debug {server_address} {port} "
+        f'-aet "{aet}" -aec "{server_aet}" '
+        f"--scan-directories {dicom_dir}"
+    )
+
+    return run(
+        query=upload_command,
+        log_dir=log_dir
+    )
+
+
 def write_file(results: str, file: str = "output.txt") -> None:
     """Writes results in file passed in parameters using the parameters passed as arguments.
 
