@@ -28,6 +28,12 @@ GROUP_ID = $(shell id -g $(USER))
 # Force to use buildkit for building the Docker image
 export DOCKER_BUILDKIT=0
 
+#validate-zenodo: @ Validate the .zenodo.json file of the project
+.PHONY: validate-zenodo
+validate-zenodo:
+	@echo "Validating .zenodo.json file..."
+	python $(PROJECT_DIR)/utils/validate_dot_zenodo_json.py
+
 #test: @ Run all tests
 .PHONY: test
 test:
