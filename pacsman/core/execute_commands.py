@@ -33,6 +33,7 @@ from pacsman.core.sanity_checks import (
 
 warnings.filterwarnings("ignore")
 
+
 # Query default parameters
 PATIENT_ID = '"PAT004"'
 STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, OUTPUT_DIR = (
@@ -40,34 +41,7 @@ STUDY_INSTANCE_UID, SERIES_INSTANCE_UID, OUTPUT_DIR = (
     '"1.2.276.0.7230010.3.1.4.2032403683.11008.1512470699.462"',
     ".",
 )
-
 PARAMETERS = "88.202.185.144 104 -aec theServerAET -aet MY_AET"
-
-# Query squeletons.
-ECHO_COMMAND = (
-    'echoscu -ll trace -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
-)
-FIND_COMMAND = (
-    "findscu -v {modified_params} --study "
-    "-k QueryRetrieveLevel={query_retrieval_level} -k 0010,0020={patient_id} "
-    "-k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={study_uid} --key 0020,000e={series_instance_uid} "
-    "--key 0008,103E={series_description} --key 18,1030={protocol_name} --key 8,22={acquisition_date} "
-    "--key 0008,0020={study_date} --key 0010,0010={patient_name} --key 10,30={patient_birthdate} "
-    "--key 8,30 --key 18,1000={device_serial_number} --key 8,60={modality} --key 8,8={image_type} "
-    "--key 8,1030={study_description} --key 8,50={accession_number} --key 18,24={sequence_name}"
-)
-MOVE_COMMAND = (
-    'movescu -ll debug {modified_params} -aem "{aet}" -k 0008,0052="PATIENT" --patient '
-    "--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
-    "--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
-    "--port {move_port} -od {output_dir}"
-)
-MOVE_REMOTE_COMMAND = (
-    'movescu -ll debug {modified_params} -aem "{move_aet}" -k 0008,0052="PATIENT" --patient '
-    "--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
-    "--key 0020,000e={series_instance_uid} --key 0008,0020={study_date}"
-)
-
 
 ########################################################################################################################
 ########################################################FUNCTIONS#######################################################
@@ -101,12 +75,12 @@ def echo(
     check_AET(server_aet, server=True)
     check_AET(aet)
 
-    command = ECHO_COMMAND.format(
-        server_aet=server_aet, aet=aet, server_address=server_address, port=port
+    echo_command = (
+        f'echoscu -ll trace -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
     )
 
     return run(
-        query=command,
+        query=echo_command,
         log_dir=log_dir,
     )
 
@@ -176,28 +150,19 @@ def find(
     modified_params = replace_default_params(
         PARAMETERS, aet, server_address, server_aet, port
     )
-    command = FIND_COMMAND.format(
-        modified_params=modified_params,
-        query_retrieval_level=query_retrieval_level,
-        patient_id=patient_id,
-        study_uid=study_uid,
-        series_instance_uid=series_instance_uid,
-        series_description=series_description,
-        protocol_name=protocol_name,
-        acquisition_date=acquisition_date,
-        study_date=study_date,
-        patient_name=patient_name,
-        patient_birthdate=patient_birthdate,
-        device_serial_number=device_serial_number,
-        modality=modality,
-        image_type=image_type,
-        study_description=study_description,
-        accession_number=accession_number,
-        sequence_name=sequence_name,
+
+    find_command = (
+        f"findscu -v {modified_params} --study "
+        f"-k QueryRetrieveLevel={query_retrieval_level} -k 0010,0020={patient_id} "
+        f"-k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={study_uid} --key 0020,000e={series_instance_uid} "
+        f"--key 0008,103E={series_description} --key 18,1030={protocol_name} --key 8,22={acquisition_date} "
+        f"--key 0008,0020={study_date} --key 0010,0010={patient_name} --key 10,30={patient_birthdate} "
+        f"--key 8,30 --key 18,1000={device_serial_number} --key 8,60={modality} --key 8,8={image_type} "
+        f"--key 8,1030={study_description} --key 8,50={accession_number} --key 18,24={sequence_name}"
     )
 
     return run(
-        query=command,
+        query=find_command,
         log_dir=log_dir,
     )
 
@@ -247,18 +212,16 @@ def get(
     modified_params = replace_default_params(
         PARAMETERS, aet, server_address, server_aet, port
     )
-    command = MOVE_COMMAND.format(
-        modified_params=modified_params,
-        aet=aet,
-        patient_id=patient_id,
-        study_instance_uid=study_instance_uid,
-        series_instance_uid=series_instance_uid,
-        study_date=study_date,
-        move_port=move_port,
-        output_dir=output_dir,
+
+    move_command = (
+        f'movescu -ll debug {modified_params} -aem "{aet}" -k 0008,0052="PATIENT" --patient '
+        f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
+        f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
+        f"--port {move_port} -od {output_dir}"
     )
+
     return run(
-        query=command,
+        query=move_command,
         log_dir=log_dir,
     )
 
@@ -306,17 +269,15 @@ def move_remote(
     modified_params = replace_default_params(
         PARAMETERS, aet, server_address, server_aet, port
     )
-    command = MOVE_REMOTE_COMMAND.format(
-        modified_params,
-        move_aet,
-        patient_id,
-        study_instance_uid,
-        series_instance_uid,
-        study_date,
+
+    move_remote_command = (
+        f'movescu -ll debug {modified_params} -aem "{move_aet}" -k 0008,0052="PATIENT" --patient '
+        f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
+        f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date}"
     )
 
     return run(
-        query=command,
+        query=move_remote_command,
         log_dir=log_dir,
     )
 
