@@ -77,9 +77,7 @@ def echo(
     check_AET(server_aet, server=True)
     check_AET(aet)
 
-    echo_command = (
-        f'echoscu -ll trace --timeout {timeout} -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
-    )
+    echo_command = f'echoscu -ll trace --timeout {timeout} -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
 
     return run(
         query=echo_command,
@@ -285,15 +283,15 @@ def move_remote(
 
 
 def upload(
-   aet: str,
-   dicom_dir: str,
-   server_address: str = "www.dicomserver.co.uk",
-   server_aet: str = "theServerAET",
-   port: int = 4242,
-   log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+    aet: str,
+    dicom_dir: str,
+    server_address: str = "www.dicomserver.co.uk",
+    server_aet: str = "theServerAET",
+    port: int = 4242,
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
 ):
     """Build a query for storescu to upload dicom files to a PACS server.
-    
+
     Args:
         aet: called AET.
         dicom_dir: directory of dicom files to upload.
@@ -315,10 +313,7 @@ def upload(
         f"--scan-directories {dicom_dir}"
     )
 
-    return run(
-        query=upload_command,
-        log_dir=log_dir
-    )
+    return run(query=upload_command, log_dir=log_dir)
 
 
 def write_file(results: str, file: str = "output.txt") -> None:
