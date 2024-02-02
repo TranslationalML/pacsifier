@@ -71,6 +71,7 @@ RUN mkdir -p "/tests/report" && chmod -R 775 "/tests"
 
 # Create directory for storing DICOM files (SCU_STORE) with correct permissions
 RUN mkdir -p "/tmp/SCU_STORE" && chmod -R 775 "/tmp/SCU_STORE"
+RUN mkdir -p "/tmp/SCU_UPLOAD_STORE" && chmod -R 775 "/tmp/SCU_UPLOAD_STORE"
 
 # Create directory for pytest cache with correct permissions
 RUN mkdir -p "/app/pacsman/.pytest_cache" && chmod -R 775 "/app/pacsman/.pytest_cache"
