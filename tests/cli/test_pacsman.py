@@ -223,6 +223,14 @@ def test_retrieve_dicoms_using_table(test_dir):
     assert sorted(output_files)[:6] == sorted(known_files)[:6]
 
 
+def test_upload_dicoms(test_dir):
+    dicomseries_karnak_tags_dir = os.path.join(test_dir, "tmp", "test_data", "dicomseries_tagged_all")
+    config_path = os.path.join("/tests", "config", "config_upload.json")
+    with open(config_path) as f:
+        parameters = json.load(f)
+    upload_dicoms(dicomseries_karnak_tags_dir, parameters)
+
+
 def test_check_output_info():
     pass
 
