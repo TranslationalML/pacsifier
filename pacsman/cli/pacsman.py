@@ -31,7 +31,7 @@ import csv
 import time
 import argparse
 
-from pacsman.core.dcmtk.commands import echo, find, get, move_remote, write_file
+from pacsman.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file
 from pacsman.core.sanity_checks import (
     check_date,
     check_date_range,
@@ -275,7 +275,9 @@ def retrieve_dicoms_using_table(
 
         check_query_attributes(query_attributes)
 
-        query_attributes["PatientName"] = process_person_names(query_attributes["PatientName"])
+        query_attributes["PatientName"] = process_person_names(
+            query_attributes["PatientName"]
+        )
 
         if len(query_attributes["StudyDate"]) > 0:
             print(
@@ -475,10 +477,112 @@ def retrieve_dicoms_using_table(
 
             if os.path.isfile(current_findscu_dump_file):
                 os.remove(current_findscu_dump_file)
-    
+
     # Clean the tmp folder
     if os.path.isdir(os.path.join(output_dir, "tmp")):
-        shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)    
+        shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
+
+
+def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
+    """Upload dicoms to a PACS server.
+
+    Args:
+        dicom_dir: path to the directory containing the dicoms.
+                   The directory should adopt the structured adopted by PACSMAN output directory
+                   when using the --save command.
+                   This means that it should contain a subdirectory for each patient,
+                   which in turn should contain a subdirectory for each study,
+                   which in turn should contain a subdirectory for each series, such as:
+
+                     dicom_dir
+                        ├── sub-01
+                        │   ├── ses-01
+                        │   │   ├── 00001-First_series
+                        │   │   │   ├── image1.dcm
+                        │   │   │   ├── image2.dcm
+                        │   │   │   ├── ...
+                        │   │   ├── 00002-Second_series
+                        │   │   │   ├── image1.dcm
+                        │   │   │   ├── image2.dcm
+                        │   │   │   ├── ...
+                        ├── sub-02
+                        │   ├── ses-01
+                        │   │   ├── 00001-First_series
+                        │   │   │   ├── image1.dcm
+
+        parameters: parameters from PACSMAN configuration file
+
+    """
+    pacs_server = parameters["server_address"]
+    port = int(parameters["port"])
+    client_aet = parameters["AET"]
+    server_aet = parameters["server_AET"]
+    batch_wait_time = int(parameters["batch_wait_time"])
+    batch_size = int(parameters["batch_size"])
+
+    log_dir = os.path.join(dicom_dir, "logs", "upload")
+
+    # check if we can ping the PACS
+    echo_res = echo(
+        server_address=pacs_server,
+        port=port,
+        server_aet=server_aet,
+        aet=client_aet,
+        log_dir=log_dir,
+    )
+    if not echo_res:
+        raise RuntimeError(
+            "Cannot associate with PACS server. Please check connectivity and firewall settings"
+            " with respect to ports configured in your config file."
+        )
+    
+    counter = 0
+    # Loop over all patients
+    for patient in os.listdir(dicom_dir):
+        if not patient.startswith("sub-"):
+            continue
+        patient_dir = os.path.join(dicom_dir, patient)
+
+        # Create a list of all series directories of this subject
+        # depending on the structure of the patient directory
+        series_dirs = []
+        series_log_dirs = []
+        for sub_dir in os.listdir(patient_dir):
+            sub_dir_path = os.path.join(patient_dir, sub_dir)
+            sub_dir_log_path = os.path.join(log_dir, patient, sub_dir)
+            if os.path.isdir(sub_dir_path):
+                if sub_dir.startswith("ses-"):
+                    for series in os.listdir(sub_dir_path):
+                        series_dir = os.path.join(sub_dir_path, series)
+                        series_log_dir = os.path.join(sub_dir_log_path, series)
+                        series_dirs.append(series_dir)
+                        series_log_dirs.append(series_log_dir)
+                else:
+                    series_dirs.append(sub_dir_path)
+                    series_log_dirs.append(sub_dir_log_path)
+
+        # Loop over all series
+        for series_dir, series_log_dir in tqdm(zip(series_dirs, series_log_dirs)):
+            counter += 1
+            if counter % batch_size == 0:
+                time.sleep(batch_wait_time)
+
+            # Check if the series directory contains dicom files
+            dicom_files = [
+                f for f in os.listdir(series_dir) if os.path.isfile(os.path.join(series_dir, f))
+            ]
+            if not dicom_files:
+                continue
+
+            # Upload the series to the PACS server
+            upload_res = upload(
+                client_aet,
+                series_dir,
+                server_address=pacs_server,
+                server_aet=server_aet,
+                port=port,
+                log_dir=series_log_dir
+            )
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -491,7 +595,7 @@ def get_parser() -> argparse.ArgumentParser:
         "--config",
         "-c",
         help="Configuration file path",
-        default=os.path.join(".", "files", "config.json"),
+        required=True,
     )
     parser.add_argument(
         "--save",
@@ -511,11 +615,27 @@ def get_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Move images resulting from query (cannot be used together with '--save')",
     )
-    parser.add_argument("--queryfile", "-q", help="Path to query file")
+    parser.add_argument(
+        "--queryfile",
+        "-q",
+        help="Path to query file (mandatory if '--save' or '--move' is used)",
+    )
     parser.add_argument(
         "--out_directory",
         "-d",
-        help="Output directory where images will be saved",
+        help="Output directory where images will be saved (used only with '--save' or '--move' options)",
+        default=os.path.join(".", "data"),
+    )
+    parser.add_argument(
+        "--upload",
+        "-u",
+        action="store_true",
+        help="Upload DICOM images to PACS server",
+    )
+    parser.add_argument(
+        "--upload_directory",
+        "-ud",
+        help="Directory containing the DICOM images to upload (only used with '--upload' option)",
         default=os.path.join(".", "data"),
     )
 
@@ -545,29 +665,45 @@ def main():
     output_dir = args.out_directory
 
     # Check the case where save & move are specified (it should be only one of the two)
-    if args.save and args.move:
+    if (
+        (args.save and args.move)
+        or (args.save and args.upload)
+        or (args.move and args.upload)
+        or (args.save and args.move and args.upload)
+    ):
         print(
-            "You must select either '--save' to save locally or '--move' to define a remote destination, not both!"
+            "You must select either '--save' to save locally "
+            "or '--move' to define a remote destination "
+            "or '--upload' to upload, not all!"
         )
         parser.print_help()
         sys.exit(1)
 
-    # Check the case where the queryfile option is missing. If it is the case print help.
-    if args.queryfile is None or args.config is None:
-        print("Missing mandatory parameter --queryfile or --config!")
-        parser.print_help()
-        sys.exit(1)
+    if args.save or args.move:
+        # Check the case where the queryfile option is missing. If it is the case print help.
+        if args.queryfile is None:
+            print(
+                "Missing mandatory parameter --queryfile for the '--save' or '--move' options!"
+            )
+            parser.print_help()
+            sys.exit(1)
 
-    # Read / parse the query file.
-    try:
-        table = read_csv(args.queryfile, dtype=str).fillna("")
-    except ParserError:
-        print("Invalid query file! Please check!")
-        sys.exit(1)
+        # Read / parse the query file.
+        try:
+            table = read_csv(args.queryfile, dtype=str).fillna("")
+        except ParserError:
+            print("Invalid query file! Please check!")
+            sys.exit(1)
 
-    check_query_table_allowed_filters(table)
+        check_query_table_allowed_filters(table)
+        retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move)
 
-    retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move)
+    elif args.upload:
+        if not os.path.isdir(args.upload_directory):
+            print("The specified upload directory does not exist. Please check!")
+            sys.exit(1)
+
+        upload_dicoms(args.upload_directory, parameters)
 
 
 if __name__ == "__main__":
