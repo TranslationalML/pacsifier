@@ -54,6 +54,7 @@ def echo(
     server_aet: str = "theServertAET",
     aet: str = "AET",
     log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+    timeout: int = 10,
 ) -> str:
     """Checks that the PACS server can be reached and accepts associations.
 
@@ -65,6 +66,7 @@ def echo(
         log_dir: Folder for the logs where the log file (log.txt) and
                     the fails file (fails.txt) produced by run() will be written.
                     Default is "./logs" e.g. the logs/ folder in the current working directory.
+        timeout: time in seconds to wait for a response from the server. Default is 30.
 
     Returns:
         string: The log lines.
@@ -76,7 +78,7 @@ def echo(
     check_AET(aet)
 
     echo_command = (
-        f'echoscu -ll trace -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
+        f'echoscu -ll trace --timeout {timeout} -aec "{server_aet}" -aet "{aet}" {server_address} {port}'
     )
 
     return run(
