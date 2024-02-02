@@ -183,6 +183,31 @@ def test_add_or_retrieve_name():
     )
 
 
+def test_invalid_retrieve_dicoms_using_table(test_dir):
+    config_path = os.path.join("/tests", "config", "config.json")
+    table = read_csv(
+        os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
+    ).fillna("")
+    out_directory = os.path.join(test_dir, "tmp", "test_set")
+
+    with open(config_path) as f:
+        parameters = json.load(f)
+
+    invalid_parameters = parameters.copy()
+    # Invalid server address to test the RuntimeError because of timeout
+    invalid_parameters["server_address"] = "128.1.0.1"
+
+    with pytest.raises(RuntimeError):
+        retrieve_dicoms_using_table(
+            table,
+            invalid_parameters,
+            out_directory,
+            True,
+            True,
+            False,
+        )
+
+
 def test_retrieve_dicoms_using_table(test_dir):
     table = read_csv(
         os.path.join(test_dir, "test_data", "query", "query_dicom.csv"),
