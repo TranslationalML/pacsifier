@@ -136,24 +136,42 @@ def get_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--config",
-        "-c",
-        help="Deidentification configuration file path",
-        default=os.path.join(".", "files", "config_deid.json"),
+        "--mode",
+        "-m",
+        help='Mode of operation: use de-ID API to get new pseudonyms and day shifts ("de-id") '
+        'or use a custom mapping file in CSV format that specifies the new pseudonyms ("custom")',
+        choices=["de-id", "custom"],
+        default="de-id",
     )
     parser.add_argument(
-        "--queryfile", "-q", help="Path to PACSMAN query file (used to find PatientIDs)"
+        "--config",
+        "-c",
+        help="Deidentification configuration file path (required for --mode de-id)",
+        required="--mode de-id" in sys.argv,
+    )
+    parser.add_argument(
+        "--queryfile",
+        "-q",
+        help="Path to PACSMAN query file (used to find PatientIDs, required for --mode de-id)",
+        required="--mode de-id" in sys.argv,
+    )
+    parser.add_argument(
+        "--mappingfile",
+        "-mf",
+        help="Path to custom mapping file in CSV format (required for --mode custom)",
+        required="--mode custom" in sys.argv,
     )
     parser.add_argument(
         "--project_name",
         "-a",
         help="Name of the project in GPCR (may or may not correspond to Kheops album)",
+        required=True,
     )
     parser.add_argument(
         "--out_directory",
         "-d",
         help="Output directory where the pseudonyms will be saved as a json",
-        default=os.path.join(".", "data"),
+        required=True,
     )
 
     return parser
