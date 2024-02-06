@@ -13,7 +13,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Script to get the new pseudonyms and day shifts for a list of PatientIDs in a PACSMAN query file."""
+"""Script to get the new pseudonyms and day shifts in JSON format.
+
+The script can be used in two modes:
+- de-id: use the de-ID API to get new pseudonyms and day shifts
+- custom: use a custom mapping file in CSV format that specifies the mapping of old / new pseudonyms
+
+In case of the de-id mode, the script requires a PACSMAN query file and a configuration file for the de-ID API.
+In case of the custom mode, the script requires a custom mapping file in CSV format.
+
+The script saves the new pseudonyms and day shifts as JSON files in the specified output directory.
+
+Example usage:
+    python get_pseudonyms.py --mode de-id --config config.json --queryfile query.csv --project_name PACSMANCohort --out_directory /path/to/output
+    python get_pseudonyms.py --mode custom --mappingfile mapping.csv --shift-days --project_name PACSMANCohort --out_directory /path/to/output
+
+"""
 
 import ast
 import sys, os, argparse
