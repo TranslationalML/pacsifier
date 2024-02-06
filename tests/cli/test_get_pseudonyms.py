@@ -16,11 +16,17 @@
 """Tests for the functions of the `pacsman.cli.get_pseudonyms` script."""
 
 import os
+import shutil
 import sys
+import json
 import pytest
 
 
-from pacsman.cli.get_pseudonyms import check_config_file_deid, convert_csv_to_deid_json
+from pacsman.cli.get_pseudonyms import (
+    check_config_file_deid,
+    check_queryfile_content,
+    convert_csv_to_deid_json,
+)
 
 
 def test_check_config_file_deid():
@@ -52,9 +58,113 @@ def test_convert_csv_to_deid_json(test_dir):
         "project": "PACSMANCohort",
         "PatientIDList": [{"PatientID": "PACSMAN1"}],
     }
-    
+
     queryfile = os.path.join(test_dir, "test_data", "query", "query_file_invalid.csv")
     project_name = "PACSMANCohort"
     json_new = convert_csv_to_deid_json(queryfile, project_name)
     print(json_new, file=sys.stderr)
     assert json_new == {}
+
+
+def test_check_queryfile_content(test_dir):
+    queryfile = os.path.join(test_dir, "test_data", "query", "query_dicom.csv")
+    check_queryfile_content(queryfile)
+
+    queryfile = os.path.join(test_dir, "test_data", "query", "query_file_invalid.csv")
+    with pytest.raises(ValueError):
+        check_queryfile_content(queryfile)
+
+
+def test_custom_get_pseudonyms_script(script_runner, test_dir):
+    output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
+    project_name = "PACSMANCohort"
+
+    # Check that the script runs successfully when the flag --shift-days is set
+    ret = script_runner.run(
+        [
+            "pacsman-get-pseudonyms",
+            "-m",
+            "custom",
+            "-mf",
+            os.path.join(test_dir, "test_data", "pseudo_mapping", "pseudo_mapping.csv"),
+            "--shift-days",
+            "--project_name",
+            project_name,
+            "-v",
+            "-d",
+            output_dir,
+        ]
+    )
+    # Check that the script runs successfully
+    assert ret.success
+    # Check that the new_ids and day_shift files are created
+    assert os.path.exists(os.path.join(output_dir, f"new_ids_{project_name}.json"))
+    assert os.path.exists(os.path.join(output_dir, f"day_shift_{project_name}.json"))
+    # Check that the content of the new_ids file is correct
+    assert json.load(
+        open(os.path.join(output_dir, f"new_ids_{project_name}.json"))
+    ) == {"sub-1234": "P0001", "sub-87262": "P0002"}
+    # Check that the content of the day shifts in the day_shift file are not all 0
+    assert json.load(
+        open(os.path.join(output_dir, f"day_shift_{project_name}.json"))
+    ) != {"sub-1234": 0, "sub-87262": 0}
+
+    # Check that the script runs successfully when the flag --shift-days is not set
+    ret = script_runner.run(
+        [
+            "pacsman-get-pseudonyms",
+            "-m",
+            "custom",
+            "-mf",
+            os.path.join(test_dir, "test_data", "pseudo_mapping", "pseudo_mapping.csv"),
+            "--project_name",
+            project_name,
+            "-v",
+            "-d",
+            output_dir,
+        ]
+    )
+    # Check that the script runs successfully
+    assert ret.success
+    # Check that the day_shift files is created
+    assert os.path.exists(os.path.join(output_dir, f"day_shift_{project_name}.json"))
+    # Check that the content of the day_shift file is correct
+    assert json.load(
+        open(os.path.join(output_dir, f"day_shift_{project_name}.json"))
+    ) == {"sub-1234": 0, "sub-87262": 0}
+
+    # Check that the script fails to run if the mapping file is not found
+    ret = script_runner.run(
+        [
+            "pacsman-get-pseudonyms",
+            "-m",
+            "custom",
+            "-mf",
+            os.path.join(test_dir, "test_data", "pseudo_mapping", "pseudo_mapping_not_existing.csv"),
+            "--project_name",
+            project_name,
+            "-v",
+            "-d",
+            output_dir,
+        ]
+    )
+    # Check that the script fails
+    assert not ret.success
+
+    # Check that the script fails to run if the mapping file contains an empty cell
+    ret = script_runner.run(
+        [
+            "pacsman-get-pseudonyms",
+            "-m",
+            "custom",
+            "-mf",
+            os.path.join(test_dir, "test_data", "pseudo_mapping", "pseudo_mapping_empty_cell.csv"),
+            "--project_name",
+            project_name,
+            "-v",
+            "-d",
+            output_dir,
+        ]
+    )
+    # Check that the script fails
+    assert not ret.success
