@@ -158,8 +158,16 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mappingfile",
         "-mf",
-        help="Path to custom mapping file in CSV format (required for --mode custom)",
+        help="Path to custom mapping file in CSV format (required for --mode custom). "
+        "The file is expected to have no header and two columns: the first column is the old pseudonym, "
+        "the second column is the new pseudonym. The file should not contain any empty cells.",
         required="--mode custom" in sys.argv,
+    )
+    parser.add_argument(
+        "--shift-days",
+        action="store_true",
+        help="Generate random day shifts for all pseudonyms (employed for --mode custom). "
+        "If not specified, day shifts are set to 0.",
     )
     parser.add_argument(
         "--project_name",
@@ -172,6 +180,12 @@ def get_parser() -> argparse.ArgumentParser:
         "-d",
         help="Output directory where the pseudonyms will be saved as a json",
         required=True,
+    )
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        help="Print verbose output",
+        action="store_true",
     )
 
     return parser
