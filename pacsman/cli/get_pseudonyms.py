@@ -294,7 +294,7 @@ def main():
         # if specified. Otherwise, set day shifts to 0.
         day_shifts = {
             p: np.random.randint(-30, 31) if args.shift_days else 0
-            for p in pseudo_mapping.values()
+            for p in pseudo_mapping.keys()
         }
         json_day_shift_response = json.dumps(day_shifts, indent=4)
 
