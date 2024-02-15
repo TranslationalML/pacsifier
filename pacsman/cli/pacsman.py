@@ -243,7 +243,7 @@ def retrieve_dicoms_using_table(
     client_aet = parameters["AET"]
     server_aet = parameters["server_AET"]
     move_aet = parameters["move_AET"]
-    batch_wait_time = int(parameters["batch_wait_time"])
+    batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
 
     # Flexible parsing.
@@ -517,7 +517,7 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
     port = int(parameters["port"])
     client_aet = parameters["AET"]
     server_aet = parameters["server_AET"]
-    batch_wait_time = int(parameters["batch_wait_time"])
+    batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
 
     log_dir = os.path.join(dicom_dir, "logs", "upload")
