@@ -18,7 +18,7 @@
 import pytest
 
 from pacsman.core.sanity_checks import (
-    check_config_file,
+    check_config_parameters,
     check_query_retrieval_level,
     check_server_address,
     check_port,
@@ -32,9 +32,58 @@ from pacsman.core.sanity_checks import (
 )
 
 
-def test_check_config_file():
+def test_check_config_parameters_invalid():
     with pytest.raises(ValueError):
-        check_config_file({"California Dreaming": 1})
+        check_config_parameters({"California Dreaming": 1})
+
+
+def test_check_config_parameters_valid():
+    check_config_parameters({
+            "server_address": "localhost",
+            "port": 4444,
+            "server_AET": "SCU_STORE",
+            "AET": "PACSMAN_SCU",
+            "move_port": 11112,
+            "move_AET": "PACSMAN_SCU",
+            "batch_size": 30,
+            "batch_wait_time": 10
+        })
+    
+
+def test_check_config_parameters_invalid_values():
+    with pytest.raises(ValueError):
+        check_config_parameters({
+            "server_address": "localhost",
+            "port": 4444,
+            "server_AET": "SCU_STORE",
+            "AET": "PACSMAN_SCU",
+            "move_port": "11112a",  # Invalid port should be an int and not a string
+            "move_AET": "PACSMAN_SCU",
+            "batch_size": 30,
+            "batch_wait_time": 10
+        })
+    with pytest.raises(ValueError):
+        check_config_parameters({
+            "server_address": "localhost",
+            "port": 4444,
+            "server_AET": "SCU_STORE",
+            "AET": "PACSMAN_SCU",
+            "move_port": 11112,
+            "move_AET": "PACSMAN_SCU",
+            "batch_size": "30y",  # Invalid batch size should be an int and not a string
+            "batch_wait_time": 10
+        })
+    with pytest.raises(ValueError):
+        check_config_parameters({
+            "server_address": "localhost",
+            "port": 4444,
+            "server_AET": "SCU_STORE",
+            "AET": "PACSMAN_SCU",
+            "move_port": 11112,
+            "move_AET": "PACSMAN_SCU",
+            "batch_size": 30,
+            "batch_wait_time": "10y"  # Invalid batch wait time
+        })
 
 
 def test_check_query_retrieval_level():
