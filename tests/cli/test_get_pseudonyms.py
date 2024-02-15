@@ -75,7 +75,7 @@ def test_check_queryfile_content(test_dir):
         check_queryfile_content(queryfile)
 
 
-def test_custom_get_pseudonyms_script(script_runner, test_dir):
+def test_custom_get_pseudonyms_script_with_shift(script_runner, test_dir):
     output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
     project_name = "PACSMANCohort"
 
@@ -109,6 +109,11 @@ def test_custom_get_pseudonyms_script(script_runner, test_dir):
         open(os.path.join(output_dir, f"day_shift_{project_name}.json"))
     ) != {"sub-1234": 0, "sub-87262": 0}
 
+
+def test_custom_get_pseudonyms_script_no_shift(script_runner, test_dir):
+    output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
+    project_name = "PACSMANCohort"
+
     # Check that the script runs successfully when the flag --shift-days is not set
     ret = script_runner.run(
         [
@@ -133,6 +138,11 @@ def test_custom_get_pseudonyms_script(script_runner, test_dir):
         open(os.path.join(output_dir, f"day_shift_{project_name}.json"))
     ) == {"sub-1234": 0, "sub-87262": 0}
 
+
+def test_failure_custom_get_pseudonyms_script_no_mapping(script_runner, test_dir):
+    output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
+    project_name = "PACSMANCohort"
+
     # Check that the script fails to run if the mapping file is not found
     ret = script_runner.run(
         [
@@ -150,6 +160,11 @@ def test_custom_get_pseudonyms_script(script_runner, test_dir):
     )
     # Check that the script fails
     assert not ret.success
+
+
+def test_failure_custom_get_pseudonyms_script_empty_cell(script_runner, test_dir):
+    output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
+    project_name = "PACSMANCohort"
 
     # Check that the script fails to run if the mapping file contains an empty cell
     ret = script_runner.run(
