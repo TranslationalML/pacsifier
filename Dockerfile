@@ -49,6 +49,7 @@ WORKDIR /app/pacsman
 
 # Copy necessary contents of this repository.
 COPY ./.coveragerc ./.coveragerc
+COPY ./.pytest.ini ./.pytest.ini
 COPY setup.py ./setup.py
 COPY setup.cfg ./setup.cfg
 COPY README.md ./README.md
