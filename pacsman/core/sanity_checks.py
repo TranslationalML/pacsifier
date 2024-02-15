@@ -15,6 +15,7 @@
 
 """This module contains sanity checks for the functions employed in the pacsman script."""
 
+import jsonschema
 from datetime import datetime
 from typing import Dict
 
@@ -227,29 +228,54 @@ def check_date(date: str) -> None:
     return
 
 
-def check_config_file(config_file: Dict[str, str]) -> None:
-    """Check that the config file passed as a parameter is valid or not.
+def check_config_parameters(config_parameters: Dict[str, str]) -> None:
+    """Check that the dictionary containing config parameters is valid.
+
+    This function check if all the keys are present and if the values are valid
+    by using the jsonschema library.
 
     Args:
-        dict: dictionary loaded from the config json file
+        config_parameters: dictionary loaded from the config json file
 
+    Raises:
+        ValueError if the config file is not valid or if the parameters are not valid
     """
-    items = set(config_file.keys())
-    valid_keys = [
-        "server_address",
-        "port",
-        "server_AET",
-        "AET",
-        "move_AET",
-        "move_port",
-        "batch_size",
-        "batch_wait_time",
-    ]
-    if items != set(valid_keys):
-        raise ValueError(
-            "Invalid config file! Must contain these and only these keys: "
-            + " ".join(valid_keys)
-        )
+    schema = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+            "server_address": {
+                'oneOf': [ # Can be either an IP address, a hostname, or a URL (http/https or starting with www.)
+                    {"format": 'ipv4'},
+                    {"format": 'ipv6'},
+                    {"format": 'hostname'},
+                    {"format": 'uri', "pattern": '^(https?|http?)://|^www.'}
+                ]
+            },
+            "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+            "server_AET": {"type": "string", "maxLength": 16},
+            "AET": {"type": "string", "maxLength": 16},
+            "move_AET": {"type": "string", "maxLength": 16},
+            "move_port": {"type": "integer", "minimum": 1, "maximum": 65535},
+            "batch_size": {"type": "integer", "minimum": 1},
+            "batch_wait_time": {"type": "number", "minimum": 0.0},
+        },
+        "required": [
+            "server_address",
+            "port",
+            "server_AET",
+            "AET",
+            "move_AET",
+            "move_port",
+            "batch_size",
+            "batch_wait_time",
+        ],
+        "additionalProperties": False,
+    }
+    try:
+        jsonschema.validate(config_parameters, schema)
+    except jsonschema.exceptions.ValidationError as e:
+        raise ValueError(f"Invalid config file: {e}")
 
 
 def check_query_retrieval_level(query_retrieval_level: str) -> None:

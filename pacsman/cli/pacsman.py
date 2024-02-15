@@ -36,7 +36,7 @@ from pacsman.core.sanity_checks import (
     check_date,
     check_date_range,
     check_query_attributes,
-    check_config_file,
+    check_config_parameters,
 )
 
 warnings.filterwarnings("ignore")
@@ -657,7 +657,7 @@ def main():
     try:
         with open(config_path) as f:
             parameters = json.load(f)
-        check_config_file(parameters)
+        check_config_parameters(parameters)
     except FileNotFoundError:
         args.config = None
         pass
