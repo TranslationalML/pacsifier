@@ -44,7 +44,7 @@ def test_anonymize(test_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir, exist_ok=True)
     out_file = os.path.join(out_dir, "slice0.dcm")
-    
+
     # Get StudyInstanceUID, SeriesInstanceUID and SOPInstanceUID from the original file
     # to increment them by 1 in the anonymized file
     dataset = pydicom.read_file(in_file)
@@ -60,7 +60,7 @@ def test_anonymize(test_dir):
     new_SOPInstanceUID = SOPInstanceUID.split(".")
     new_SOPInstanceUID[-1] = str(int(new_SOPInstanceUID[-1]) + 1)
     new_SOPInstanceUID = ".".join(new_SOPInstanceUID)
-    
+
     # Test if the anonymization works
     anonymize_dicom_file(
         in_file,
@@ -75,10 +75,10 @@ def test_anonymize(test_dir):
         delete_identifiable_files=True,
         remove_private_tags=False,
     )
- 
+
     dataset = pydicom.read_file(out_file)
     attributes = dataset.dir("")
- 
+
     assert dataset.PatientID == "PACSMAN2"
     assert dataset.PatientName == "PACSMAN2^sub"
     if "InstitutionAddress" in attributes:
@@ -189,19 +189,24 @@ def test_anonymize_all_dicoms_within_folder(test_dir):
     # Create a folder with a few files following the expected structure
     dicom_dir = os.path.join(test_dir, "test_data", "dicomseries")
     pacsman_dir = os.path.join(test_dir, "tmp", "test_data", "dicomseries_structured")
-    structured_series_dir = os.path.join(pacsman_dir, "sub-PACSMAN1", "ses-20232016", "00000-No_series_description")
-    anonymization_dir = os.path.join(test_dir, "tmp", "test_data", "dicomseries_structured_anon")
+    structured_series_dir = os.path.join(
+        pacsman_dir, "sub-PACSMAN1", "ses-20232016", "00000-No_series_description"
+    )
+    anonymization_dir = os.path.join(
+        test_dir, "tmp", "test_data", "dicomseries_structured_anon"
+    )
 
     for dir in [structured_series_dir, anonymization_dir]:
         if os.path.exists(dir):
             shutil.rmtree(dir, ignore_errors=True)
-        os.makedirs(dir, exist_ok=True)    
+        os.makedirs(dir, exist_ok=True)
 
     for dir, _, files in os.walk(dicom_dir):
         for f in files:
-            print(f"dir = {dir}, f = {f}", file=sys.stderr)
             if f.endswith(".dcm"):
-                shutil.copyfile(os.path.join(dir, f), os.path.join(structured_series_dir, f))
+                shutil.copyfile(
+                    os.path.join(dir, f), os.path.join(structured_series_dir, f)
+                )
 
     dict_ = anonymize_all_dicoms_within_root_folder(
         output_folder=anonymization_dir,
@@ -209,4 +214,4 @@ def test_anonymize_all_dicoms_within_folder(test_dir):
         pattern_dicom_files=os.path.join("ses-*", "*", "*.dcm"),
         rename_patient_directories=False,
     )
-    assert dict_ == {'000001': 'PACSMAN1'}
+    assert dict_ == {"000001": "PACSMAN1"}

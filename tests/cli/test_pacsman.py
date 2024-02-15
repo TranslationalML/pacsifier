@@ -33,8 +33,9 @@ from pacsman.cli import (
     process_person_names,
     generate_new_folder_name,
     add_or_retrieve_name,
+    retrieve_dicoms_using_table,
+    upload_dicoms,
 )
-from pacsman.cli.pacsman import retrieve_dicoms_using_table
 
 
 def test_process_findscu_dump_file(test_dir):
@@ -140,7 +141,9 @@ def test_parse_table(test_dir):
 
 def test_read_line_by_line(test_dir):
     lines = list(
-        readLineByLine(os.path.join(test_dir, "test_data", "dump", "findscu_dump_file_example.txt"))
+        readLineByLine(
+            os.path.join(test_dir, "test_data", "dump", "findscu_dump_file_example.txt")
+        )
     )[:4]
     assert lines == [
         "I: Requesting Association",
@@ -183,10 +186,34 @@ def test_add_or_retrieve_name():
     )
 
 
+def test_invalid_retrieve_dicoms_using_table(test_dir):
+    config_path = os.path.join("/tests", "config", "config.json")
+    table = read_csv(
+        os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
+    ).fillna("")
+    out_directory = os.path.join(test_dir, "tmp", "test_set")
+
+    with open(config_path) as f:
+        parameters = json.load(f)
+
+    invalid_parameters = parameters.copy()
+    # Invalid server address to test the RuntimeError because of timeout
+    invalid_parameters["server_address"] = "128.1.0.1"
+
+    with pytest.raises(RuntimeError):
+        retrieve_dicoms_using_table(
+            table,
+            invalid_parameters,
+            out_directory,
+            True,
+            True,
+            False,
+        )
+
+
 def test_retrieve_dicoms_using_table(test_dir):
     table = read_csv(
-        os.path.join(test_dir, "test_data", "query", "query_dicom.csv"),
-        dtype=str
+        os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
     ).fillna("")
     config_path = os.path.join("/tests/config/config.json")
 
@@ -206,10 +233,10 @@ def test_retrieve_dicoms_using_table(test_dir):
     retrieve_dicoms_using_table(table, parameters, out_directory, True, True, False)
 
     # Assert the first six files of the list are correct
-    output_files = glob(
-        os.path.join(test_dir, "tmp", "test_set", "sub-*/ses-*/*/*")
+    output_files = glob(os.path.join(test_dir, "tmp", "test_set", "sub-*/ses-*/*/*"))
+    known_files_dir = os.path.join(
+        test_dir, "tmp", "test_set", "sub-PACSMAN1", "ses-20231016"
     )
-    known_files_dir = os.path.join(test_dir, "tmp", "test_set", "sub-PACSMAN1", "ses-20231016")
     known_files_dir = os.path.join(known_files_dir, "00000-No_series_description")
     known_filenames = [
         "MR.1.2.826.0.1.3680043.8.498.10078350936423615213975808998561561261",
@@ -221,6 +248,16 @@ def test_retrieve_dicoms_using_table(test_dir):
     ]
     known_files = [os.path.join(known_files_dir, file) for file in known_filenames]
     assert sorted(output_files)[:6] == sorted(known_files)[:6]
+
+
+def test_upload_dicoms(test_dir):
+    dicomseries_karnak_tags_dir = os.path.join(
+        test_dir, "tmp", "test_data", "dicomseries_tagged_all"
+    )
+    config_path = os.path.join("/tests", "config", "config_upload.json")
+    with open(config_path) as f:
+        parameters = json.load(f)
+    upload_dicoms(dicomseries_karnak_tags_dir, parameters)
 
 
 def test_check_output_info():

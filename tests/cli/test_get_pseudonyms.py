@@ -47,14 +47,12 @@ def test_convert_csv_to_deid_json(test_dir):
     queryfile = os.path.join(test_dir, "test_data", "query", "query_dicom.csv")
     project_name = "PACSMANCohort"
     json_new = convert_csv_to_deid_json(queryfile, project_name)
-    print(json_new, file=sys.stderr)
     assert json_new == {
         "project": "PACSMANCohort",
         "PatientIDList": [{"PatientID": "PACSMAN1"}],
     }
-    
+
     queryfile = os.path.join(test_dir, "test_data", "query", "query_file_invalid.csv")
     project_name = "PACSMANCohort"
     json_new = convert_csv_to_deid_json(queryfile, project_name)
-    print(json_new, file=sys.stderr)
     assert json_new == {}

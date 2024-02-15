@@ -16,6 +16,7 @@
 # limitations under the License.
 
 conda run -n pacsman_minimal pytest \
+    -c "/app/pacsman/.pytest.ini" \
     --cov-config "/app/pacsman/.coveragerc" \
     --cov-report html:"/tests/report/cov_html" \
     --cov-report xml:"/tests/report/cov.xml" \

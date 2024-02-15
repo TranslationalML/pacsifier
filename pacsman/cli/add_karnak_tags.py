@@ -74,6 +74,8 @@ def tag_all_dicoms_within_root_folder(
 
     # List all  patient directories.
     patients_folders = next(os.walk(data_path))[1]
+    # Keep only sub-XXX folders
+    patients_folders = [p for p in patients_folders if p.startswith("sub-")]
 
     if not patients_folders:
         raise NotADirectoryError(

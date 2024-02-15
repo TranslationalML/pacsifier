@@ -45,7 +45,6 @@ def test_tag_dicom_file(test_dir):
         album_name="PACSMANCohort",
     )
     dataset = pydicom.read_file(file_to_tag)
-    print(dataset, file=sys.stderr)
 
     # Check that the tags have been added
     assert dataset[0x000B, 0x1001].value == "PACSMAN2"
@@ -70,10 +69,12 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
                     folder_to_tag, f"sub-{patient_id}", session_folder, series_folder
                 )
                 if os.path.exists(os.path.join(series_path)):
-                        shutil.rmtree(os.path.join(series_path))
+                    shutil.rmtree(os.path.join(series_path))
                 os.makedirs(series_path)
                 for file in files:
-                    shutil.copy(os.path.join(in_folder, file), os.path.join(series_path, file))
+                    shutil.copy(
+                        os.path.join(in_folder, file), os.path.join(series_path, file)
+                    )
                     # Update PatientID Tag
                     dataset = pydicom.read_file(os.path.join(series_path, file))
                     dataset.PatientID = patient_id
@@ -81,26 +82,32 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
                     dataset.StudyDate = str(session_folder.split("-")[1])
                     # TODO: Update PatientID / StudyInstanceUID / SeriesInstanceUID Tag
                     # to be able to load the different series in Weasis.
-                    # For now, we have to "remove the patient" from Weasis to load the different series. 
+                    # For now, we have to "remove the patient" from Weasis to load the different series.
                     dataset.save_as(os.path.join(series_path, file))
-    
+
     patient_codes = ["PACSMAN1coded", "PACSMAN2coded", "PACSMAN3coded"]
     day_shifts = ["10", "20", "30"]
 
     tag_all_dicoms_within_root_folder(
         data_path=folder_to_tag,
         new_ids={
-            f"sub-{real_id}": coded_id for real_id, coded_id in zip(patient_ids, patient_codes)
+            f"sub-{real_id}": coded_id
+            for real_id, coded_id in zip(patient_ids, patient_codes)
         },
         day_shift={
-            f"sub-{real_id}": day_shift for real_id, day_shift in zip(patient_ids, day_shifts)
+            f"sub-{real_id}": day_shift
+            for real_id, day_shift in zip(patient_ids, day_shifts)
         },
         album_name="PACSMANCohort",
     )
 
     # Check that the new private tags have been added
-    for patient_id, patient_code, day_shift in zip(patient_ids, patient_codes, day_shifts):
-        for file in glob(os.path.join(folder_to_tag, f"sub-{patient_id}", "*", "*", "*")):
+    for patient_id, patient_code, day_shift in zip(
+        patient_ids, patient_codes, day_shifts
+    ):
+        for file in glob(
+            os.path.join(folder_to_tag, f"sub-{patient_id}", "*", "*", "*")
+        ):
             dataset = pydicom.read_file(file)
             assert dataset[0x000B, 0x1001].value == patient_code
             assert dataset[0x000B, 0x1002].value == "PACSMANCohort"

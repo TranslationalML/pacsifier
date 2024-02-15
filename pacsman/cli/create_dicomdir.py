@@ -20,7 +20,7 @@ import warnings
 import argparse
 import string
 import random
-from pacsman.core.execute_commands import run
+from pacsman.core.dcmtk.commands import run
 from glob import glob
 import shutil
 from typing import Tuple, Dict, List

@@ -15,14 +15,15 @@
 
 """Tests for the functions of the `pacsman.core.execute_commands` module."""
 
+import os
 import pytest
 
-from pacsman.core.execute_commands import echo, find, get, replace_default_params, run
+from pacsman.core.dcmtk.commands import (
+    echo, find, get, upload, replace_default_params, run
+)
 
 
-def test_echo_invalid_inputs():
-    dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-
+def test_echo_invalid_inputs(dummy_long_string):
     with pytest.raises(ValueError):
         echo(port=0)
 
@@ -54,9 +55,7 @@ def test_echo_invalid_inputs():
         echo(server_address="128.132.1855.16")
 
 
-def test_find_invalid_inputs():
-    dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-
+def test_find_invalid_inputs(dummy_long_string):
     with pytest.raises(ValueError):
         find("", "19930911")
 
@@ -97,9 +96,7 @@ def test_find_invalid_inputs():
         find("AET", study_date="19930911", server_address="128.132.1855.16")
 
 
-def test_get_invalid_inputs():
-    dummy_long_string = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-
+def test_get_invalid_inputs(dummy_long_string):
     with pytest.raises(ValueError):
         get("", "19930911")
 
@@ -141,6 +138,36 @@ def test_get_invalid_inputs():
 
     with pytest.raises(ValueError):
         get("AET", "19930911", server_address="128.132.1855.16")
+
+
+def test_upload_invalid_inputs(test_dir):
+    
+    with pytest.raises(ValueError):
+        upload("", os.path.join(test_dir, "test_data", "dicomseries-not-existing"))
+    
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), port=0)
+
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), port=65536)
+
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), server_address="128.132.185.16.1")
+
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), server_address="128.s132.185.16")
+    
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), server_address="128.132..16")
+    
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), server_address="128.132.1855.16")
+
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), server_aet="dummyserverAETdummyserverAETdummyserverAET")
+    
+    with pytest.raises(ValueError):
+        upload("AET", os.path.join(test_dir, "test_data", "dicomseries"), server_aet="")
 
 
 def test_replace_default_parameters():

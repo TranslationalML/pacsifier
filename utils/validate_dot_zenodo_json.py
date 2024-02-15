@@ -20,6 +20,12 @@ It uses the json schema from https://github.com/zenodraft/metadata-schema-zenodo
 It is used in the CI/CD pipeline to validate the `.zenodo.json` file to make sure
 it is compliant with the Zenodo metadata schema before we make a new release.
 
+Example:
+
+    $ python utils/validate_dot_zenodo_json.py \
+        --zenodo-json .zenodo.json \
+        --zenodo-schema https://raw.githubusercontent.com/zenodraft/metadata-schema-zenodo/main/schema.json
+
 """
 
 import os
