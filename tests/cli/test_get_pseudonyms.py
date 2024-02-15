@@ -31,20 +31,20 @@ from pacsman.cli.get_pseudonyms import (
 
 def test_check_config_file_deid():
     config_file = {
-        "deid_URL": "https://deid.gpcr-project.org",
+        "deid_URL": "https://dummy.url.example",
         "deid_token": "1234567890",
     }
     check_config_file_deid(config_file)
 
     config_file = {
-        "deid_URL": "https://deid.gpcr-project.org",
+        "deid_URL": "https://dummy.url.example",
         "deid_token": "1234567890",
         "dummy_key": "dummy_value",
     }
     with pytest.raises(ValueError):
         check_config_file_deid(config_file)
 
-    config_file = {"deid_URL": "https://deid.gpcr-project.org"}
+    config_file = {"deid_URL": "https://dummy.url.example"}
     with pytest.raises(ValueError):
         check_config_file_deid(config_file)
 
