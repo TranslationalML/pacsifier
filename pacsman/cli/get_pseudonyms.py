@@ -201,7 +201,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--shift-days",
         action="store_true",
-        help="Generate random day shifts for all pseudonyms (employed for --mode custom). "
+        help="Generate random day shifts for all pseudonyms in the +- 30 days range (employed for --mode custom). "
         "If not specified, day shifts are set to 0.",
     )
     parser.add_argument(
