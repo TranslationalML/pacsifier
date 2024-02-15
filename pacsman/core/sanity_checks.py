@@ -245,7 +245,7 @@ def check_config_parameters(config_parameters: Dict[str, str]) -> None:
         "type": "object",
         "properties": {
             "server_address": {
-                'oneOf': [ # Can be either an IP address, a hostname, or a URL (http/https or starting with www.)
+                'anyOf': [ # Can be either an IP address, a hostname, or a URL (http/https or starting with www.)
                     {"format": 'ipv4'},
                     {"format": 'ipv6'},
                     {"format": 'hostname'},
