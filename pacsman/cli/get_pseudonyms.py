@@ -94,7 +94,7 @@ def get_deid_pseudonyms(deid_parameters: dict, query_json: dict) -> None:
         deid_parameters: dictionary containing the de-ID URL and token in the following format::
 
             {
-                "deid_URL": "https://deid.gpcr-project.org",
+                "deid_URL": "https://dummy.url.example",
                 "deid_token": "1234567890"
             }
 
@@ -123,7 +123,7 @@ def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
         deid_parameters: dictionary containing the de-ID URL and token in the following format::
 
             {
-                "deid_URL": "https://deid.gpcr-project.org",
+                "deid_URL": "https://dummy.url.example",
                 "deid_token": "1234567890"
             }
 
