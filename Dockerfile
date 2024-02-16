@@ -9,7 +9,7 @@ WORKDIR /app
 # Reference to ch.archive.ubuntu.com instead of archive.ubuntu.com 
 # RUN sed -i'' 's/archive\.ubuntu\.com/ch\.archive\.ubuntu\.com/' /etc/apt/sources.list
 
-RUN apt-get -y update && apt-get -qq -y install curl dcmtk bzip2 && \
+RUN apt-get -y update && apt-get -qq -y install curl dcmtk=3.6.6-5 bzip2 && \
     apt-get autoremove -y --purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
