@@ -13,12 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Script to get the new pseudonyms and day shifts for a list of PatientIDs in a PACSMAN query file."""
+"""Script to get the new pseudonyms and day shifts in JSON format.
+
+The script can be used in two modes:
+- de-id: use the de-ID API to get new pseudonyms and day shifts
+- custom: use a custom mapping file in CSV format that specifies the mapping of old / new pseudonyms
+
+In case of the de-id mode, the script requires a PACSMAN query file and a configuration file for the de-ID API.
+In case of the custom mode, the script requires a custom mapping file in CSV format.
+
+The script saves the new pseudonyms and day shifts as JSON files in the specified output directory.
+
+Example usage:
+    python get_pseudonyms.py --mode de-id --config config.json --queryfile query.csv --project_name PACSMANCohort --out_directory /path/to/output
+    python get_pseudonyms.py --mode custom --mappingfile mapping.csv --shift-days --project_name PACSMANCohort --out_directory /path/to/output
+
+"""
 
 import ast
 import sys, os, argparse
 import json, csv, requests
 from typing import Dict, Any
+import numpy as np
 from pandas import read_csv
 from pacsman.cli.pacsman import check_query_table_allowed_filters
 
@@ -76,12 +92,12 @@ def get_deid_pseudonyms(deid_parameters: dict, query_json: dict) -> None:
 
     Args:
         deid_parameters: dictionary containing the de-ID URL and token in the following format::
-            
+
             {
-                "deid_URL": "https://deid.gpcr-project.org",
+                "deid_URL": "https://dummy.url.example",
                 "deid_token": "1234567890"
             }
-        
+
         query_json: the PACSMAN query formatted as a dictionary
 
     Returns:
@@ -95,7 +111,7 @@ def get_deid_pseudonyms(deid_parameters: dict, query_json: dict) -> None:
     )
 
     resp = ast.literal_eval(response.text)
-    json_resp = json.dumps(resp)
+    json_resp = json.dumps(resp, indent=4)
 
     return json_resp
 
@@ -105,12 +121,12 @@ def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
 
     Args:
         deid_parameters: dictionary containing the de-ID URL and token in the following format::
-            
+
             {
-                "deid_URL": "https://deid.gpcr-project.org",
+                "deid_URL": "https://dummy.url.example",
                 "deid_token": "1234567890"
             }
-        
+
         query_json: the PACSMAN query formatted as a dictionary
 
     Returns:
@@ -120,13 +136,32 @@ def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
     head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
 
     response = requests.post(
-        deid_parameters["deid_URL"] + "_shift", headers=head, json=query_json, verify=False
+        deid_parameters["deid_URL"] + "_shift",
+        headers=head,
+        json=query_json,
+        verify=False,
     )
 
     resp = ast.literal_eval(response.text)
-    json_resp = json.dumps(resp)
-    
+    json_resp = json.dumps(resp, indent=4)
+
     return json_resp
+
+
+def check_queryfile_content(queryfile: str) -> None:
+    """Check that the PACSMAN query file is valid.
+
+    Args:
+        queryfile: the path of the PACSMAN query file
+
+    """
+    try:
+        query_table = read_csv(queryfile, dtype=str).fillna("")
+    except Exception as e:
+        print(f"Error reading PACSMAN query file: {e}")
+        sys.exit(1)
+
+    check_query_table_allowed_filters(query_table)
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -136,24 +171,56 @@ def get_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "--config",
-        "-c",
-        help="Deidentification configuration file path",
-        default=os.path.join(".", "files", "config_deid.json"),
+        "--mode",
+        "-m",
+        help='Mode of operation: use de-ID API to get new pseudonyms and day shifts ("de-id") '
+        'or use a custom mapping file in CSV format that specifies the new pseudonyms ("custom")',
+        choices=["de-id", "custom"],
+        default="de-id",
     )
     parser.add_argument(
-        "--queryfile", "-q", help="Path to PACSMAN query file (used to find PatientIDs)"
+        "--config",
+        "-c",
+        help="Deidentification configuration file path (required for --mode de-id)",
+        required="--mode de-id" in sys.argv,
+    )
+    parser.add_argument(
+        "--queryfile",
+        "-q",
+        help="Path to PACSMAN query file (used to find PatientIDs, required for --mode de-id)",
+        required="--mode de-id" in sys.argv,
+    )
+    parser.add_argument(
+        "--mappingfile",
+        "-mf",
+        help="Path to custom mapping file in CSV format (required for --mode custom). "
+        "The file is expected to have no header and two columns: the first column is the old pseudonym, "
+        "the second column is the new pseudonym. The file should not contain any empty cells.",
+        required="--mode custom" in sys.argv,
+    )
+    parser.add_argument(
+        "--shift-days",
+        action="store_true",
+        help="Generate random day shifts for all pseudonyms in the +- 30 days range (employed for --mode custom). "
+        "If not specified, day shifts are set to 0.",
     )
     parser.add_argument(
         "--project_name",
         "-a",
         help="Name of the project in GPCR (may or may not correspond to Kheops album)",
+        required=True,
     )
     parser.add_argument(
         "--out_directory",
         "-d",
         help="Output directory where the pseudonyms will be saved as a json",
-        default=os.path.join(".", "data"),
+        required=True,
+    )
+    parser.add_argument(
+        "--verbose",
+        "-v",
+        help="Print verbose output",
+        action="store_true",
     )
 
     return parser
@@ -165,68 +232,90 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    # Check the case where the queryfile, config, or project_name is missing.
-    # If it is the case print help.
-    # TODO: Can be directly done with argparse with the required=True option.
-    if args.queryfile is None or args.config is None or args.project_name is None:
-        print("Missing mandatory parameter --queryfile or --config or --project_name!")
-        parser.print_help()
-        sys.exit()
-
-    # Check if the config file exists.
-    config_path = os.path.abspath(args.config)
-    if not os.path.isfile(config_path):
-        print(f"Config file {config_path} does not exist!")
-        sys.exit()
-    
     # Check if the output directory exists. If not, create it.
     output_dir = os.path.abspath(args.out_directory)
     if not os.path.isdir(output_dir):
-        print(f"Output directory {output_dir} does not exist! Creating...")
+        print(f"Output directory does not exist! Creating {output_dir}...")
         os.makedirs(output_dir, exist_ok=True)
 
-    # Check if the queryfile exists.
-    query_file = os.path.abspath(args.queryfile)
-    if not os.path.isfile(query_file):
-        print(f"Query file {query_file} does not exist!")
-        sys.exit()
+    if args.mode == "de-id":
+        # Check if the config file exists.
+        config_path = os.path.abspath(args.config)
+        if not os.path.isfile(config_path):
+            print(f"Config file {config_path} does not exist!")
+            sys.exit(1)
 
-    # Read and validate the queryfile.
-    table = read_csv(args.queryfile, dtype=str).fillna("")
-    check_query_table_allowed_filters(table)
+        # Read and validate config file for deid parameters.
+        with open(config_path) as f:
+            try:
+                deid_parameters = json.load(f)
+            except json.JSONDecodeError:
+                print("The config file does not contain valid json.")
+                sys.exit(1)
 
-    # Reading config file for deid parameters.
-    with open(config_path) as f:
-        deid_parameters = json.load(f)
-        check_config_file_deid(deid_parameters)
-    
-    # TODO should enable reading IDs from json file too, or scan from disk.
+            check_config_file_deid(deid_parameters)
 
-    # Convert the queryfile to json format.
-    query_json = convert_csv_to_deid_json(query_file, args.project_name)
+        # Check if the queryfile exists.
+        query_file = os.path.abspath(args.queryfile)
+        if not os.path.isfile(query_file):
+            print(f"Query file {query_file} does not exist!")
+            sys.exit(1)
 
-    # Get the new pseudonyms
-    json_response = get_deid_pseudonyms(deid_parameters, query_json)
-    print(json_response)
+        # Validate the queryfile content.
+        check_queryfile_content(query_file)
 
-    with open(
-        os.path.normpath(
-            os.path.join(output_dir, f"new_ids_{args.project_name}.json")
-        ),
-        "w",
-    ) as f:
-        f.write(json_response)
+        # Convert the queryfile to json format.
+        deid_query_json = convert_csv_to_deid_json(query_file, args.project_name)
 
-    # Get day shift
-    json_response = get_deid_day_shifts(deid_parameters, query_json)
+        # Get the new pseudonyms
+        json_pseudo_response = get_deid_pseudonyms(deid_parameters, deid_query_json)
 
-    with open(
-        os.path.normpath(
-            os.path.join(output_dir, f"day_shift_{args.project_name}.json")
-        ),
-        "w",
-    ) as f:
-        f.write(json_response)
+        # Get day shift
+        json_day_shift_response = get_deid_day_shifts(deid_parameters, deid_query_json)
+
+    else:
+        # Read the custom mapping file.
+        mappingfile_path = os.path.abspath(args.mappingfile)
+        if not os.path.isfile(mappingfile_path):
+            print(f"Custom mapping file {mappingfile_path} does not exist!")
+            sys.exit(1)
+
+        mapping_table = read_csv(mappingfile_path, dtype=str, header=None)
+        if mapping_table.isnull().values.any():
+            print("The custom mapping file contains empty cells!")
+            sys.exit(1)
+
+        pseudo_mapping = {row[0]: row[1] for row in mapping_table.to_numpy(dtype=str)}
+
+        # Convert the custom pseudo mapping to json format.
+        json_pseudo_response = json.dumps(pseudo_mapping, indent=4)
+
+        # Generate random day shifts between -30 and 30 days for all pseudonyms
+        # if specified. Otherwise, set day shifts to 0.
+        day_shifts = {
+            p: np.random.randint(-30, 31) if args.shift_days else 0
+            for p in pseudo_mapping.keys()
+        }
+        json_day_shift_response = json.dumps(day_shifts, indent=4)
+
+    # Print the old / new pseudonyms and day shifts if verbose mode is on.
+    if args.verbose:
+        print(f"Old / new pseudonyms: {json_pseudo_response} \n")
+        print(f"Day shifts: {json_day_shift_response}")
+
+    # Save the old /new pseudonyms mapping to a json file.
+    json_pseudo_response_path = os.path.normpath(
+        os.path.join(output_dir, f"new_ids_{args.project_name}.json")
+    )
+    with open(json_pseudo_response_path, "w") as f:
+        f.write(json_pseudo_response)
+
+    # Save the day shifts to a json file.
+    json_day_shift_response_path = os.path.normpath(
+        os.path.join(output_dir, f"day_shift_{args.project_name}.json")
+    )
+    with open(json_day_shift_response_path, "w") as f:
+        f.write(json_day_shift_response)
 
     print("Done!")
 
