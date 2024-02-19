@@ -4,4 +4,4 @@
 License
 ***********************************
 
-TODO
+.. include:: ../LICENSE
