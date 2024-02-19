@@ -6,7 +6,7 @@
 Welcome to PACSMAN's documentation!
 ===================================
 
-This radiological PACS data management software is developed by the Translational Machine Learning Lab team at the University Hospital of Lausanne (CHUV) for use within the lab, as well as for open-source software distribution.
+This radiological PACS data management software is developed by the Translational Machine Learning Lab team at the Lausanne University Hospital and University of Lausanne for use within the hospital, as well as for open-source software distribution.
 
 .. image:: https://img.shields.io/github/v/release/TranslationalML/pacsman
   :alt: Latest GitHub Release
