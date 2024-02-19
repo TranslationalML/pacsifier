@@ -47,7 +47,7 @@ How to install `PACSMAN` locally
         source venv/bin/activate            
 
 .. important::
-    `PACSMAN` requires a Python environment with `python>=3.8`.
+    `PACSMAN` requires a Python environment with `python>=3.10`.
 
 2.2 Once the virtual environment is activated, `PACSMAN` can be installed with the following command:
 
