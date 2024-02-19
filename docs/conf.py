@@ -26,7 +26,7 @@ class CustomCommonMarkParser(CommonMarkParser):
 # -- General project information -------------------------------------------
 
 project = "PACSMAN: Tool to manage and convert radiological PACS data"
-copyright = "2018-{}, The TML team, University Hospital of Lausanne (CHUV), Switzerland & Contributors".format(
+copyright = "2018-{}, The Translational Machine Learning Lab team, Lausanne University Hospital and University of Lausanne, Switzerland & Contributors".format(
     time.strftime("%Y")
 )
 author = "Translational Machine Learning Lab Team"
