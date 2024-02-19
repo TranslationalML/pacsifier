@@ -111,7 +111,7 @@ ARG VCS_REF=unknown
 
 LABEL org.label-schema.build-date=${BUILD_DATE} \
     org.label-schema.name="PACSMAN" \
-    org.label-schema.description="Tools to manage and convert radiological PACS data" \
+    org.label-schema.description="PACSMAN: batch DICOM query/retrieve tool for PACS systems" \
     org.label-schema.url="https://translationalml.github.io/" \
     org.label-schema.vcs-ref=${VCS_REF} \
     org.label-schema.vcs-url="https://github.com/TranslationalML/pacsman" \

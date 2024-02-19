@@ -25,7 +25,7 @@ class CustomCommonMarkParser(CommonMarkParser):
 
 # -- General project information -------------------------------------------
 
-project = "PACSMAN: Tool to manage and convert radiological PACS data"
+project = "PACSMAN: batch DICOM query/retrieve tool for PACS systems"
 copyright = "2018-{}, The Translational Machine Learning Lab team, Lausanne University Hospital and University of Lausanne, Switzerland & Contributors".format(
     time.strftime("%Y")
 )
