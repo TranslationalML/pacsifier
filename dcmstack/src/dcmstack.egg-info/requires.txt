@@ -1,9 +1,0 @@
-pydicom>=0.9.7
-nibabel>=2.0.0
-
-[doc]
-sphinx
-numpydoc
-
-[test]
-nose

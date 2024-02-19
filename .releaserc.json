@@ -1,0 +1,46 @@
+{
+    "branches": [
+        "master", {
+            "name": "dev",
+            "prerelease": true
+        }
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        [
+            "@google/semantic-release-replace-plugin", {
+                "replacements": [
+                    {
+                        "files": ["pacsman/info.py"],
+                        "from": "__version__ = \".*\"",
+                        "to": "__version__ = \"${nextRelease.version}\"",
+                        "countMatches": true
+                    }
+                ]
+            }
+        ],
+        "@semantic-release/release-notes-generator",
+        "@semantic-release/changelog",
+        [
+            "@semantic-release/changelog", {
+                "changelogFile": "docs/changes.md"
+            }
+        ],
+        [
+            "semantic-release-python", {
+                "setupPy": "./setup.py",
+                "pypiPublish": true
+            }
+        ],
+        [
+            "@semantic-release/git", {
+                "assets": [
+                    "pacsman/info.py", "docs/changes.md"
+                ],
+                "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+            }
+        ]
+    ],
+    "dryRun": true,
+    "debug": true
+}

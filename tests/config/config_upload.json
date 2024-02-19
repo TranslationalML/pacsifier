@@ -1,0 +1,10 @@
+{
+    "server_address": "localhost",
+    "port": 4444,
+    "server_AET": "SCU_UPLOAD_STORE",
+    "AET": "PACSMAN_SCU",
+    "move_port": 11112,
+    "move_AET": "PACSMAN_SCU",
+    "batch_size": 30,
+    "batch_wait_time": 10
+}
