@@ -31,6 +31,7 @@ import csv
 import time
 import argparse
 
+from pacsifier.info import __version__
 from pacsifier.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file
 from pacsifier.core.sanity_checks import (
     check_date,
@@ -637,6 +638,11 @@ def get_parser() -> argparse.ArgumentParser:
         "-ud",
         help="Directory containing the DICOM images to upload (only used with '--upload' option)",
         default=os.path.join(".", "data"),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=__version__,
     )
 
     return parser
