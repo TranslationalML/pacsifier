@@ -41,6 +41,7 @@ __email__ = "sebastien.tourbier1@gmail.com"
 __status__ = "Beta"
 
 __packagename__ = "pacsifier"
+__container_name__ = "pacsifier"
 
 __url__ = "https://github.com/TranslationalML/{name}/tree/{version}".format(
     name=__packagename__, version=__version__
