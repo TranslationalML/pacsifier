@@ -1,0 +1,10 @@
+{
+    "server_address": "www.dicomserver.co.uk",
+    "port": 104,
+    "server_AET": "PACSMAN_Test",
+    "AET": "PACSMAN_Test",
+    "move_port": 104,
+    "move_AET": "PACSMAN_Test",
+    "batch_size": 30,
+    "batch_wait_time": 10
+}

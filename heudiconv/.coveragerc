@@ -1,4 +1,0 @@
-[run]
-include = tests/*
-          heudiconv/*
-          setup.py

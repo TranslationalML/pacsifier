@@ -1,0 +1,15 @@
+# Format is:
+#   Prefered Name <preferred e-mail>  Other Name <other e-mail>
+#
+# Reference: https://git-scm.com/docs/git-blame#_mapping_authors
+
+Firas Ben Othman <firas.benothman@epfl.ch>  firas11 <firas.benothman@epfl.ch>
+Jonas Richiardi <jonas.richiardi@chuv.ch>  jonasrichiardi <jonas.richiardi@chuv.ch>  Jonas Richiardi <richiard@stanford.edu>
+Sebastien Tourbier <sebastien.tourbier1@gmail.com>  Sebastien Tourbier <sebastien.tourbier1@gmail.com>
+Tommaso Di Noto <tommydino@hotmail.it>
+Alexandre Wetzel <alexandre.wetzel@chuv.ch>
+Mazen Mahdi <mazenalahdal13@gmail.com>
+Pedron Frederic <fpedron@intranet.chuv>
+Roger Schaer <roger.schaer@hevs.ch>
+Veronica Ravano <veronica.ravano@epfl.ch>
+Elda Fischi Gomez <elda.fischi@gmail.com>  elda.f <elda.fischi@gmail.com>

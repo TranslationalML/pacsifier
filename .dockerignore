@@ -1,1 +1,21 @@
-/data
+# hidden directories
+.github/
+.idea/
+.vscode/
+.pytest_cache/
+# .git/
+.eggs/
+*.egg-info/
+
+__pycache__/
+**/__pycache__/
+# pip installs
+build/**/*
+build/
+
+# normal directories
+tests/
+
+# normal and hidden files
+.gitignore
+Makefile

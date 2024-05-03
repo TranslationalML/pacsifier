@@ -193,7 +193,7 @@ Notes :
 ## Config file 
 
 The config file is a json file that must include exactly these keys: 
-- `server_ip`: PACS server IP address
+- `server_address`: PACS server IP / URL address
 - `port`: PACS server port number 
 - `server_AET`: PACS server application entity title
 - `AET`: current station application entity title
