@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains pacsman package information."""
+"""This module contains pacsifier package information."""
 
 import datetime
 
@@ -40,7 +40,7 @@ __maintainer__ = "Translational Machine Learning Lab"
 __email__ = "sebastien.tourbier1@gmail.com"
 __status__ = "Beta"
 
-__packagename__ = "pacsman"
+__packagename__ = "pacsifier"
 
 __url__ = "https://github.com/TranslationalML/{name}/tree/{version}".format(
     name=__packagename__, version=__version__

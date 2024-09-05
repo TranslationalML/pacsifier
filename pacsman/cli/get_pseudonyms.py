@@ -19,14 +19,14 @@ The script can be used in two modes:
 - de-id: use the de-ID API to get new pseudonyms and day shifts
 - custom: use a custom mapping file in CSV format that specifies the mapping of old / new pseudonyms
 
-In case of the de-id mode, the script requires a PACSMAN query file and a configuration file for the de-ID API.
+In case of the de-id mode, the script requires a PACSIFIER query file and a configuration file for the de-ID API.
 In case of the custom mode, the script requires a custom mapping file in CSV format.
 
 The script saves the new pseudonyms and day shifts as JSON files in the specified output directory.
 
 Example usage:
-    python get_pseudonyms.py --mode de-id --config config.json --queryfile query.csv --project_name PACSMANCohort --out_directory /path/to/output
-    python get_pseudonyms.py --mode custom --mappingfile mapping.csv --shift-days --project_name PACSMANCohort --out_directory /path/to/output
+    python get_pseudonyms.py --mode de-id --config config.json --queryfile query.csv --project_name PACSIFIERCohort --out_directory /path/to/output
+    python get_pseudonyms.py --mode custom --mappingfile mapping.csv --shift-days --project_name PACSIFIERCohort --out_directory /path/to/output
 
 """
 
@@ -36,7 +36,7 @@ import json, csv, requests
 from typing import Dict, Any
 import numpy as np
 from pandas import read_csv
-from pacsman.cli.pacsman import check_query_table_allowed_filters
+from pacsifier.cli.pacsifier import check_query_table_allowed_filters
 
 
 def check_config_file_deid(config_file: Dict[str, str]) -> None:
@@ -56,10 +56,10 @@ def check_config_file_deid(config_file: Dict[str, str]) -> None:
 
 
 def convert_csv_to_deid_json(queryfile: str, project_name: str) -> Any:
-    """Convert PACSMAN query to json format the de-ID API can understand.
+    """Convert PACSIFIER query to json format the de-ID API can understand.
 
     Args:
-        queryfile: the filename of the PACSMAN query file
+        queryfile: the filename of the PACSIFIER query file
         project_name: the name of the project in GPCR (may or may not correspond to Kheops album)
 
     Returns:
@@ -98,7 +98,7 @@ def get_deid_pseudonyms(deid_parameters: dict, query_json: dict) -> None:
                 "deid_token": "1234567890"
             }
 
-        query_json: the PACSMAN query formatted as a dictionary
+        query_json: the PACSIFIER query formatted as a dictionary
 
     Returns:
         JSON object containing the new pseudonyms for each patient
@@ -127,7 +127,7 @@ def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
                 "deid_token": "1234567890"
             }
 
-        query_json: the PACSMAN query formatted as a dictionary
+        query_json: the PACSIFIER query formatted as a dictionary
 
     Returns:
         JSON object containing the day shifts for each patient
@@ -149,16 +149,16 @@ def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
 
 
 def check_queryfile_content(queryfile: str) -> None:
-    """Check that the PACSMAN query file is valid.
+    """Check that the PACSIFIER query file is valid.
 
     Args:
-        queryfile: the path of the PACSMAN query file
+        queryfile: the path of the PACSIFIER query file
 
     """
     try:
         query_table = read_csv(queryfile, dtype=str).fillna("")
     except Exception as e:
-        print(f"Error reading PACSMAN query file: {e}")
+        print(f"Error reading PACSIFIER query file: {e}")
         sys.exit(1)
 
     check_query_table_allowed_filters(query_table)
@@ -187,7 +187,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--queryfile",
         "-q",
-        help="Path to PACSMAN query file (used to find PatientIDs, required for --mode de-id)",
+        help="Path to PACSIFIER query file (used to find PatientIDs, required for --mode de-id)",
         required="--mode de-id" in sys.argv,
     )
     parser.add_argument(

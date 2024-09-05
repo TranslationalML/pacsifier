@@ -14,7 +14,7 @@ override TAG := $(subst _,-,$(TAG))
 $(info TAG (Normalized) = $(TAG))
 
 # Define the complete docker image tag 
-IMAGE_TAG = $(if $(CI_REGISTRY),$(CI_REGISTRY)/tml/pacsman:$(TAG),pacsman:$(TAG)) 
+IMAGE_TAG = $(if $(CI_REGISTRY),$(CI_REGISTRY)/tml/pacsifier:$(TAG),pacsifier:$(TAG)) 
 
 # Define the build date and vcs reference
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -55,7 +55,7 @@ test:
 		-v \
 		-d \
 		--scan-directories \
-		--aetitle PACSMAN_SCU \
+		--aetitle PACSIFIER_SCU \
 		--call SCU_STORE \
 		localhost 4444 \
 		/tests/test_data/dicomseries
@@ -72,7 +72,7 @@ test:
 	sudo chown -R $(USER_ID):$(GROUP_ID) $(PROJECT_DIR)/tests
 	@echo "Fix path in coverage xml report..."
 	sed -i -r  \
-		"s|/app/pacsman/pacsman|$(PROJECT_DIR)/pacsman|g" \
+		"s|/app/pacsifier/pacsifier|$(PROJECT_DIR)/pacsifier|g" \
 		$(PROJECT_DIR)/tests/report/cov.xml
 
 #kill-dcmqrscp: @ Kill the docker-dcmqrscp container
@@ -94,7 +94,7 @@ bash:
 	docker run -it --rm \
 		--entrypoint "/bin/bash" \
 		-v $(PROJECT_DIR)/tests:/tests \
-		-v $(PROJECT_DIR)/pacsman:/app/pacsman/pacsman \
+		-v $(PROJECT_DIR)/pacsifier:/app/pacsifier/pacsifier \
 		$(IMAGE_TAG)
 
 #build-docker: @ Builds the Docker image
@@ -109,7 +109,7 @@ build-docker:
 # push-docker-ci:
 # 	if $(CI_REGISTRY); then \
 # 		docker login -u $(CI_REGISTRY_USER) -p $(CI_REGISTRY_PASSWORD) $(CI_REGISTRY); \
-# 		docker push $(CI_REGISTRY)/tml/pacsman:$(TAG); 
+# 		docker push $(CI_REGISTRY)/tml/pacsifier:$(TAG); 
 # 	fi
 
 # #rm-docker-ci: @ Remove the Docker image with TAG to the CI registry
@@ -131,11 +131,11 @@ build-python-wheel:
 
 #install-python-wheel: @ Installs the python wheel
 install-python-wheel: build-python-wheel
-	pip install pacsman
+	pip install pacsifier
 
 #test-python-install: @ Tests the python package installation
 test-python-install: install-python build-python-wheel install-python-wheel	
-	pacsman --version
+	pacsifier --version
 
 #build-docs: @ Builds the documentation
 build-docs: install-python
@@ -143,7 +143,7 @@ build-docs: install-python
 
 #clean: @ Clean the project
 clean:
-	rm -rf build dist pacsman.egg-info
+	rm -rf build dist pacsifier.egg-info
 
 #help:	@ List available tasks on this project
 help:

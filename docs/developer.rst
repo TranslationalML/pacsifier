@@ -12,19 +12,19 @@ How to build the Docker image locally
 
 1. Go to the clone directory of your fork and run the following command in the terminal ::
 
-    cd pacsman
+    cd pacsifier
     make -B build-docker
 
 .. note::
     The tag of the version of the image is generated from the git tag thanks to the versioneer.py library.
 
 
-.. _instructions_pacsman_install:
+.. _instructions_pacsifier_install:
 
-How to install `PACSMAN` locally
+How to install `PACSIFIER` locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. PACSMAN relies on the `DCMTK`_ tools for DICOM network communication. It can be easily installed on Ubuntu with the following command:
+1. PACSIFIER relies on the `DCMTK`_ tools for DICOM network communication. It can be easily installed on Ubuntu with the following command:
 
     .. code-block:: bash
 
@@ -32,14 +32,14 @@ How to install `PACSMAN` locally
 
     For other operating systems, please refer to the DCMTK_ documentation.
 
-2. Install the Python environment with `PACSMAN` and its dependencies.
+2. Install the Python environment with `PACSIFIER` and its dependencies.
 
-2.1 It is recommended to use a virtual environment to install `PACSMAN` and its dependencies, which can be achieved using `venv`_ or `conda`_. For convenience, a minimal `conda` environment is provided in the `environment` directory of the repository. It can be installed as follow:
+2.1 It is recommended to use a virtual environment to install `PACSIFIER` and its dependencies, which can be achieved using `venv`_ or `conda`_. For convenience, a minimal `conda` environment is provided in the `environment` directory of the repository. It can be installed as follow:
 
     .. code-block:: bash
 
         conda create env -f environment/environment_minimal_202301.yml
-        conda activate pacsman_minimal
+        conda activate pacsifier_minimal
 
     If you prefer to use `venv`, you can create a virtual environment and activate it as follow::
 
@@ -47,11 +47,11 @@ How to install `PACSMAN` locally
         source venv/bin/activate            
 
 .. important::
-    `PACSMAN` requires a Python environment with `python>=3.10`.
+    `PACSIFIER` requires a Python environment with `python>=3.10`.
 
-2.2 Once the virtual environment is activated, `PACSMAN` can be installed with the following command:
+2.2 Once the virtual environment is activated, `PACSIFIER` can be installed with the following command:
 
-2. Install `PACSMAN` along with all its Python dependencies (including dependencies to build the documentation and to test the package)::
+2. Install `PACSIFIER` along with all its Python dependencies (including dependencies to build the documentation and to test the package)::
 
     pip install -e .[all]
 
@@ -69,7 +69,7 @@ Go to the cloned repository and run the following `make` command::
 
     make -B build-docs
 
-This will re-install PACSMAN's python package, clean any existing documentation, and build the documentation in the `docs/build/html` directory.
+This will re-install PACSIFIER's python package, clean any existing documentation, and build the documentation in the `docs/build/html` directory.
 
 The built HTML files of the documentation, including its main page (``index.html``), can be found in the ``docs/_build/html`` directory, and can be opened in your favorite browser.
 
@@ -93,7 +93,7 @@ How to run the tests via the Docker image
 How to run the tests locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Go the cloned repository folder and (re-)install `PACSMAN` and its dependencies (see :ref:`instructions_pacsman_install`).
+1. Go the cloned repository folder and (re-)install `PACSIFIER` and its dependencies (see :ref:`instructions_pacsifier_install`).
 
 2. Run the `pytest` tests with the script provided in the repository as follow::
 

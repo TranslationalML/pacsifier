@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for the functions of the `pacsman.cli.anonymize_dicoms` script.""" ""
+"""Tests for the functions of the `pacsifier.cli.anonymize_dicoms` script.""" ""
 
 import os
 import random
@@ -23,7 +23,7 @@ import pytest
 
 import pydicom
 
-from pacsman.cli.anonymize_dicoms import (
+from pacsifier.cli.anonymize_dicoms import (
     fuzz_date,
     anonymize_dicom_file,
     anonymize_all_dicoms_within_root_folder,
@@ -65,7 +65,7 @@ def test_anonymize(test_dir):
     anonymize_dicom_file(
         in_file,
         out_file,
-        PatientID="PACSMAN2",
+        PatientID="PACSIFIER2",
         new_StudyInstanceUID=new_StudyInstanceUID,
         new_SeriesInstanceUID=new_SeriesInstanceUID,
         new_SOPInstanceUID=new_SOPInstanceUID,
@@ -79,8 +79,8 @@ def test_anonymize(test_dir):
     dataset = pydicom.read_file(out_file)
     attributes = dataset.dir("")
 
-    assert dataset.PatientID == "PACSMAN2"
-    assert dataset.PatientName == "PACSMAN2^sub"
+    assert dataset.PatientID == "PACSIFIER2"
+    assert dataset.PatientName == "PACSIFIER2^sub"
     if "InstitutionAddress" in attributes:
         assert dataset.InstitutionAddress == "Address"
     if "PatientBirthDate" in attributes:
@@ -166,7 +166,7 @@ def test_anonymize(test_dir):
     anonymize_dicom_file(
         in_file_new_age,
         out_file_new_age,
-        PatientID="PACSMAN2",
+        PatientID="PACSIFIER2",
         new_StudyInstanceUID=new_StudyInstanceUID,
         new_SeriesInstanceUID=new_SeriesInstanceUID,
         new_SOPInstanceUID=new_SOPInstanceUID,
@@ -188,9 +188,9 @@ def test_anonymize(test_dir):
 def test_anonymize_all_dicoms_within_folder(test_dir):
     # Create a folder with a few files following the expected structure
     dicom_dir = os.path.join(test_dir, "test_data", "dicomseries")
-    pacsman_dir = os.path.join(test_dir, "tmp", "test_data", "dicomseries_structured")
+    pacsifier_dir = os.path.join(test_dir, "tmp", "test_data", "dicomseries_structured")
     structured_series_dir = os.path.join(
-        pacsman_dir, "sub-PACSMAN1", "ses-20232016", "00000-No_series_description"
+        pacsifier_dir, "sub-PACSIFIER1", "ses-20232016", "00000-No_series_description"
     )
     anonymization_dir = os.path.join(
         test_dir, "tmp", "test_data", "dicomseries_structured_anon"
@@ -210,8 +210,8 @@ def test_anonymize_all_dicoms_within_folder(test_dir):
 
     dict_ = anonymize_all_dicoms_within_root_folder(
         output_folder=anonymization_dir,
-        datapath=pacsman_dir,
+        datapath=pacsifier_dir,
         pattern_dicom_files=os.path.join("ses-*", "*", "*.dcm"),
         rename_patient_directories=False,
     )
-    assert dict_ == {"000001": "PACSMAN1"}
+    assert dict_ == {"000001": "PACSIFIER1"}

@@ -15,14 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utility script to get the version of `PACSMAN`."""
+"""Utility script to get the version of `PACSIFIER`."""
 import sys
 import os.path as op
 
 
 def main():
     sys.path.insert(0, op.abspath("."))
-    from pacsman.info import __version__
+    from pacsifier.info import __version__
 
     print(__version__)
     return __version__

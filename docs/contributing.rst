@@ -12,7 +12,7 @@ Contribution Types
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/TranslationalML/pacsman/issues.
+Report bugs at https://github.com/TranslationalML/pacsifier/issues.
 
 If you are reporting a bug, please include:
 
@@ -33,12 +33,12 @@ Look through the GitHub issues for features. Anything tagged with "enhancement" 
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-`PACSMAN` could always use more documentation, whether as part of the official `pacsman` docs, in docstrings, or even on the web in blog posts, articles, and such.
+`PACSIFIER` could always use more documentation, whether as part of the official `pacsifier` docs, in docstrings, or even on the web in blog posts, articles, and such.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to create an issue at https://github.com/TranslationalML/pacsman/issues.
+The best way to send feedback is to create an issue at https://github.com/TranslationalML/pacsifier/issues.
 
 If you are proposing a feature:
 
@@ -50,14 +50,14 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `PACSMAN` for local development.
+Ready to contribute? Here's how to set up `PACSIFIER` for local development.
 
-1. Fork the repository of `PACSMAN` on GitHub.
+1. Fork the repository of `PACSIFIER` on GitHub.
 
 2. Clone your fork locally::
 
-    git clone git@github.com:your_name_here/pacsman.git
-    cd pacsman
+    git clone git@github.com:your_name_here/pacsifier.git
+    cd pacsifier
 
 3. Create a branch for local development::
 
@@ -75,7 +75,7 @@ Ready to contribute? Here's how to set up `PACSMAN` for local development.
 6. Submit a pull request through the GitHub website.
 
    .. important::
-       Please make sure that the pull request is made against the ``dev`` branch. The ``master`` branch is used for the stable version releases of `PACSMAN`.
+       Please make sure that the pull request is made against the ``dev`` branch. The ``master`` branch is used for the stable version releases of `PACSIFIER`.
 
 Pull Request Guidelines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -89,23 +89,23 @@ Before you submit a pull request, check that it meets these guidelines:
 CI/CD Pipeline: Under the Hood
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`PACSMAN` uses CircleCI for continuous integration (CI) and continuous deployment (CD).
+`PACSIFIER` uses CircleCI for continuous integration (CI) and continuous deployment (CD).
 
-The pipeline, described by the file `.circleci/config.yml <https://github.com/TranslationalML/pacsman/blob/master/.circleci/config.yml>`_, consists of the following stages:
+The pipeline, described by the file `.circleci/config.yml <https://github.com/TranslationalML/pacsifier/blob/master/.circleci/config.yml>`_, consists of the following stages:
 
-    1. `test-install-python`: install Python and the dependencies of PACSMAN in a Docker container.
+    1. `test-install-python`: install Python and the dependencies of PACSIFIER in a Docker container.
 
-    2. `build`: Build the Docker image of PACSMAN. 
+    2. `build`: Build the Docker image of PACSIFIER. 
 
-    3. `test`: Run the tests with pytest using the built Docker image. Send the coverage report to `codecov.io <https://codecov.io/gh/TranslationalML/pacsman>`_ using the ``$CODECOV_TOKEN`` environment variable.
+    3. `test`: Run the tests with pytest using the built Docker image. Send the coverage report to `codecov.io <https://codecov.io/gh/TranslationalML/pacsifier>`_ using the ``$CODECOV_TOKEN`` environment variable.
 
     4. `clean`: Clean the Docker container.
 
-    5. `semantic-release`: Make a version release of PACSMAN with semantic-release. This updates the version tag of PACSMAN, updates ``docs/CHANGES.md``, commits the changes, and creates a new tag on GitHub using ``$GH_TOKEN`` environment variable (TODO: might need to be adapted). The configuration of semantic-release is described by the file `.releaserc.json <https://github.com/TranslationalML/pacsman/blob/master/.releaserc.json>`_. It uses the ``dev`` branch for beta releases and the ``master`` branch for stable releases.
+    5. `semantic-release`: Make a version release of PACSIFIER with semantic-release. This updates the version tag of PACSIFIER, updates ``docs/CHANGES.md``, commits the changes, and creates a new tag on GitHub using ``$GH_TOKEN`` environment variable (TODO: might need to be adapted). The configuration of semantic-release is described by the file `.releaserc.json <https://github.com/TranslationalML/pacsifier/blob/master/.releaserc.json>`_. It uses the ``dev`` branch for beta releases and the ``master`` branch for stable releases.
 
-    6. `deploy-release`: Build the Docker image with the new version of PACSMAN and push it to Dockerhub_. This stage takes also care of pushing the changes and tags made by `semantic-release` stage to GitHub using SSH. A private key on CircleCI is read from ``$SSH_PRIVATE_KEY`` variable and set in ``.circleci/config.yml``.
+    6. `deploy-release`: Build the Docker image with the new version of PACSIFIER and push it to Dockerhub_. This stage takes also care of pushing the changes and tags made by `semantic-release` stage to GitHub using SSH. A private key on CircleCI is read from ``$SSH_PRIVATE_KEY`` variable and set in ``.circleci/config.yml``.
 
-        .. _Dockerhub: https://hub.docker.com/repository/docker/translationalml/pacsman
+        .. _Dockerhub: https://hub.docker.com/repository/docker/translationalml/pacsifier
 
 Depending on the event, the pipeline will run all the stages of the CI/CD pipeline or only a subset of them.
 
@@ -139,7 +139,7 @@ When a Pull Request towards the ``dev`` and ``master`` branches is opened, updat
 Not listed as a contributor?
 ----------------------------
 
-This is easy, `PACSMAN` has the `all contributors bot <https://allcontributors.org/docs/en/bot/usage>`_ installed.
+This is easy, `PACSIFIER` has the `all contributors bot <https://allcontributors.org/docs/en/bot/usage>`_ installed.
 
 Just comment on Issue or Pull Request (PR), asking `@all-contributors` to add you as contributor::
 
@@ -151,7 +151,7 @@ The all-contributors bot will create a PR to add you in the README and reply wit
 
 When the PR is merged you will have to make an extra Pull Request where you have to:
 
-    1. add your entry in the `.zenodo.json` (for that you will need an ORCID ID - https://orcid.org/). Doing so, you will appear as a contributor on Zenodo in the future version releases of PACSMAN. Zenodo is used by PACSMAN to publish and archive each of the version release with a unique Digital Object Identifier (DOI), which can then be used for citation.
+    1. add your entry in the `.zenodo.json` (for that you will need an ORCID ID - https://orcid.org/). Doing so, you will appear as a contributor on Zenodo in the future version releases of PACSIFIER. Zenodo is used by PACSIFIER to publish and archive each of the version release with a unique Digital Object Identifier (DOI), which can then be used for citation.
 
     2. update the content of the table in `docs/contributors.rst` with the new content generated by the bot in the README. Doing so, you will appear in the :ref:`Contributing Page <contributing>`.
 

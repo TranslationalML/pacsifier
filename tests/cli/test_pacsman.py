@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for the functions of the `pacsman.cli.pacsman` script."""
+"""Tests for the functions of the `pacsifier.cli.pacsifier` script."""
 
 from glob import glob
 import json
@@ -25,7 +25,7 @@ import string
 from hypothesis import given, example
 from hypothesis.strategies import text
 
-from pacsman.cli import (
+from pacsifier.cli import (
     readLineByLine,
     parse_findscu_dump_file,
     check_query_table_allowed_filters,
@@ -235,7 +235,7 @@ def test_retrieve_dicoms_using_table(test_dir):
     # Assert the first six files of the list are correct
     output_files = glob(os.path.join(test_dir, "tmp", "test_set", "sub-*/ses-*/*/*"))
     known_files_dir = os.path.join(
-        test_dir, "tmp", "test_set", "sub-PACSMAN1", "ses-20231016"
+        test_dir, "tmp", "test_set", "sub-PACSIFIER1", "ses-20231016"
     )
     known_files_dir = os.path.join(known_files_dir, "00000-No_series_description")
     known_filenames = [
@@ -263,7 +263,7 @@ def test_upload_dicoms(test_dir):
 def test_check_output_info():
     pass
 
-    # pacsman.main(["--info", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
+    # pacsifier.main(["--info", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
     # subjects = glob("./test_set/*")
     # sessions = glob("./test_set/sub-*/ses-*")
     # csv_files = glob("./test_set/sub-*/ses-*/*.csv")

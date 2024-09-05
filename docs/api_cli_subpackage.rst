@@ -1,78 +1,78 @@
 .. _apidoc_cli:
 
 ******************
-``pacsman.cli``
+``pacsifier.cli``
 ******************
 
-The ``pacsman.cli`` subpackage contains multiple modules that define the command line interface (CLI) tools of the ``pacsman`` package.
+The ``pacsifier.cli`` subpackage contains multiple modules that define the command line interface (CLI) tools of the ``pacsifier`` package.
 
-`pacsman.cli.pacsman`
+`pacsifier.cli.pacsifier`
 ======================
 
-.. automodule:: pacsman.cli.pacsman
+.. automodule:: pacsifier.cli.pacsifier
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.anonymize_dicoms`
+`pacsifier.cli.anonymize_dicoms`
 ==============================
 
-.. automodule:: pacsman.cli.anonymize_dicoms
+.. automodule:: pacsifier.cli.anonymize_dicoms
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.create_dicomdir`
+`pacsifier.cli.create_dicomdir`
 =============================
 
-.. automodule:: pacsman.cli.create_dicomdir
+.. automodule:: pacsifier.cli.create_dicomdir
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.get_pseudonyms`
+`pacsifier.cli.get_pseudonyms`
 ============================
 
-.. automodule:: pacsman.cli.get_pseudonyms
+.. automodule:: pacsifier.cli.get_pseudonyms
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.move_dumps`
+`pacsifier.cli.move_dumps`
 ========================
 
-.. automodule:: pacsman.cli.move_dumps
+.. automodule:: pacsifier.cli.move_dumps
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.add_karnak_tags`
+`pacsifier.cli.add_karnak_tags`
 =============================
 
-.. automodule:: pacsman.cli.add_karnak_tags
+.. automodule:: pacsifier.cli.add_karnak_tags
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.extract_carestream_report`
+`pacsifier.cli.extract_carestream_report`
 =======================================
 
-.. automodule:: pacsman.cli.extract_carestream_report
+.. automodule:: pacsifier.cli.extract_carestream_report
    :members:
    :undoc-members:
    :show-inheritance:
    :noindex:
 
-`pacsman.cli.convert`
+`pacsifier.cli.convert`
 ======================
 
-.. automodule:: pacsman.cli.convert
+.. automodule:: pacsifier.cli.convert
    :members:
    :undoc-members:
    :show-inheritance:

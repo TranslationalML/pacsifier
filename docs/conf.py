@@ -11,7 +11,7 @@ import sys
 import mock
 import time
 from recommonmark.parser import CommonMarkParser
-from pacsman.info import __version__, __release_date__  # noqa: 402
+from pacsifier.info import __version__, __release_date__  # noqa: 402
 
 # sys.path.append("../")  # noqa: 402
 
@@ -25,7 +25,7 @@ class CustomCommonMarkParser(CommonMarkParser):
 
 # -- General project information -------------------------------------------
 
-project = "PACSMAN: batch DICOM query/retrieve tool for PACS systems"
+project = "PACSIFIER: batch DICOM query/retrieve tool for PACS systems"
 copyright = "2018-{}, The Translational Machine Learning Lab team, Lausanne University Hospital and University of Lausanne, Switzerland & Contributors".format(
     time.strftime("%Y")
 )
@@ -44,7 +44,7 @@ rst_prolog = """
 .. |pypirelease| replace:: {}
 .. |vrelease| replace:: {}
 """.format(
-    f"pacsman=={release}", f"v{release}"
+    f"pacsifier=={release}", f"v{release}"
 )
 
 
@@ -54,7 +54,7 @@ rst_prolog = """
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath("../pacsman"))
+sys.path.insert(0, os.path.abspath("../pacsifier"))
 
 # If your documentation needs a minimal Sphinx version, state it here.
 # needs_sphinx = '1.0'
@@ -112,7 +112,7 @@ napoleon_type_aliases = None
 napoleon_attr_annotations = True
 
 # APIdoc settings
-apidoc_module_dir = "../pacsman"
+apidoc_module_dir = "../pacsifier"
 apidoc_output_dir = "api/generated"
 # apidoc_excluded_paths = ['tests']
 apidoc_separate_modules = True
@@ -200,16 +200,16 @@ html_theme_options = {
 html_title = project
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title = "PACSMAN"
+html_short_title = "PACSIFIER"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-# html_logo = "logos/pacsman-logo.png"
+# html_logo = "logos/pacsifier-logo.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-# html_favicon = "_static/pacsman-logo-32x32.ico"
+# html_favicon = "_static/pacsifier-logo-32x32.ico"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -258,7 +258,7 @@ html_show_sourcelink = False
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "PACSMANdoc"
+htmlhelp_basename = "PACSIFIERdoc"
 
 html_context = {"release_date": __release_date__}
 
@@ -299,8 +299,8 @@ latex_elements = {
 latex_documents = [
     (
         "index",
-        "PACSMAN.tex",
-        "PACSMAN Documentation",
+        "PACSIFIER.tex",
+        "PACSIFIER Documentation",
         "The TML team and Contributors",
         "manual",
     ),
@@ -308,7 +308,7 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-# latex_logo = "images/pacsman-logo.png"
+# latex_logo = "images/pacsifier-logo.png"
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -339,8 +339,8 @@ latex_show_urls = "footnote"
 man_pages = [
     (
         "index",
-        "PACSMAN",
-        "PACSMAN Documentation",
+        "PACSIFIER",
+        "PACSIFIER Documentation",
         ["The TML team and Contributors"],
         1,
     )
@@ -358,10 +358,10 @@ man_pages = [
 texinfo_documents = [
     (
         "index",
-        "PACSMAN",
-        "PACSMAN Documentation",
+        "PACSIFIER",
+        "PACSIFIER Documentation",
         "The TML team and Contributors",
-        "pacsman",
+        "pacsifier",
         "Tool to manage and convert radiological PACS data.",
         "Science",
     ),
