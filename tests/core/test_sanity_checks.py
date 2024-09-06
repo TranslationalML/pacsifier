@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for the functions of the `pacsman.core.sanity_checks` module."""
+"""Tests for the functions of the `pacsifier.core.sanity_checks` module."""
 
 import pytest
 
-from pacsman.core.sanity_checks import (
+from pacsifier.core.sanity_checks import (
     check_config_parameters,
     check_query_retrieval_level,
     check_server_address,
@@ -42,9 +42,9 @@ def test_check_config_parameters_valid():
             "server_address": "localhost",
             "port": 4444,
             "server_AET": "SCU_STORE",
-            "AET": "PACSMAN_SCU",
+            "AET": "PACSIFIER_SCU",
             "move_port": 11112,
-            "move_AET": "PACSMAN_SCU",
+            "move_AET": "PACSIFIER_SCU",
             "batch_size": 30,
             "batch_wait_time": 10
         })
@@ -56,9 +56,9 @@ def test_check_config_parameters_invalid_values():
             "server_address": "localhost",
             "port": 4444,
             "server_AET": "SCU_STORE",
-            "AET": "PACSMAN_SCU",
+            "AET": "PACSIFIER_SCU",
             "move_port": "11112a",  # Invalid port should be an int and not a string
-            "move_AET": "PACSMAN_SCU",
+            "move_AET": "PACSIFIER_SCU",
             "batch_size": 30,
             "batch_wait_time": 10
         })
@@ -67,9 +67,9 @@ def test_check_config_parameters_invalid_values():
             "server_address": "localhost",
             "port": 4444,
             "server_AET": "SCU_STORE",
-            "AET": "PACSMAN_SCU",
+            "AET": "PACSIFIER_SCU",
             "move_port": 11112,
-            "move_AET": "PACSMAN_SCU",
+            "move_AET": "PACSIFIER_SCU",
             "batch_size": "30y",  # Invalid batch size should be an int and not a string
             "batch_wait_time": 10
         })
@@ -78,9 +78,9 @@ def test_check_config_parameters_invalid_values():
             "server_address": "localhost",
             "port": 4444,
             "server_AET": "SCU_STORE",
-            "AET": "PACSMAN_SCU",
+            "AET": "PACSIFIER_SCU",
             "move_port": 11112,
-            "move_AET": "PACSMAN_SCU",
+            "move_AET": "PACSIFIER_SCU",
             "batch_size": 30,
             "batch_wait_time": "10y"  # Invalid batch wait time
         })

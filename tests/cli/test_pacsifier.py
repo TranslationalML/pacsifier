@@ -22,6 +22,7 @@ from pandas import read_csv
 import pytest
 from functools import reduce
 import string
+import shutil
 from hypothesis import given, example
 from hypothesis.strategies import text
 
@@ -187,7 +188,7 @@ def test_add_or_retrieve_name():
 
 
 def test_invalid_retrieve_dicoms_using_table(test_dir):
-    config_path = os.path.join("/tests", "config", "config.json")
+    config_path = os.path.join(test_dir, "config", "config.json")
     table = read_csv(
         os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
     ).fillna("")
@@ -212,30 +213,25 @@ def test_invalid_retrieve_dicoms_using_table(test_dir):
 
 
 def test_retrieve_dicoms_using_table(test_dir):
+    # Ensure output directory exists
+    out_directory = os.path.join(test_dir, "tmp", "test_set")
+    if os.path.exists(out_directory):
+        shutil.rmtree(out_directory)  # Clear old files if needed
+    os.makedirs(out_directory)  # Create fresh output directory
+
     table = read_csv(
         os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
     ).fillna("")
-    config_path = os.path.join("/tests/config/config.json")
-
+    config_path = os.path.join(test_dir, "config", "config.json")
     with open(config_path) as f:
         parameters = json.load(f)
-
-    out_directory = os.path.join(test_dir, "tmp", "test_set")
-
-    # Test retrieve DICOM series
-
-    # retrieve_dicoms_using_table(table, parameters, out_directory, False, False)
-    # assert glob("./test_set/sub-*/ses-*/*/*") == []
-
-    # retrieve_dicoms_using_table(table, parameters, out_directory, False, True)
-    # assert glob("./test_set/sub-*/ses-*/*/*") == []
 
     retrieve_dicoms_using_table(table, parameters, out_directory, True, True, False)
 
     # Assert the first six files of the list are correct
-    output_files = glob(os.path.join(test_dir, "tmp", "test_set", "sub-*/ses-*/*/*"))
+    output_files = glob(os.path.join(out_directory, "sub-*/ses-*/*/*"))
     known_files_dir = os.path.join(
-        test_dir, "tmp", "test_set", "sub-PACSIFIER1", "ses-20231016"
+        test_dir, "tmp", "test_set", "sub-PACSMAN1", "ses-20231016"
     )
     known_files_dir = os.path.join(known_files_dir, "00000-No_series_description")
     known_filenames = [
@@ -254,7 +250,7 @@ def test_upload_dicoms(test_dir):
     dicomseries_karnak_tags_dir = os.path.join(
         test_dir, "tmp", "test_data", "dicomseries_tagged_all"
     )
-    config_path = os.path.join("/tests", "config", "config_upload.json")
+    config_path = os.path.join(test_dir, "config", "config_upload.json")
     with open(config_path) as f:
         parameters = json.load(f)
     upload_dicoms(dicomseries_karnak_tags_dir, parameters)
