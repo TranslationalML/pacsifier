@@ -73,7 +73,7 @@ extensions = [
     "sphinxcontrib.apidoc",
     "sphinxemoji.sphinxemoji",
     "sphinxcontrib.mermaid",
-    "m2r2",
+    "myst_parser",
 ]
 # Add additional extension if on readthedocs
 on_rtd = os.environ.get("READTHEDOCS") == "True"
@@ -88,6 +88,7 @@ autodoc_mock_imports = [
     "pydicom",
     "nibabel",
     "pandas",
+    "pandas.errors"
 ]
 
 # Make sure sphinx argparse considers the autodoc_mock_imports
