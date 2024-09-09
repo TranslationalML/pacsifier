@@ -73,7 +73,7 @@ extensions = [
     "sphinxcontrib.apidoc",
     "sphinxemoji.sphinxemoji",
     "sphinxcontrib.mermaid",
-    "m2r2",
+    "myst_parser",
 ]
 # Add additional extension if on readthedocs
 on_rtd = os.environ.get("READTHEDOCS") == "True"
@@ -88,6 +88,7 @@ autodoc_mock_imports = [
     "pydicom",
     "nibabel",
     "pandas",
+    "pandas.errors"
 ]
 
 # Make sure sphinx argparse considers the autodoc_mock_imports
@@ -214,7 +215,7 @@ html_short_title = "PACSMAN"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+#html_static_path = ["_static"]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
