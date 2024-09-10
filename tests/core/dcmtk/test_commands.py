@@ -208,4 +208,6 @@ def test_replace_default_parameters():
 
 
 def test_run():
-    assert [] == run("echo California Dreaming.", log_dir="/tests/logs")
+    log_dir = "./logs"
+    os.makedirs(log_dir, exist_ok=True)
+    assert [] == run("echo California Dreaming.", log_dir=log_dir)
