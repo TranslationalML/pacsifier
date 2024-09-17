@@ -4,90 +4,90 @@
 Commandline Usage
 ***********************
 
-PACSMAN is a commandline tool that can be run in a variety of ways, providing a set of command-line interface (CLI) commands, which can be run directly in a shell or via a Docker container, for interacting with a PACS server and manipulating DICOM files.
+PACSIFIER is a commandline tool that can be run in a variety of ways, providing a set of command-line interface (CLI) commands, which can be run directly in a shell or via a Docker container, for interacting with a PACS server and manipulating DICOM files.
 
 It consists of the following commands:
 
-* ``pacsman``: The main command, which can be used to interact with a PACS server and manipulate DICOM files.
-* ``pacsman-anonymize-dicoms``: Anonymize DICOM files.
-* ``pacsman-create-dicomdir``: Create a DICOMDIR file.
-* ``pacsman-get-pseudonyms``: Get pseudonyms for a list of DICOM files.
-* ``pacsman-move-dumps``: Move DICOM files from a PACS server to a local directory.
-* ``pacsman-add-karnak-tags``: Add Karnak tags to DICOM files.
-* ``pacsman-extract-carestream-report``: Extract Carestream reports from DICOM files.
-* ``pacsman-convert``: Convert DICOM files to another format.
+* ``pacsifier``: The main command, which can be used to interact with a PACS server and manipulate DICOM files.
+* ``pacsifier-anonymize-dicoms``: Anonymize DICOM files.
+* ``pacsifier-create-dicomdir``: Create a DICOMDIR file.
+* ``pacsifier-get-pseudonyms``: Get pseudonyms for a list of DICOM files.
+* ``pacsifier-move-dumps``: Move DICOM files from a PACS server to a local directory.
+* ``pacsifier-add-karnak-tags``: Add Karnak tags to DICOM files.
+* ``pacsifier-extract-carestream-report``: Extract Carestream reports from DICOM files.
+* ``pacsifier-convert``: Convert DICOM files to another format.
 
 
 In the following sections, we will describe how to run these commands in a shell and in a Docker container.
 
-Running `PACSMAN` commands in a shell
+Running `PACSIFIER` commands in a shell
 =====================================
 
-``pacsman`` command
+``pacsifier`` command
 -------------------
 
 .. argparse::
-		:ref: pacsman.cli.pacsman.get_parser
-		:prog: pacsman
+		:ref: pacsifier.cli.pacsifier.get_parser
+		:prog: pacsifier
 
-``pacsman-anonymize-dicoms`` command
+``pacsifier-anonymize-dicoms`` command
 -------------------------------------
 
 .. argparse::
-		:ref: pacsman.cli.anonymize_dicoms.get_parser
-		:prog: pacsman-anonymize_dicoms
+		:ref: pacsifier.cli.anonymize_dicoms.get_parser
+		:prog: pacsifier-anonymize_dicoms
 
-``pacsman-create-dicomdir`` command
+``pacsifier-create-dicomdir`` command
 -------------------------------------
 
 .. argparse::
-		:ref: pacsman.cli.create_dicomdir.get_parser
-		:prog: pacsman-create-dicomdir
+		:ref: pacsifier.cli.create_dicomdir.get_parser
+		:prog: pacsifier-create-dicomdir
 
-``pacsman-get-pseudonyms`` command
+``pacsifier-get-pseudonyms`` command
 -------------------------------------
 
 .. argparse::
-		:ref: pacsman.cli.get_pseudonyms.get_parser
-		:prog: pacsman-get-pseudonyms
+		:ref: pacsifier.cli.get_pseudonyms.get_parser
+		:prog: pacsifier-get-pseudonyms
 
-``pacsman-move-dumps`` command
+``pacsifier-move-dumps`` command
 -------------------------------------
 
 .. argparse::
-		:ref: pacsman.cli.move_dumps.get_parser
-		:prog: pacsman-move-dumps
+		:ref: pacsifier.cli.move_dumps.get_parser
+		:prog: pacsifier-move-dumps
 
-``pacsman-add-karnak-tags`` command
+``pacsifier-add-karnak-tags`` command
 -------------------------------------
 
 .. argparse::
-		:ref: pacsman.cli.add_karnak_tags.get_parser
-		:prog: pacsman-add-karnak-tags
+		:ref: pacsifier.cli.add_karnak_tags.get_parser
+		:prog: pacsifier-add-karnak-tags
 
-``pacsman-extract-carestream-report`` command
+``pacsifier-extract-carestream-report`` command
 ----------------------------------------------
 
 .. argparse::
-		:ref: pacsman.cli.extract-carestream_report.get_parser
-		:prog: pacsman-extract-carestream-report
+		:ref: pacsifier.cli.extract-carestream_report.get_parser
+		:prog: pacsifier-extract-carestream-report
 
-``pacsman-convert`` command
+``pacsifier-convert`` command
 ----------------------------
 
 .. argparse::
-		:ref: pacsman.cli.convert.get_parser
-		:prog: pacsman-convert
+		:ref: pacsifier.cli.convert.get_parser
+		:prog: pacsifier-convert
 
 
 .. _cmdusage-docker:
 
-Running `PACSMAN` commands in Docker
+Running `PACSIFIER` commands in Docker
 ====================================
 
-In this section, we provide examples to run each of the ``PACSMAN`` commands in the Docker container.
+In this section, we provide examples to run each of the ``PACSIFIER`` commands in the Docker container.
 
-``pacsman`` command
+``pacsifier`` command
 -------------------
 
 .. code-block:: bash

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Script to move all csv files retrieved by `pacsman --info ...` into a new folder."""
+"""Script to move all csv files retrieved by `pacsifier --info ...` into a new folder."""
 
 import shutil
 from glob import glob

@@ -53,6 +53,6 @@
     ],
     "access_right": "open",
     "upload_type": "software",
-    "title": "PACSMAN",
+    "title": "PACSIFIER",
     "description": "Open-source software for batch DICOM data retrieval and upload to a PACS (picture archiving and communication system)"
 }

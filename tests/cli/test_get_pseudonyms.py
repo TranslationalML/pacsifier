@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for the functions of the `pacsman.cli.get_pseudonyms` script."""
+"""Tests for the functions of the `pacsifier.cli.get_pseudonyms` script."""
 
 import os
 import shutil
@@ -22,7 +22,7 @@ import json
 import pytest
 
 
-from pacsman.cli.get_pseudonyms import (
+from pacsifier.cli.get_pseudonyms import (
     check_config_file_deid,
     check_queryfile_content,
     convert_csv_to_deid_json,
@@ -51,15 +51,15 @@ def test_check_config_file_deid():
 
 def test_convert_csv_to_deid_json(test_dir):
     queryfile = os.path.join(test_dir, "test_data", "query", "query_dicom.csv")
-    project_name = "PACSMANCohort"
+    project_name = "PACSIFIERCohort"
     json_new = convert_csv_to_deid_json(queryfile, project_name)
     assert json_new == {
-        "project": "PACSMANCohort",
+        "project": "PACSIFIERCohort",
         "PatientIDList": [{"PatientID": "PACSMAN1"}],
     }
 
     queryfile = os.path.join(test_dir, "test_data", "query", "query_file_invalid.csv")
-    project_name = "PACSMANCohort"
+    project_name = "PACSIFIERCohort"
     json_new = convert_csv_to_deid_json(queryfile, project_name)
     assert json_new == {}
 
@@ -75,12 +75,12 @@ def test_check_queryfile_content(test_dir):
 
 def test_custom_get_pseudonyms_script_with_shift(script_runner, test_dir):
     output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
-    project_name = "PACSMANCohort"
+    project_name = "PACSIFIERCohort"
 
     # Check that the script runs successfully when the flag --shift-days is set
     ret = script_runner.run(
         [
-            "pacsman-get-pseudonyms",
+            "pacsifier-get-pseudonyms",
             "-m",
             "custom",
             "-mf",
@@ -110,12 +110,12 @@ def test_custom_get_pseudonyms_script_with_shift(script_runner, test_dir):
 
 def test_custom_get_pseudonyms_script_no_shift(script_runner, test_dir):
     output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
-    project_name = "PACSMANCohort"
+    project_name = "PACSIFIERCohort"
 
     # Check that the script runs successfully when the flag --shift-days is not set
     ret = script_runner.run(
         [
-            "pacsman-get-pseudonyms",
+            "pacsifier-get-pseudonyms",
             "-m",
             "custom",
             "-mf",
@@ -139,12 +139,12 @@ def test_custom_get_pseudonyms_script_no_shift(script_runner, test_dir):
 
 def test_failure_custom_get_pseudonyms_script_no_mapping(script_runner, test_dir):
     output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
-    project_name = "PACSMANCohort"
+    project_name = "PACSIFIERCohort"
 
     # Check that the script fails to run if the mapping file is not found
     ret = script_runner.run(
         [
-            "pacsman-get-pseudonyms",
+            "pacsifier-get-pseudonyms",
             "-m",
             "custom",
             "-mf",
@@ -162,12 +162,12 @@ def test_failure_custom_get_pseudonyms_script_no_mapping(script_runner, test_dir
 
 def test_failure_custom_get_pseudonyms_script_empty_cell(script_runner, test_dir):
     output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms")
-    project_name = "PACSMANCohort"
+    project_name = "PACSIFIERCohort"
 
     # Check that the script fails to run if the mapping file contains an empty cell
     ret = script_runner.run(
         [
-            "pacsman-get-pseudonyms",
+            "pacsifier-get-pseudonyms",
             "-m",
             "custom",
             "-mf",

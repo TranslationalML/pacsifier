@@ -11,7 +11,7 @@
             "@google/semantic-release-replace-plugin", {
                 "replacements": [
                     {
-                        "files": ["pacsman/info.py"],
+                        "files": ["pacsifier/info.py"],
                         "from": "__version__ = \".*\"",
                         "to": "__version__ = \"${nextRelease.version}\"",
                         "countMatches": true
@@ -35,7 +35,7 @@
         [
             "@semantic-release/git", {
                 "assets": [
-                    "pacsman/info.py", "docs/changes.md"
+                    "pacsifier/info.py", "docs/changes.md"
                 ],
                 "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
             }

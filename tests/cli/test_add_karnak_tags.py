@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Test for the functions of the `pacsman.cli.add_karnak_tags` script."""
+"""Test for the functions of the `pacsifier.cli.add_karnak_tags` script."""
 
 import os
 from glob import glob
@@ -22,7 +22,7 @@ import sys
 import pydicom
 
 
-from pacsman.cli.add_karnak_tags import (
+from pacsifier.cli.add_karnak_tags import (
     tag_dicom_file,
     tag_all_dicoms_within_root_folder,
 )
@@ -40,15 +40,15 @@ def test_tag_dicom_file(test_dir):
 
     tag_dicom_file(
         file_to_tag,
-        patient_code="PACSMAN2",
+        patient_code="PACSIFIER2",
         patient_shift="10",
-        album_name="PACSMANCohort",
+        album_name="PACSIFIERCohort",
     )
     dataset = pydicom.read_file(file_to_tag)
 
     # Check that the tags have been added
-    assert dataset[0x000B, 0x1001].value == "PACSMAN2"
-    assert dataset[0x000B, 0x1002].value == "PACSMANCohort"
+    assert dataset[0x000B, 0x1001].value == "PACSIFIER2"
+    assert dataset[0x000B, 0x1002].value == "PACSIFIERCohort"
     assert dataset[0x000B, 0x1003].value == "10"
 
 
@@ -57,7 +57,7 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
     folder_to_tag = os.path.join(test_dir, "tmp", "test_data", "dicomseries_tagged_all")
     if not os.path.exists(folder_to_tag):
         os.makedirs(folder_to_tag, exist_ok=True)
-    patient_ids = ["PACSMAN1", "PACSMAN2", "PACSMAN3"]
+    patient_ids = ["PACSIFIER1", "PACSIFIER2", "PACSIFIER3"]
     session_folders = ["ses-20231006", "ses-20231016", "ses-20231026"]
     series_folders = ["00000_series", "00001_series"]
     files = ["slice0.dcm", "slice1.dcm", "slice2.dcm"]
@@ -85,7 +85,7 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
                     # For now, we have to "remove the patient" from Weasis to load the different series.
                     dataset.save_as(os.path.join(series_path, file))
 
-    patient_codes = ["PACSMAN1coded", "PACSMAN2coded", "PACSMAN3coded"]
+    patient_codes = ["PACSIFIER1coded", "PACSIFIER2coded", "PACSIFIER3coded"]
     day_shifts = ["10", "20", "30"]
 
     tag_all_dicoms_within_root_folder(
@@ -98,7 +98,7 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
             f"sub-{real_id}": day_shift
             for real_id, day_shift in zip(patient_ids, day_shifts)
         },
-        album_name="PACSMANCohort",
+        album_name="PACSIFIERCohort",
     )
 
     # Check that the new private tags have been added
@@ -110,5 +110,5 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
         ):
             dataset = pydicom.read_file(file)
             assert dataset[0x000B, 0x1001].value == patient_code
-            assert dataset[0x000B, 0x1002].value == "PACSMANCohort"
+            assert dataset[0x000B, 0x1002].value == "PACSIFIERCohort"
             assert dataset[0x000B, 0x1003].value == day_shift

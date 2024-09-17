@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for the functions of the `pacsman.cli.pacsman` script."""
+"""Tests for the functions of the `pacsifier.cli.pacsifier` script."""
 
 from glob import glob
 import json
@@ -22,10 +22,11 @@ from pandas import read_csv
 import pytest
 from functools import reduce
 import string
+import shutil
 from hypothesis import given, example
 from hypothesis.strategies import text
 
-from pacsman.cli import (
+from pacsifier.cli import (
     readLineByLine,
     parse_findscu_dump_file,
     check_query_table_allowed_filters,
@@ -187,7 +188,7 @@ def test_add_or_retrieve_name():
 
 
 def test_invalid_retrieve_dicoms_using_table(test_dir):
-    config_path = os.path.join("/tests", "config", "config.json")
+    config_path = os.path.join(test_dir, "config", "config.json")
     table = read_csv(
         os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
     ).fillna("")
@@ -212,28 +213,23 @@ def test_invalid_retrieve_dicoms_using_table(test_dir):
 
 
 def test_retrieve_dicoms_using_table(test_dir):
+    # Ensure output directory exists
+    out_directory = os.path.join(test_dir, "tmp", "test_set")
+    if os.path.exists(out_directory):
+        shutil.rmtree(out_directory)  # Clear old files if needed
+    os.makedirs(out_directory)  # Create fresh output directory
+
     table = read_csv(
         os.path.join(test_dir, "test_data", "query", "query_dicom.csv"), dtype=str
     ).fillna("")
-    config_path = os.path.join("/tests/config/config.json")
-
+    config_path = os.path.join(test_dir, "config", "config.json")
     with open(config_path) as f:
         parameters = json.load(f)
-
-    out_directory = os.path.join(test_dir, "tmp", "test_set")
-
-    # Test retrieve DICOM series
-
-    # retrieve_dicoms_using_table(table, parameters, out_directory, False, False)
-    # assert glob("./test_set/sub-*/ses-*/*/*") == []
-
-    # retrieve_dicoms_using_table(table, parameters, out_directory, False, True)
-    # assert glob("./test_set/sub-*/ses-*/*/*") == []
 
     retrieve_dicoms_using_table(table, parameters, out_directory, True, True, False)
 
     # Assert the first six files of the list are correct
-    output_files = glob(os.path.join(test_dir, "tmp", "test_set", "sub-*/ses-*/*/*"))
+    output_files = glob(os.path.join(out_directory, "sub-*/ses-*/*/*"))
     known_files_dir = os.path.join(
         test_dir, "tmp", "test_set", "sub-PACSMAN1", "ses-20231016"
     )
@@ -254,7 +250,7 @@ def test_upload_dicoms(test_dir):
     dicomseries_karnak_tags_dir = os.path.join(
         test_dir, "tmp", "test_data", "dicomseries_tagged_all"
     )
-    config_path = os.path.join("/tests", "config", "config_upload.json")
+    config_path = os.path.join(test_dir, "config", "config_upload.json")
     with open(config_path) as f:
         parameters = json.load(f)
     upload_dicoms(dicomseries_karnak_tags_dir, parameters)
@@ -263,7 +259,7 @@ def test_upload_dicoms(test_dir):
 def test_check_output_info():
     pass
 
-    # pacsman.main(["--info", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
+    # pacsifier.main(["--info", "--queryfile test.csv", "--out_directory ./tests/test_set",  "--config ./files/config.json"])
     # subjects = glob("./test_set/*")
     # sessions = glob("./test_set/sub-*/ses-*")
     # csv_files = glob("./test_set/sub-*/ses-*/*.csv")

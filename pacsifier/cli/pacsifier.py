@@ -31,8 +31,8 @@ import csv
 import time
 import argparse
 
-from pacsman.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file
-from pacsman.core.sanity_checks import (
+from pacsifier.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file
+from pacsifier.core.sanity_checks import (
     check_date,
     check_date_range,
     check_query_attributes,
@@ -488,7 +488,7 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
 
     Args:
         dicom_dir: path to the directory containing the dicoms.
-                   The directory should adopt the structure adopted by PACSMAN output directory
+                   The directory should adopt the structure adopted by PACSIFIER output directory
                    when using the --save command.
                    This means that it should contain a subdirectory for each patient,
                    which in turn should contain a subdirectory for each study,
@@ -510,7 +510,7 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
                         │   │   ├── 00001-First_series
                         │   │   │   ├── image1.dcm
 
-        parameters: parameters from PACSMAN configuration file
+        parameters: parameters from PACSIFIER configuration file
 
     """
     pacs_server = parameters["server_address"]

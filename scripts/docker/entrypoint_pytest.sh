@@ -15,12 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-conda run -n pacsman_minimal pytest \
-    -c "/app/pacsman/.pytest.ini" \
-    --cov-config "/app/pacsman/.coveragerc" \
+conda run -n pacsifier_minimal pytest \
+    -c "/app/pacsifier/.pytest.ini" \
+    --cov-config "/app/pacsifier/.coveragerc" \
     --cov-report html:"/tests/report/cov_html" \
     --cov-report xml:"/tests/report/cov.xml" \
     --cov-report lcov:"/tests/report/cov.info" \
-    --cov=pacsman \
+    --cov=pacsifier \
     -s \
     "${@}"

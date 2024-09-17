@@ -333,7 +333,7 @@ def anonymize_all_dicoms_within_root_folder(
         output_folder: path where anonymized images will be located
         datapath: path to the dicom images
         pattern_dicom_files: (generic) path to the dicom images starting from the patient folder
-            (in a PACSMAN dump, this would reflect e.g. `ses-20170115/0002-MPRAGE/*.dcm`)
+            (in a PACSIFIER dump, this would reflect e.g. `ses-20170115/0002-MPRAGE/*.dcm`)
         new_ids: anonymous ids to be set after anonymizing the original ids
         rename_patient_directories: rename patient directories using the anonymized ids if True
         delete_identifiable_files: delete DICOM Series which have identifiable information in the image data itself if True

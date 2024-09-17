@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""This module contains sanity checks for the functions employed in the pacsman script."""
+"""This module contains sanity checks for the functions employed in the pacsifier script."""
 
 import jsonschema
 from datetime import datetime

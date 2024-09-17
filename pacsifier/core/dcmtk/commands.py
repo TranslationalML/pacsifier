@@ -22,7 +22,7 @@ import shlex
 import subprocess
 import platform
 
-from pacsman.core.sanity_checks import (
+from pacsifier.core.sanity_checks import (
     check_parameters_inputs,
     check_ids,
     check_server_address,
@@ -188,11 +188,11 @@ def get(
         server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
         server_aet: PACS server AET. Default is "theServerAET".
         port: PACS server port for incoming requests. Default is 104.
-        patient_id: patient id. Default is pacsman.core.execute_commands.patient_id.
+        patient_id: patient id. Default is pacsifier.core.execute_commands.patient_id.
         study_instance_uid: study instance unique idetifier. Default is
-                          pacsman.core.execute_commands.study_instance_uid.
+                          pacsifier.core.execute_commands.study_instance_uid.
         series_instance_uid: series instance unique identifier. Default is
-                           pacsman.core.execute_commands.series_instance_uid.
+                           pacsifier.core.execute_commands.series_instance_uid.
         move_port: port used for movescu command. Default is 4006.
         output_dir: directory of output files. Default is "." e.g. the current working directory.
         log_dir: Folder for the logs where the log file (log.txt) and
@@ -246,11 +246,11 @@ def move_remote(
         server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
         server_aet: PACS server AET. Default is "theServerAET".
         port: PACS server port for incoming requests. Default is 104.
-        patient_id: patient id. Default is pacsman.core.execute_commands.patient_id.
+        patient_id: patient id. Default is pacsifier.core.execute_commands.patient_id.
         study_instance_uid: study instance unique idetifier. Default is
-                          pacsman.core.execute_commands.study_instance_uid.
+                          pacsifier.core.execute_commands.study_instance_uid.
         series_instance_uid: series instance unique identifier. Default is
-                           pacsman.core.execute_commands.series_instance_uid.
+                           pacsifier.core.execute_commands.series_instance_uid.
         move_aet: AET where to move the images. Default is "theMoveAET".
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.

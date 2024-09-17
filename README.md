@@ -1,4 +1,4 @@
-PACSMAN is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
+PACSIFIER is a batch query/retrieve interface for the CareStream PACS at Lausanne University Hospital.
 
 It is implemented as a Python application running on Ubuntu Linux, relying on the DCMTK suite of tools. A Docker image is available.
 
@@ -8,13 +8,13 @@ NOTE: This readme has not been updated in a little while. It's mostly correct bu
 # Building and testing
 
 
-## Building the pacsman Docker image from the repo
+## Building the pacsifier Docker image from the repo
 
-    cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
+    cd /path/to/PACSIFIER/; docker build --network=host -t pacsifier .
 
 ## Running the test suite 
 
-    cd /path/to/PACSMAN/; docker build --network=host -t pacsman .
+    cd /path/to/PACSIFIER/; docker build --network=host -t pacsifier .
 
 
 # Deployment
@@ -25,17 +25,17 @@ NOTE: This readme has not been updated in a little while. It's mostly correct bu
 
 Login to the registry with `docker login registry.gitlab.com`
 
-Pull and run the image with `docker run registry.gitlab.com/jonasrichiardi/pacsman/pacsman`
+Pull and run the image with `docker run registry.gitlab.com/jonasrichiardi/pacsifier/pacsifier`
 
-You should see the help message from PACSMAN.
+You should see the help message from PACSIFIER.
 
 ### Deploying from a local image
 
-First load the docker image (`pacsman.tar`) from the distribution server or storage media where it's located into the local docker install on your computer.
+First load the docker image (`pacsifier.tar`) from the distribution server or storage media where it's located into the local docker install on your computer.
 
 #### Linux
 
-    docker load -i /path/to/image/pacsman.tar
+    docker load -i /path/to/image/pacsifier.tar
 
 #### Windows 10
 
@@ -43,7 +43,7 @@ TODO
 
 #### Windows 7 (Deprecated)
 
-Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsman.tar`
+Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker load -i pacsifier.tar`
 
 
 
@@ -54,7 +54,7 @@ Start the `Docker Quickstart Terminal`, then `cd /path/to/image/`, then `docker 
 
 1. Install dcmtk `sudo apt-get install -y dcmtk`
 2. Download and install miniconda: `wget -c http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh`, then `chmod +x Miniconda-latest-Linux-x86_64.sh`
-3. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
+3. Download the code using command `git clone https://gitlab.com/jonasrichiardi/PACSIFIER`
 4. Setup the environment and install heudiconv by running `bash ./utils/create_miniconda3_environment.sh` and then `bash ./utils/installation_python_modules.sh` .
 5. Create the configuration file as described below.
 6. Verify the installation works by running this test: `XXX_TEST_WITH_EXAMPLE_CSV_HERE`
@@ -78,11 +78,11 @@ This is more annoying than the Linux install.
 2. Take a new `command prompt in admin mode and install dcmtk: `choco install dcmtk`
 3. Check installation succeeded by taking a new command prompt and typing `echoscu`
 4. Download and install miniconda from <https://conda.io>
-5. Download the pacsman code using command `git clone https://gitlab.com/jonasrichiardi/PACSMAN`
+5. Download the pacsifier code using command `git clone https://gitlab.com/jonasrichiardi/PACSIFIER`
 6. Using `cmd.exe` in admin mode: Setup the python environment 
 	- Run a command prompt as admin (start menu - right click on Command Prompt - Run as administrator)
 	- Activate the base conda environment: `D:\path\to\miniconda\Scripts\activate.bat d:\path\to\miniconda`
-	- Create the environment: `conda env create -n pacsman_minimal -f /path/to/PACSMAN/deployment/utils/environment_minimal.yml`
+	- Create the environment: `conda env create -n pacsifier_minimal -f /path/to/PACSIFIER/deployment/utils/environment_minimal.yml`
 	- Note: This is messy but using `Anaconda Prompt` may get you a `NotWriteableError: The current user does not have write
 permissions to a required path`,
 7. Using `Anaconda prompt`: install support to run conda in PowerShell (<https://github.com/BCSharp/PSCondaEnvs>), because that's where chocolatey makes dcmtk available
@@ -103,20 +103,20 @@ permissions to a required path`,
 
 To keep things simple, chose a directory (e.g. `my_dir`) that will store the query file (e.g. `my_query.csv`) and configuration file (e.g. `my_config.json`). Create a sub-directory (say `my_output_dir`) to store the DICOM files into.
 
-To make this directory accessible within the Docker container, you need to `bind mount` it as a docker volume to a specific location in the container by using the `-v` flag. In the examples below, we bind mount the host computer's directory into the `/base` volume within Docker. Then within the PACSMAN options (which runs *within* the container), paths for the config file and query files will be relative to that docker volume.
+To make this directory accessible within the Docker container, you need to `bind mount` it as a docker volume to a specific location in the container by using the `-v` flag. In the examples below, we bind mount the host computer's directory into the `/base` volume within Docker. Then within the PACSIFIER options (which runs *within* the container), paths for the config file and query files will be relative to that docker volume.
 
-This docker image's entrypoint is `pacsman.py`.
+This docker image's entrypoint is `pacsifier.py`.
 
 ### Linux 
 
-    docker run --net=host -it --rm -v ~/my_dir/.:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run --net=host -it --rm -v ~/my_dir/.:/base registry.gitlab.com/jonasrichiardi/pacsifier/pacsifier --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
 ### Windows 10 
 	
 You need to give Docker permission to access your chosen directory `my_dir`. To do this, right-click onto Docker in your taskbar > Settings > File sharing.
 Then add permission for `my_dir`. 
 
-    docker run -p my_move_port -it --rm -v c:\Users\my_user\my_dir:/base registry.gitlab.com/jonasrichiardi/pacsman/pacsman --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
+    docker run -p my_move_port -it --rm -v c:\Users\my_user\my_dir:/base registry.gitlab.com/jonasrichiardi/pacsifier/pacsifier --save --info  --queryfile /base/my_query.csv --config /base/my_config.json --out_directory /base/my_output_dir
 
 Where `my_move_port` should be replaced by the same value as you have in the config file `move_port`.
 
@@ -125,8 +125,8 @@ Where `my_move_port` should be replaced by the same value as you have in the con
 
 ### Windows 7 (deprecated)
 
-1. Using `Powershell` in normal mode we can now run pacsman
-	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsman_minimal`. We can probably to better in terms of adding the cmdlet to the path.
+1. Using `Powershell` in normal mode we can now run pacsifier
+	- Run `Powershell`, cd to `D:\path\to\miniconda\Scripts\`, then `.\activate pacsifier_minimal`. We can probably to better in terms of adding the cmdlet to the path.
 2. Verify the installation works by running this test: (TODO `XXX_TEST_WITH_EXAMPLE_CSV_HERE`)
 
 ### Windows 10 (deprecated)
@@ -145,7 +145,7 @@ See the section `Running queries`
 
 ## Command line
 
-	python pacsman.py --info --save --queryfile path_to_queryfile --config path_to_config_file --out_directory path_to_out_directory
+	python pacsifier.py --info --save --queryfile path_to_queryfile --config path_to_config_file --out_directory path_to_out_directory
 
  - The --info or -i option allows you to dump the information in the retrieved series (`findscu` output) into csv files.
  - The --save or -s option allows you to save the queryed dicom images to disk. Cannot be used with --move.
@@ -260,7 +260,7 @@ For patients that have a study declared in the Horus system, you can get consist
 	python get_pseudonyms.py --config my_config_deid.json --queryfile my_query.csv --project_name my_project_name --out_directory ./
 
  - `my_config_deid.json` is the configuration file for the de-ID API, containing token and service URL.
- - `my_query.csv` is the PACSMAN query file, listing all PatientIDs to pseudonymise
+ - `my_query.csv` is the PACSIFIER query file, listing all PatientIDs to pseudonymise
  - `my_project_name` Corresponds both to the project name on GPCR and may correspond to the album name on Kheops where the study will be pushed
 
 After running, the output directory will contain two files `new_ids_[my_project_name].json` and `day_shift_[my_project_name].json` which can be used directly with
@@ -268,9 +268,9 @@ anonymisation process below
 
 ### Docker command-line (Windows)
 
-	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python get_pseudonyms.py ...
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsifier/pacsifier run -n pacsifier_minimal python get_pseudonyms.py ...
 
-## Anonymizing directly with PACSMAN
+## Anonymizing directly with PACSIFIER
 
 ### Command line 
 	python anonymize_Dicoms.py --in_folder files-directory --out_folder anonymized-files-directory --new_ids my_new_ids.json --delete_identifiable --fuzz_acq_dates
@@ -282,7 +282,7 @@ anonymisation process below
  - `--fuzz_acq_dates` - shifts acquisition dates by a random amount, synchronised with birth date fuzzing. Returns a file 'date_offsets.csv'.
 
 ### Docker command-line (Windows)
-	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python anonymize_Dicoms.py ...
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsifier/pacsifier run -n pacsifier_minimal python anonymize_Dicoms.py ...
 
 where `...` refers to the same argument as above
 
@@ -315,10 +315,10 @@ Runnning the command above will replace all the images within data folder with a
 ## Anonymizing via the Karnak gateway
 
 ### Docker command-line (Windows)
-	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsman/pacsman run -n pacsman_minimal python add_Karnak_tags.py --new_ids my_new_ids.json --day_shift day_shift.json --album_name my_album_name
+	docker run -it --rm -v c:\Users\my_user\my_dir:/base --entrypoint "conda" registry.gitlab.com/jonasrichiardi/pacsifier/pacsifier run -n pacsifier_minimal python add_Karnak_tags.py --new_ids my_new_ids.json --day_shift day_shift.json --album_name my_album_name
 
- - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code, same syntax as for direct PACSMAN anonymisation. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
- - `day_shift.json` maps on-disk real patient IDs to a chosen day shift, similar syntax as for direct PACSMAN anonymisation. It is an optional parameter. Example contents: `{'sub-1234':'-1', 'sub-87262':'35'}`
+ - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code, same syntax as for direct PACSIFIER anonymisation. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
+ - `day_shift.json` maps on-disk real patient IDs to a chosen day shift, similar syntax as for direct PACSIFIER anonymisation. It is an optional parameter. Example contents: `{'sub-1234':'-1', 'sub-87262':'35'}`
  - `my_album_name` must match a Kheops album name
 
 
@@ -334,7 +334,7 @@ path_to_data_folder is the path to the data to be converted to nifti format. The
 
 # Move dumps 
 
-If pacsman is called with the option --info or -i it will store csv files containing information about each series. <br> Move dumps is useful for moving these csv files into a new folder for complete anonymization of the data folder content.
+If pacsifier is called with the option --info or -i it will store csv files containing information about each series. <br> Move dumps is useful for moving these csv files into a new folder for complete anonymization of the data folder content.
 
 ## Command line
 

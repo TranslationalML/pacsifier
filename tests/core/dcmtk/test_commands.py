@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for the functions of the `pacsman.core.execute_commands` module."""
+"""Tests for the functions of the `pacsifier.core.execute_commands` module."""
 
 import os
 import pytest
 
-from pacsman.core.dcmtk.commands import (
+from pacsifier.core.dcmtk.commands import (
     echo, find, get, upload, replace_default_params, run
 )
 
@@ -208,4 +208,6 @@ def test_replace_default_parameters():
 
 
 def test_run():
-    assert [] == run("echo California Dreaming.", log_dir="/tests/logs")
+    log_dir = "./logs"
+    os.makedirs(log_dir, exist_ok=True)
+    assert [] == run("echo California Dreaming.", log_dir=log_dir)

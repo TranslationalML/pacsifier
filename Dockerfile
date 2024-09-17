@@ -42,10 +42,10 @@ RUN conda env create -f environment_minimal_202401.yml && \
     rm environment_minimal_202401.yml
 
 ###############################################################################
-# Install PACSMAN
+# Install PACSIFIER
 ###############################################################################
 
-WORKDIR /app/pacsman
+WORKDIR /app/pacsifier
 
 # Copy necessary contents of this repository.
 COPY ./.coveragerc ./.coveragerc
@@ -54,13 +54,13 @@ COPY setup.py ./setup.py
 COPY setup.cfg ./setup.cfg
 COPY README.md ./README.md
 # COPY LICENSE ./LICENSE
-COPY pacsman ./pacsman
+COPY pacsifier ./pacsifier
 
-# Install pacsman with static version taken from the argument
+# Install pacsifier with static version taken from the argument
 ARG VERSION=unknown
-RUN echo "${VERSION}" > /app/pacsman/pacsman/VERSION \
-    && conda run -n pacsman_minimal pip install -e ".[all]" \
-    && conda run -n pacsman_minimal pip install pytest-order
+RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
+    && conda run -n pacsifier_minimal pip install -e ".[all]" \
+    && conda run -n pacsifier_minimal pip install pytest-order
 
 ###############################################################################
 # Create initial folders for testing / code coverage with correct permissions
@@ -75,7 +75,7 @@ RUN mkdir -p "/tmp/SCU_STORE" && chmod -R 775 "/tmp/SCU_STORE"
 RUN mkdir -p "/tmp/SCU_UPLOAD_STORE" && chmod -R 775 "/tmp/SCU_UPLOAD_STORE"
 
 # Create directory for pytest cache with correct permissions
-RUN mkdir -p "/app/pacsman/.pytest_cache" && chmod -R 775 "/app/pacsman/.pytest_cache"
+RUN mkdir -p "/app/pacsifier/.pytest_cache" && chmod -R 775 "/app/pacsifier/.pytest_cache"
 
 ###############################################################################
 # Set environment variables
@@ -110,11 +110,11 @@ ARG BUILD_DATE=today
 ARG VCS_REF=unknown
 
 LABEL org.label-schema.build-date=${BUILD_DATE} \
-    org.label-schema.name="PACSMAN" \
-    org.label-schema.description="PACSMAN: batch DICOM query/retrieve tool for PACS systems" \
+    org.label-schema.name="PACSIFIER" \
+    org.label-schema.description="PACSIFIER: batch DICOM query/retrieve tool for PACS systems" \
     org.label-schema.url="https://translationalml.github.io/" \
     org.label-schema.vcs-ref=${VCS_REF} \
-    org.label-schema.vcs-url="https://github.com/TranslationalML/pacsman" \
+    org.label-schema.vcs-url="https://github.com/TranslationalML/pacsifier" \
     org.label-schema.version=${VERSION} \
     org.label-schema.maintainer="The TranslationalML team" \
     org.label-schema.vendor="The TranslationalML team" \
@@ -123,10 +123,10 @@ LABEL org.label-schema.build-date=${BUILD_DATE} \
         -v "/path/to/config.json":/config.json \
         -v "/path/to/query.csv":/query.csv \
         -v "/path/to/output/directory":/output \
-        pacsman:1.0.0 \
-        pacsman -c /config.json -i -q /query.csv -d /output" \
+        pacsifier:1.0.0 \
+        pacsifier -c /config.json -i -q /query.csv -d /output" \
     org.label-schema.docker.cmd.test="docker run --rm --net=host \
         --entrypoint /entrypoint_pytest.sh \
-        -v /path/to/PACSMAN/tests:/test \
-        -t pacsman:1.0.0 \
+        -v /path/to/PACSIFIER/tests:/test \
+        -t pacsifier:1.0.0 \
         /test"

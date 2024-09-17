@@ -1,4 +1,4 @@
-name: pacsman_minimal
+name: pacsifier_minimal
 channels:
   - conda-forge
 dependencies:
