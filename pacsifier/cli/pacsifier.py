@@ -270,6 +270,8 @@ def retrieve_dicoms_using_table(
 
     validator = Validator(schema)
     counter = 0
+    log_entries = []
+
     for i, query_attributes in enumerate(attributes_list):
         # print("Retrieving images for element number ", i+1)
 
@@ -436,6 +438,19 @@ def retrieve_dicoms_using_table(
             # Store all later retrieved files of current patient within the serie_id directory.
             if not os.path.isdir(patient_serie_output_dir) and (save or info):
                 os.makedirs(patient_serie_output_dir, exist_ok=True)
+            
+            # Log entry creation
+            log_entry = {col: query_attributes[col] for col in table.columns}  # Add original query attributes
+            study_uid = serie["StudyInstanceUID"]
+            series_uid = serie["SeriesInstanceUID"]
+            num_files_found = len(os.listdir(patient_serie_output_dir)) if os.path.isdir(patient_serie_output_dir) else 0
+            
+            log_entry["StudyInstanceUID"] = study_uid
+            log_entry["SeriesInstanceUID"] = series_uid
+            log_entry["FilesFound"] = num_files_found
+            
+            # Append the log entry for this series
+            log_entries.append(log_entry.copy())
 
             # Retrieving files of current patient, study and serie.
             # TODO: handle and report error 'F: cannot listen on port 104, insufficient privileges' in movescu
@@ -478,6 +493,23 @@ def retrieve_dicoms_using_table(
             if os.path.isfile(current_findscu_dump_file):
                 os.remove(current_findscu_dump_file)
 
+    # Path to save the CSV file
+    log_file_path = os.path.join(output_dir, "logs","pacs_query_log.csv")
+
+    # Write the log entries to a CSV file
+    with open(log_file_path, "w", newline="") as csvfile:
+        # Define the fieldnames for the CSV (dynamic from query file + additional fields)
+        fieldnames = list(table.columns) + ["StudyInstanceUID", "SeriesInstanceUID", "FilesFound"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        # Write the header
+        writer.writeheader()
+
+        # Write all log entries
+        for log_entry in log_entries:
+            writer.writerow(log_entry)
+
+    print(f"Log written to {log_file_path}")
     # Clean the tmp folder
     if os.path.isdir(os.path.join(output_dir, "tmp")):
         shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
