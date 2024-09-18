@@ -438,19 +438,6 @@ def retrieve_dicoms_using_table(
             # Store all later retrieved files of current patient within the serie_id directory.
             if not os.path.isdir(patient_serie_output_dir) and (save or info):
                 os.makedirs(patient_serie_output_dir, exist_ok=True)
-            
-            # Log entry creation
-            log_entry = {col: query_attributes[col] for col in table.columns}  # Add original query attributes
-            study_uid = serie["StudyInstanceUID"]
-            series_uid = serie["SeriesInstanceUID"]
-            num_files_found = len(os.listdir(patient_serie_output_dir)) if os.path.isdir(patient_serie_output_dir) else 0
-            
-            log_entry["StudyInstanceUID"] = study_uid
-            log_entry["SeriesInstanceUID"] = series_uid
-            log_entry["FilesFound"] = num_files_found
-            
-            # Append the log entry for this series
-            log_entries.append(log_entry.copy())
 
             # Retrieving files of current patient, study and serie.
             # TODO: handle and report error 'F: cannot listen on port 104, insufficient privileges' in movescu
@@ -489,6 +476,19 @@ def retrieve_dicoms_using_table(
                     w = csv.DictWriter(f, serie.keys())
                     w.writeheader()
                     w.writerow(serie)
+
+            # Log entry creation
+            log_entry = {col: query_attributes[col] for col in table.columns}  # Add original query attributes
+            study_uid = serie["StudyInstanceUID"]
+            series_uid = serie["SeriesInstanceUID"]
+            num_files_found = len(os.listdir(patient_serie_output_dir)) if os.path.isdir(patient_serie_output_dir) else 0
+
+            log_entry["StudyInstanceUID"] = study_uid
+            log_entry["SeriesInstanceUID"] = series_uid
+            log_entry["FilesFound"] = num_files_found
+
+            # Append the log entry for this series
+            log_entries.append(log_entry.copy())
 
             if os.path.isfile(current_findscu_dump_file):
                 os.remove(current_findscu_dump_file)
