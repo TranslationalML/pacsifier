@@ -480,11 +480,11 @@ def retrieve_dicoms_using_table(
             # Log entry creation
             log_entry = {col: query_attributes[col] for col in table.columns}  # Add original query attributes
             study_uid = serie["StudyInstanceUID"]
-            series_uid = serie["SeriesInstanceUID"]
+            series_uid = serie["SeriesNumber"]
             num_files_found = len(os.listdir(patient_serie_output_dir)) if os.path.isdir(patient_serie_output_dir) else 0
 
             log_entry["StudyInstanceUID"] = study_uid
-            log_entry["SeriesInstanceUID"] = series_uid
+            log_entry["SeriesNumber"] = series_uid
             log_entry["FilesFound"] = num_files_found
 
             # Append the log entry for this series
@@ -499,7 +499,7 @@ def retrieve_dicoms_using_table(
     # Write the log entries to a CSV file
     with open(log_file_path, "w", newline="") as csvfile:
         # Define the fieldnames for the CSV (dynamic from query file + additional fields)
-        fieldnames = list(table.columns) + ["StudyInstanceUID", "SeriesInstanceUID", "FilesFound"]
+        fieldnames = list(table.columns) + ["StudyInstanceUID", "SeriesNumber", "FilesFound"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
 
         # Write the header
