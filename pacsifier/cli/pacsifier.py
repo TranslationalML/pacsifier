@@ -480,11 +480,11 @@ def retrieve_dicoms_using_table(
             # Log entry creation
             log_entry = {col: query_attributes[col] for col in table.columns}  # Add original query attributes
             study_uid = serie["StudyInstanceUID"]
-            series_uid = serie["SeriesNumber"]
+            series_number = serie["SeriesNumber"]
             num_files_found = len(os.listdir(patient_serie_output_dir)) if os.path.isdir(patient_serie_output_dir) else 0
 
             log_entry["StudyInstanceUID"] = study_uid
-            log_entry["SeriesNumber"] = series_uid
+            log_entry["SeriesNumber"] = series_number
             log_entry["FilesFound"] = num_files_found
 
             # Append the log entry for this series
