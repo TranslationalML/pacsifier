@@ -494,7 +494,7 @@ def retrieve_dicoms_using_table(
                 os.remove(current_findscu_dump_file)
 
     # Path to save the CSV file
-    log_file_path = os.path.join(output_dir, "logs","pacs_query_log.csv")
+    log_file_path = os.path.join(output_dir, "logs","pacsifier_log.csv")
 
     # Write the log entries to a CSV file
     with open(log_file_path, "w", newline="") as csvfile:
