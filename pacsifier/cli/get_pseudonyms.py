@@ -164,6 +164,31 @@ def check_queryfile_content(queryfile: str) -> None:
     check_query_table_allowed_filters(query_table)
 
 
+def generate_csv_with_pseudonyms_and_day_shifts(queryfile: str, pseudonyms: dict, day_shifts: dict, output_dir: str) -> None:
+    """Create a CSV file with the original query file columns, new pseudonyms, and day shifts.
+
+    Args:
+        queryfile: path to the original PACSIFIER query file
+        pseudonyms: dictionary mapping old Patient IDs to new pseudonyms
+        day_shifts: dictionary mapping old Patient IDs to day shifts
+        output_dir: path to save the resulting CSV file
+    """
+    # Load the original query file
+    query_table = read_csv(queryfile, dtype=str).fillna("")
+
+    # Add two new columns for pseudonyms and day shifts
+    query_table["NewPseudonym"] = query_table["PatientID"].map(pseudonyms)
+    query_table["DayShift"] = query_table["PatientID"].map(day_shifts)
+
+    # Define the output CSV path
+    output_csv = os.path.join(output_dir, "log_get_pseudonyms.csv")
+
+    # Save the updated table with new pseudonyms and day shifts to a CSV file
+    query_table.to_csv(output_csv, index=False)
+
+    print(f"CSV with new pseudonyms and day shifts saved to: {output_csv}")
+    
+
 def get_parser() -> argparse.ArgumentParser:
     """Get parser for command line arguments."""
     parser = argparse.ArgumentParser(
@@ -272,6 +297,14 @@ def main():
 
         # Get day shift
         json_day_shift_response = get_deid_day_shifts(deid_parameters, deid_query_json)
+
+        # Generate the CSV file with original query data, new pseudonyms, and day shifts
+        generate_csv_with_pseudonyms_and_day_shifts(
+            queryfile=query_file,
+            pseudonyms=json.loads(json_pseudo_response),
+            day_shifts=json.loads(json_day_shift_response),
+            output_dir=output_dir
+        )
 
     else:
         # Read the custom mapping file.
