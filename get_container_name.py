@@ -22,7 +22,7 @@ import os.path as op
 
 def main():
     sys.path.insert(0, op.abspath("."))
-    from pacsman.info import __container_name__
+    from pacsifier.info import __container_name__
 
     print(__container_name__)
     return __container_name__
