@@ -79,8 +79,8 @@ jobs:
         
         - name: Set image name and test tag
           run: |
-            IMAGE_NAME=${QUAY_SERVER}/${QUAY_NAMESPACE}/${CONTAINER_NAME}
-            TEST_TAG=${IMAGE_NAME}:${VERSION}-test
+            IMAGE_NAME=${{ env.QUAY_SERVER }}/${{ env.QUAY_NAMESPACE }}/${{ env.CONTAINER_NAME }}
+            TEST_TAG=${IMAGE_NAME}:${{ env.VERSION }}-test
             echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
             echo "TEST_TAG=$TEST_TAG" >> $GITHUB_ENV
         
