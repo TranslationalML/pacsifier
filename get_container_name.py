@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utility script to get the container name of `PACSMAN`."""
+"""Utility script to get the container name of `PACSIFIER`."""
 import sys
 import os.path as op
 

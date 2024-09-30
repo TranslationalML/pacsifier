@@ -1,4 +1,4 @@
-name: Build, Test, and Deploy the Docker image and "pacsman" package
+name: Build, Test, and Deploy the Docker image and "pacsifier" package
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ on:
       - setup.py
       - setup.cfg
       - environment/*
-      - pacsman/*
+      - pacsifier/*
       - scripts/*
       - tests/*
       - utils/*
@@ -99,7 +99,7 @@ jobs:
           run: |
             make install-python-wheel
             # check if the main installed script runs
-            pacsman --version
+            pacsifier --version
 
         - name: Run PyTest tests via the Docker image build previously
           run: |
