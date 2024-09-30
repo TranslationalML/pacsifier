@@ -17,11 +17,7 @@ override TAG := $(subst _,-,$(TAG))
 $(info TAG (Normalized) = $(TAG))
 
 # Define the complete docker image tag 
-<<<<<<< HEAD
-IMAGE_TAG = $(if $(CI_REGISTRY),$(CI_REGISTRY)/tml/pacsifier:$(TAG),pacsifier:$(TAG)) 
-=======
 IMAGE_TAG=$(IMAGE_NAME):$(TAG)
->>>>>>> 8894ea1 (refactor(Makefile): set IMAGE_NAME with get_container_name.py)
 
 # Define the build date and vcs reference
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
