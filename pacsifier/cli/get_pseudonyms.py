@@ -69,7 +69,7 @@ def convert_csv_to_deid_json(queryfile: str, project_name: str) -> Any:
     json_new_str = '{"project": "' + project_name + '", "PatientIDList": ['
     patient_list_str = ""
 
-    with open(queryfile, newline="") as csvfile:
+    with open(queryfile, newline="",encoding='UTF-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row["PatientID"] != "":
