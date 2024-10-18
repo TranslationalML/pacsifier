@@ -143,6 +143,11 @@ def get_deid_day_shifts(deid_parameters: dict, query_json: dict) -> None:
     )
 
     resp = ast.literal_eval(response.text)
+    
+    #force day shift in integer for tml compatibility (if provided in str)
+    for key in resp.keys():
+        resp[key] = int(resp[key])
+    
     json_resp = json.dumps(resp, indent=4)
 
     return json_resp
