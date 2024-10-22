@@ -29,6 +29,27 @@ from pacsifier.cli.get_pseudonyms import (
 )
 
 
+def test_convert_csv_with_utf8_sig_encoding(tmpdir):
+    queryfile = os.path.join(tmpdir, "query.csv")
+
+    # Write the CSV with UTF-8-sig encoding to simulate a file with BOM
+    with open(queryfile, "w", encoding="UTF-8-sig") as csvfile:
+        csvfile.write("PatientID,AccessionNumber\n")
+        csvfile.write("123,AAA\n")
+        csvfile.write("432,BBB\n")
+
+    project_name = "TestProject"
+    json_new = convert_csv_to_deid_json(queryfile, project_name)
+
+    assert json_new == {
+        "project": "TestProject",
+        "PatientIDList": [
+            {"PatientID": "123"},
+            {"PatientID": "432"}
+        ],
+    }
+
+
 def test_check_config_file_deid():
     config_file = {
         "deid_URL": "https://dummy.url.example",
