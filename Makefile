@@ -3,6 +3,9 @@
 # Define the project directory
 PROJECT_DIR = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
+# Set environment variables for the docker image name and tag
+IMAGE_NAME=$(shell python get_container_name.py)
+
 # Define the version tag 
 TAG = $(shell python get_version.py)
 $(info TAG = $(TAG))
@@ -14,7 +17,7 @@ override TAG := $(subst _,-,$(TAG))
 $(info TAG (Normalized) = $(TAG))
 
 # Define the complete docker image tag 
-IMAGE_TAG = $(if $(CI_REGISTRY),$(CI_REGISTRY)/tml/pacsifier:$(TAG),pacsifier:$(TAG)) 
+IMAGE_TAG=$(IMAGE_NAME):$(TAG)
 
 # Define the build date and vcs reference
 BUILD_DATE = $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -131,7 +134,7 @@ build-python-wheel:
 
 #install-python-wheel: @ Installs the python wheel
 install-python-wheel: build-python-wheel
-	pip install pacsifier
+	pip install dist/pacsifier-*.whl
 
 #test-python-install: @ Tests the python package installation
 test-python-install: install-python build-python-wheel install-python-wheel	

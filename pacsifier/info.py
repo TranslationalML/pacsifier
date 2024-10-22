@@ -18,7 +18,7 @@
 import datetime
 
 
-__version__ = "1.0.0"
+__version__ = "1.0.0.dev0"
 
 __current_year__ = datetime.datetime.now().strftime("%Y")
 
@@ -41,6 +41,7 @@ __email__ = "sebastien.tourbier1@gmail.com"
 __status__ = "Beta"
 
 __packagename__ = "pacsifier"
+__container_name__ = "pacsifier"
 
 __url__ = "https://github.com/TranslationalML/{name}/tree/{version}".format(
     name=__packagename__, version=__version__
