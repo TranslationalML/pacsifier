@@ -245,6 +245,10 @@ def test_retrieve_dicoms_using_table(test_dir):
     known_files = [os.path.join(known_files_dir, file) for file in known_filenames]
     assert sorted(output_files)[:6] == sorted(known_files)[:6]
 
+    # Check if the log CSV file was created
+    log_csv_path = os.path.join(out_directory, "logs", "pacsifier_log.csv")
+    assert os.path.exists(log_csv_path), f"CSV log file {log_csv_path} was not created."
+
 
 def test_upload_dicoms(test_dir):
     dicomseries_karnak_tags_dir = os.path.join(

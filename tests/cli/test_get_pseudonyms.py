@@ -16,16 +16,17 @@
 """Tests for the functions of the `pacsifier.cli.get_pseudonyms` script."""
 
 import os
-import shutil
-import sys
 import json
 import pytest
-
+import pandas as pd
+from unittest import mock
+from io import StringIO
 
 from pacsifier.cli.get_pseudonyms import (
     check_config_file_deid,
     check_queryfile_content,
     convert_csv_to_deid_json,
+    generate_csv_with_pseudonyms_and_day_shifts
 )
 
 
@@ -181,3 +182,69 @@ def test_failure_custom_get_pseudonyms_script_empty_cell(script_runner, test_dir
     )
     # Check that the script fails
     assert not ret.success
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+@mock.patch("pacsifier.cli.get_pseudonyms.open", create=True)
+def test_generate_csv_with_pseudonyms_and_day_shifts(mock_open, mock_post, test_dir):
+    """Test the `generate_csv_with_pseudonyms_and_day_shifts` function.
+
+    This test mocks the API responses and checks that the CSV file is generated correctly
+    with the given pseudonyms and day shifts based on the input query file.
+
+    Steps:
+    - Mock API responses to simulate the pseudonym and day shift returned from the server.
+    - Mock the process of reading the actual query file.
+    - Call the `generate_csv_with_pseudonyms_and_day_shifts` function to generate the CSV.
+    - Verify that the CSV is created at the expected path.
+    - Ensure that the content of the generated CSV matches the expected columns and data,
+      specifically that the `PatientID`, `StudyDate`, `NewPseudonym`, and `DayShift` fields are correct.
+
+    The test uses a valid query file with a PatientID of '125' and ensures that the CSV correctly
+    maps the pseudonym 'P0001' and day shift of -5 for the corresponding patient.
+    """
+    # Define mock responses for the API
+    mock_pseudonym_response = {
+        "125": "P0001",
+    }
+
+    mock_day_shift_response = {
+        "125": -5,
+    }
+
+    # Mock the API responses
+    mock_post.side_effect = [
+        mock.Mock(text=json.dumps(mock_pseudonym_response)),
+        mock.Mock(text=json.dumps(mock_day_shift_response))
+    ]
+
+    # Set up the output directory
+    output_dir = os.path.join(test_dir, "tmp", "test_get_pseudonyms", "logs")
+    os.mkdir(output_dir)
+
+    # Use the actual query file path from the test data
+    queryfile = os.path.join(test_dir, "test_data", "query", "query_file_valid.csv")
+
+    # Mock the file reading process to read the real queryfile
+    mock_open.side_effect = [open(queryfile, 'r'), mock.mock_open().return_value]
+
+    # Call the function to generate the CSV
+    pseudonyms = mock_pseudonym_response
+    day_shifts = mock_day_shift_response
+    generate_csv_with_pseudonyms_and_day_shifts(queryfile, pseudonyms, day_shifts, str(output_dir))
+
+    # Check the output CSV file
+    expected_csv_path = os.path.join(output_dir, "log_get_pseudonyms.csv")
+
+    # Assert the CSV file exists
+    assert os.path.exists(expected_csv_path)
+
+    # Read and check the content of the CSV file, enforce PatientID as string
+    generated_csv = pd.read_csv(expected_csv_path, dtype={'PatientID': str, 'StudyDate': str})
+
+    # Check the structure and content of the CSV file
+    assert list(generated_csv.columns) == ["PatientID", "StudyDate", "NewPseudonym", "DayShift"]
+    assert generated_csv["PatientID"].tolist() == ["125"]
+    assert generated_csv["StudyDate"].tolist() == ["20170814"]
+    assert generated_csv["NewPseudonym"].tolist() == ["P0001"]
+    assert generated_csv["DayShift"].tolist() == [-5]
