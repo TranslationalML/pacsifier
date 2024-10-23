@@ -37,7 +37,7 @@ __credits__ = (
 )
 __license__ = "Apache 2.0"
 __maintainer__ = "Translational Machine Learning Lab"
-__email__ = "sebastien.tourbier1@gmail.com"
+__email__ = "translationalML@gmail.com"
 __status__ = "Beta"
 
 __packagename__ = "pacsifier"
