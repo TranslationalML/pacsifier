@@ -19,7 +19,6 @@ import re
 import shutil
 import unicodedata
 import sys
-from tqdm import tqdm
 import os
 import warnings
 from pandas import read_csv, DataFrame
@@ -27,6 +26,7 @@ from pandas.errors import ParserError
 import json
 from typing import Iterator, Dict, List
 from cerberus import Validator
+from progressbar import ProgressBar
 import csv
 import time
 import argparse
@@ -365,7 +365,8 @@ def retrieve_dicoms_using_table(
         my_re_clean = re.compile("[^0-9a-zA-Z]+")  # keep only alphanums
 
         # loop over series
-        for serie in tqdm(series):
+        progress = ProgressBar()
+        for serie in progress(series):
             # replace illegal chars with underscores
             patientID_sanitized = my_re_clean.sub(
                 "_",
@@ -595,7 +596,8 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
                     series_log_dirs.append(sub_dir_log_path)
 
         # Loop over all series
-        for series_dir, series_log_dir in tqdm(zip(series_dirs, series_log_dirs)):
+        progress = ProgressBar()
+        for series_dir, series_log_dir in progress(zip(series_dirs, series_log_dirs)):
             counter += 1
             if counter % batch_size == 0:
                 time.sleep(batch_wait_time)
