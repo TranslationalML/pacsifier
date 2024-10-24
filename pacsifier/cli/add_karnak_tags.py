@@ -19,7 +19,7 @@ import sys
 import pydicom
 from glob import glob
 import os
-from tqdm import tqdm
+from progressbar import ProgressBar
 import json
 from typing import Dict
 import argparse
@@ -104,7 +104,8 @@ def tag_all_dicoms_within_root_folder(
     # TODO add Cerberus validation on album_name and newid - both should be DICOM VR LO
 
     # Loop over patients...
-    for patient in tqdm(patients_folders):
+    progress = ProgressBar()
+    for patient in progress(patients_folders):
         new_id = old2new_idx[patient]
         patient_shift = personal_day_shift[patient]
         current_path = os.path.join(data_path, patient, pattern_dicom_files)

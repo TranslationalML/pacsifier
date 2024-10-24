@@ -24,7 +24,7 @@ from datetime import datetime, timedelta
 from glob import glob
 import os
 import warnings
-from tqdm import tqdm
+from progressbar import ProgressBar
 import random
 import json
 from typing import Dict, Tuple
@@ -379,7 +379,8 @@ def anonymize_all_dicoms_within_root_folder(
     old2set_idx = {}
 
     # Loop over patients...
-    for patient_index, patient in enumerate(tqdm(patients_folders)):
+    progress = ProgressBar()
+    for patient_index, patient in enumerate(progress(patients_folders)):
         new_id = old2new_idx[patient]
         current_path = os.path.join(datapath, patient, pattern_dicom_files)
 
