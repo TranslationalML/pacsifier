@@ -8,28 +8,14 @@ Installation Instructions for Users
 Prerequisites
 ==============
 
-Installation and use of `PACSIFIER` and dependencies have been facilitated through the use of `Docker <https://www.docker.com/>`_ software containerization. If you adopt this approach, which is recommended, you need to have Docker engine installed (see instructions in :ref:`manual-install-docker`).
+Docker
+------
 
-While Docker enables `PACSIFIER` to be run on all major operating systems where you have root privileges. A Docker image can be easily converted to a Singularity image to run `PACSIFIER` on Linux systems where you might not have root privileges such as a High Performance Computing cluster (See `examples <https://docs.sylabs.io/guides/3.7/user-guide/cli/singularity_pull.html#examples>`_).
+Ensure that Docker is installed on your system. Docker allows PACSIFIER to run in a containerized environment, simplifying the setup and deployment. Follow the appropriate installation guide for your operating system:
 
-Please check https://docs.docker.com/get-started/overview/ if you want to learn more about Docker.
-
-.. note::
-    If you do not want to use Docker, `PACSIFIER` can also be installed locally (see :ref:`instructions_pacsifier_install`).
-
-
-.. _manual-install-docker:
-
-Installation of Docker Engine
-------------------------------
-
-* Install Docker Engine corresponding to your system:
-
-  * For Ubuntu, follow the instructions from https://docs.docker.com/install/linux/docker-ce/ubuntu/
-
-  * For Mac OSX (>=10.10.3), get the .dmg installer from https://store.docker.com/editions/community/docker-ce-desktop-mac
-
-  * For Windows (>=10), get the installer from https://store.docker.com/editions/community/docker-ce-desktop-windows
+* **Linux**: Follow the official Docker installation guide.
+* **Windows (Recommended: WSL)**: Install Docker Desktop for Windows and enable WSL 2 integration. Follow the Docker Desktop installation guide. Make sure to enable the "Use the WSL 2 based engine" option during installation.
+* **macOS**: Follow the Docker Desktop installation guide.
 
 * Set Docker to be managed as a non-root user
 
@@ -49,6 +35,26 @@ Installation of Docker Engine
 
       $ docker run hello-world
 
+After installation, verify that Docker is correctly installed by running:
+
+.. code-block:: bash
+
+    docker --version
+
+DCMTK
+-----
+
+DCMTK (DICOM Toolkit) is required for interacting with DICOM servers. You can install it as follows:
+
+* **Linux (Ubuntu-based systems)**:
+
+  .. code-block:: bash
+
+      sudo apt install dcmtk
+
+* **Windows (With WSL)**: Follow the same instructions as above within your WSL environment.
+
+For more details about the DCMTK toolkit and available tools, refer to the `DCMTK tools documentation <https://dicom.offis.de/en/dcmtk/dcmtk-tools/>`_.
 
 .. _manual-build-docker-image:
 
@@ -83,3 +89,45 @@ Once you know the image tag, you can test the built image by running the command
         --version
 
 We refer to :ref:`cmdusage-docker` for more details on how to run the Docker image.
+
+Installation from Source (For Developers)
+=========================================
+
+If you need to develop or customize PACSIFIER, you can install it from source:
+
+1. **Create a Python Environment:**
+
+   Use Miniconda or another virtual environment manager to create a clean Python environment:
+
+   .. code-block:: bash
+
+      conda create -n pacsifier_minimal python=3.10
+      conda activate pacsifier_minimal
+
+2. **Install PACSIFIER:**
+
+   With the environment activated, run:
+
+   .. code-block:: bash
+
+      pip install -e .
+
+   This will install PACSIFIER in editable mode, allowing you to make and test changes easily.
+
+3. **Optional: Install Additional Development Tools**
+
+   If you plan to work on documentation or run tests, you may want to install additional dependencies:
+
+   .. code-block:: bash
+
+      pip install ".[dev,docs,test]"
+
+4. **Verify the Installation:**
+
+   To ensure everything is set up correctly, you can run:
+
+   .. code-block:: bash
+
+      pacsifier --help
+
+   This should display the help message for PACSIFIER, confirming the installation was successful.
