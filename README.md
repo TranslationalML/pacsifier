@@ -448,10 +448,9 @@ Runnning the command above will replace all the images within data folder with a
 
 ## Anonymizing via the Karnak gateway
 
-### Docker Command-Line
-	```bash
-   docker run -it --rm -v /home/my_user/my_dir:/base --entrypoint "conda" pacsifier:1.0.0 run -n pacsifier_minimal python add_Karnak_tags.py --new_ids /base/my_new_ids.json --day_shift /base/day_shift.json --album_name my_album_name
-   ```
+```bash
+docker run -it --rm -v /home/my_user/my_dir:/base --entrypoint "conda" pacsifier:1.0.0 run -n pacsifier_minimal python add_Karnak_tags.py --new_ids /base/my_new_ids.json --day_shift /base/day_shift.json --album_name my_album_name
+  ```
 
  - `my_new_ids.json` maps on-disk real patient IDs to a chosen anonymisation code, same syntax as for direct PACSIFIER anonymisation. Example contents: `{'sub-1234':'P0001', 'sub-87262':'P0002'}`
  - `day_shift.json` maps on-disk real patient IDs to a chosen day shift, similar syntax as for direct PACSIFIER anonymisation. It is an optional parameter. Example contents: `{'sub-1234':'-1', 'sub-87262':'35'}`
@@ -462,9 +461,9 @@ Runnning the command above will replace all the images within data folder with a
 If pacsifier is called with the option --info or -i it will store csv files containing information about each series. <br> Move dumps is useful for moving these csv files into a new folder for complete anonymization of the data folder content.
 
 ## Command line
-	```bash
-	python move_dumps.py --data_folder ~/path-to-folder-containing-dicom-files --info_folder ~/path-to-new-folder
-   ```
+```bash
+python move_dumps.py --data_folder ~/path-to-folder-containing-dicom-files --info_folder ~/path-to-new-folder
+```
 
 - data_folder takes the path to the dicom folder. 
 - info_folder takes the path to the folder where the csv files will be moved.
@@ -479,9 +478,9 @@ If pacsifier is called with the option --info or -i it will store csv files cont
 The create_DICOMDIR script creates a copy of the dicom directory passed as parameter changing the names of folders and images to 8 character alpha numeric names and creates a DICOMDIR file of this newly created directory.
 
 ## Command line
-	```bash
-	python create_DICOMDIR.py --in_folder ~/path-to-dicom-folder --out_folder ~/out-path
-   ```
+```bash
+python create_DICOMDIR.py --in_folder ~/path-to-dicom-folder --out_folder ~/out-path
+```
 
 - in_folder takes the path to the dicom folder.
 - out_folder takes the path where the renamed dicoms and the DICOMDIR will be stored.
