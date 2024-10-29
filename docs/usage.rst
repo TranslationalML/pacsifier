@@ -4,7 +4,7 @@
 Commandline Usage
 ***********************
 
-PACSIFIER is a commandline tool that can be run in a variety of ways, providing a set of command-line interface (CLI) commands, which can be run directly in a shell or via a Docker container, for interacting with a PACS server and manipulating DICOM files.
+`PACSIFIER` is a commandline tool that can be run in a variety of ways, providing a set of command-line interface (CLI) commands, which can be run directly in a shell or via a Docker container, for interacting with a PACS server and manipulating DICOM files.
 
 It consists of the following commands:
 
@@ -18,7 +18,7 @@ It consists of the following commands:
 
 In the following sections, we will describe how to run these commands in a shell and in a Docker container.
 
-Running `PACSIFIER` commands in a shell
+Running ``PACSIFIER`` commands in a shell
 =======================================
 
 ``pacsifier`` command
@@ -66,8 +66,8 @@ Running `PACSIFIER` commands in a shell
 
 .. _cmdusage-docker:
 
-Running `PACSIFIER` commands in Docker
-======================================
+Running ``PACSIFIER`` commands in Docker
+========================================
 
 In this section, we provide examples to run each of the ``PACSIFIER`` commands in the Docker container.
 

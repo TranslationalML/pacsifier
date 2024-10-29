@@ -21,7 +21,7 @@ How to build the Docker image locally
 
 .. _instructions_pacsifier_install:
 
-How to install `PACSIFIER` locally
+How to install ``PACSIFIER`` locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. PACSIFIER relies on the `DCMTK`_ tools for DICOM network communication. It can be easily installed on Ubuntu with the following command:

@@ -27,7 +27,7 @@ If your are using `PACSIFIER` in your work, please acknowledge this software and
 License information
 --------------------
 
-This software is distributed under the XXX license. See :ref:`license <license>` for more details.
+This software is distributed under the Apache 2 license. See :ref:`license <license>` for more details.
 
 All trademarks referenced herein are property of their respective holders.
 
@@ -44,7 +44,7 @@ See :ref:`Contributing <contributing>` for more details.
 Funding
 --------
 
-This project received funding from [...]
+This project received funding from the Lausanne University Hospital and the Lundin Family Brain Tumour Research Center.
 
 Contents
 =========
