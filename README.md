@@ -172,6 +172,18 @@ This installation process is more cumbersome than the Linux setup.
 
 9. Create the PACS client/server configuration file as described in the documentation.
 
+# Building the Documentation
+
+## Build the Documentation
+
+Navigate to the docs directory in your cloned repository and use the following command to build the HTML documentation:
+`make build-docs`
+This will generate the HTML documentation in `./docs/_build/html`.
+
+## Access the Documentation
+
+To view the documentation, open the `index.html` file located in the `./docs/_build/html` directory. You can do this from the command line or using a file browser
+
 # Usage
 
 ## Using Docker
