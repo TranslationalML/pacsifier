@@ -93,11 +93,37 @@ How to run the tests via the Docker image
 How to run the tests locally
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-1. Go the cloned repository folder and (re-)install `PACSIFIER` and its dependencies (see :ref:`instructions_pacsifier_install`).
+Before running the tests locally, you need to set up a mock server to simulate a DICOM network service. This documentation details instructions for using `dcmqrscp`, included in the DCMTK tools, to verify the functionality of PACSIFIER without requiring a real DICOM server.
 
-2. Run the `pytest` tests with the script provided in the repository as follow::
+1. **Start the mock server**: Open a separate terminal and navigate to the `tests` directory. Then run the following command:
 
-    sh test/run_tests.sh (TODO: update this command)
+    .. code-block:: bash
+
+        cd tests
+        dcmqrscp -v -c ./config/dcmqrscp.cfg
+
+2. **Check connection**: To ensure the connection to the mock server is successful, run the following command in another terminal:
+
+    .. code-block:: bash
+
+        echoscu -ll trace -aec SCU_STORE -aet PACSIFIER_CLIENT localhost 4444
+
+    If the connection does not work, try restarting the mock server and then checking the connection again.
+
+3. **Run the tests**: Now that the mock server is running, you can run the tests locally. Go to the cloned repository folder and (re-)install `PACSIFIER` and its dependencies (see :ref:`instructions_pacsifier_install`).
+
+4. To run the tests, use the following command:
+
+    .. code-block:: bash
+
+        pytest ./tests
+
+.. tip:: 
+      If you want to generate a coverage report, you can run the tests with the following command:
+
+      .. code-block:: bash
+
+        pytest --cov=pacsifier --cov-report html ./tests
 
 
 .. _tests_outputs:
@@ -105,7 +131,7 @@ How to run the tests locally
 Outputs of tests
 ~~~~~~~~~~~~~~~~~
 
-In both cases, the tests are run in a temporary `tmp` directory in the `tests` directory, so that the original data are not modified. After completion, coverage report in HTML format can be found in ``tests/report/cov_html`` and be displayed by opening ``index.html`` in your favorite browser.
+In both cases, the tests are run in a temporary `tmp` directory in the `tests` directory, so that the original data are not modified. After completion, coverage report in HTML format can be found in the ``htmlcov`` folder and can be displayed by opening ``index.html`` in your favorite browser.
 
 
 .. _venv: https://docs.python.org/3/library/venv.html

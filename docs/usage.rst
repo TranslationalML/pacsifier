@@ -15,23 +15,21 @@ It consists of the following commands:
 * ``pacsifier-move-dumps``: Move DICOM files from a PACS server to a local directory.
 * ``pacsifier-add-karnak-tags``: Add Karnak tags to DICOM files.
 * ``pacsifier-extract-carestream-report``: Extract Carestream reports from DICOM files.
-* ``pacsifier-convert``: Convert DICOM files to another format.
-
 
 In the following sections, we will describe how to run these commands in a shell and in a Docker container.
 
 Running `PACSIFIER` commands in a shell
-=====================================
+=======================================
 
 ``pacsifier`` command
--------------------
+----------------------
 
 .. argparse::
 		:ref: pacsifier.cli.pacsifier.get_parser
 		:prog: pacsifier
 
 ``pacsifier-anonymize-dicoms`` command
--------------------------------------
+--------------------------------------
 
 .. argparse::
 		:ref: pacsifier.cli.anonymize_dicoms.get_parser
@@ -65,38 +63,17 @@ Running `PACSIFIER` commands in a shell
 		:ref: pacsifier.cli.add_karnak_tags.get_parser
 		:prog: pacsifier-add-karnak-tags
 
-``pacsifier-extract-carestream-report`` command
-----------------------------------------------
-
-.. argparse::
-		:ref: pacsifier.cli.extract-carestream_report.get_parser
-		:prog: pacsifier-extract-carestream-report
-
-``pacsifier-convert`` command
-----------------------------
-
-.. argparse::
-		:ref: pacsifier.cli.convert.get_parser
-		:prog: pacsifier-convert
-
 
 .. _cmdusage-docker:
 
 Running `PACSIFIER` commands in Docker
-====================================
+======================================
 
 In this section, we provide examples to run each of the ``PACSIFIER`` commands in the Docker container.
 
 ``pacsifier`` command
--------------------
+---------------------
 
 .. code-block:: bash
 
-        docker run --rm -it \
-            -v /path/to/dicom/files:/data:ro \
-            -v /path/to/output:/output:rw \
-            -v /path/to/config:/config:ro \
-            -v /path/to/logs:/logs:rw
-            -v /path/to/pseudonyms:
-
-TODO
+        docker run -it --rm -v /home/my_user/my_dir:/base --entrypoint "conda" pacsifier:1.0.0 run -n pacsifier_minimal python anonymize_Dicoms.py --in_folder /base/files-directory --out_folder /base/anonymized-files-directory --new_ids /base/my_new_ids.json --delete_identifiable --fuzz_acq_dates
