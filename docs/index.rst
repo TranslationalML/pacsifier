@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to PACSIFIER's documentation!
-===================================
+=====================================
 
 This radiological PACS data management software is developed by the Translational Machine Learning Lab team at the Lausanne University Hospital and University of Lausanne for use within the hospital, as well as for open-source software distribution.
 
@@ -79,6 +79,7 @@ Contents
    :maxdepth: 5
    :caption: API Documentation
 
+   api/generated/modules
    api_cli_subpackage
    api_core_subpackage
 
