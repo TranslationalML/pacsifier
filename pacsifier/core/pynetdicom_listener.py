@@ -58,8 +58,9 @@ def create_ae():
     ae.add_supported_context(MRImageStorage)
     ae.add_supported_context(SecondaryCaptureImageStorage)
     
-    # Add all storage presentation contexts
-    ae.add_supported_context(*StoragePresentationContexts)
+    # Add all storage presentation contexts one by one
+    for context in StoragePresentationContexts:
+        ae.add_supported_context(context)
     
     return ae
 

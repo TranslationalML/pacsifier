@@ -255,13 +255,13 @@ def retrieve_dicoms_using_table(
     batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
 
-    # Karnak parameters (required if using --karnak)
-    karnak_address = None
-    karnak_port = None
-    karnak_aet = None
-    pynetdicom_address = None
-    pynetdicom_port = None
-    pynetdicom_aet = None
+    # Karnak parameters (extract from config if using --karnak)
+    karnak_address = parameters.get("karnak_address") if args.karnak else None
+    karnak_port = parameters.get("karnak_port") if args.karnak else None
+    karnak_aet = parameters.get("karnak_aet") if args.karnak else None
+    pynetdicom_address = parameters.get("pynetdicom_address") if args.karnak else None
+    pynetdicom_port = parameters.get("pynetdicom_port") if args.karnak else None
+    pynetdicom_aet = parameters.get("pynetdicom_aet") if args.karnak else None
 
     # Initialize command collection if command file is provided
     commands_to_write = []
@@ -874,14 +874,6 @@ def main():
 
         # Check Karnak-specific parameters if using --karnak
         if args.karnak:
-            # Extract Karnak parameters from config
-            karnak_address = parameters.get("karnak_address")
-            karnak_port = parameters.get("karnak_port")
-            karnak_aet = parameters.get("karnak_aet")
-            pynetdicom_address = parameters.get("pynetdicom_address")
-            pynetdicom_port = parameters.get("pynetdicom_port")
-            pynetdicom_aet = parameters.get("pynetdicom_aet")
-            
             missing_params = []
             if karnak_address is None:
                 missing_params.append("karnak_address")
