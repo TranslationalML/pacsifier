@@ -21,6 +21,9 @@ import unicodedata
 import sys
 import os
 import warnings
+import threading
+import signal
+import atexit
 from pandas import read_csv, DataFrame
 from pandas.errors import ParserError
 import json
@@ -252,8 +255,13 @@ def retrieve_dicoms_using_table(
     batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
 
-    # Karnak parameters (with defaults if not in config)
-    karnak_port = int(parameters.get("karnak_port", 11112))
+    # Karnak parameters (required if using --karnak)
+    karnak_address = None
+    karnak_port = None
+    karnak_aet = None
+    pynetdicom_address = None
+    pynetdicom_port = None
+    pynetdicom_aet = None
 
     # Initialize command collection if command file is provided
     commands_to_write = []
@@ -500,7 +508,12 @@ def retrieve_dicoms_using_table(
                     patient_id=query_attributes["PatientID"],  # serie["PatientID"],
                     study_instance_uid=serie["StudyInstanceUID"],
                     series_instance_uid=serie["SeriesInstanceUID"],
+                    karnak_address=karnak_address,
                     karnak_port=karnak_port,
+                    karnak_aet=karnak_aet,
+                    pynetdicom_address=pynetdicom_address,
+                    pynetdicom_port=pynetdicom_port,
+                    pynetdicom_aet=pynetdicom_aet,
                     log_dir=os.path.join(output_dir, "logs"),
                     command_file=command_file,
                 )
@@ -745,6 +758,75 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# Global variable to store the pynetdicom listener thread
+pynetdicom_thread = None
+listener_stop_event = None
+
+
+def start_pynetdicom_listener(pynetdicom_address, pynetdicom_port, pynetdicom_aet, output_dir):
+    """Start the pynetdicom listener in a separate thread."""
+    global pynetdicom_thread, listener_stop_event
+    
+    # Import here to avoid circular imports
+    from pacsifier.core.pynetdicom_listener import start_listener
+    
+    # Create the output directory for received DICOM files
+    listener_output_dir = os.path.join(output_dir, "received_dicoms")
+    os.makedirs(listener_output_dir, exist_ok=True)
+    
+    print("Starting pynetdicom listener...")
+    print(f"Address: {pynetdicom_address}")
+    print(f"Port: {pynetdicom_port}")
+    print(f"AET: {pynetdicom_aet}")
+    print(f"Output directory: {listener_output_dir}")
+    print("-" * 50)
+    
+    try:
+        # Create stop event for graceful shutdown
+        listener_stop_event = threading.Event()
+        
+        # Start the listener in a separate thread
+        pynetdicom_thread = threading.Thread(
+            target=start_listener,
+            args=(pynetdicom_address, pynetdicom_port, pynetdicom_aet, listener_output_dir),
+            daemon=True
+        )
+        pynetdicom_thread.start()
+        
+        # Give the listener a moment to start
+        time.sleep(2)
+        
+        # Check if the thread is still running
+        if not pynetdicom_thread.is_alive():
+            print("Failed to start pynetdicom listener!")
+            return False
+        
+        print("Pynetdicom listener started successfully!")
+        return True
+        
+    except Exception as e:
+        print(f"Error starting pynetdicom listener: {e}")
+        return False
+
+
+def stop_pynetdicom_listener():
+    """Stop the pynetdicom listener thread."""
+    global pynetdicom_thread, listener_stop_event
+    
+    if pynetdicom_thread and pynetdicom_thread.is_alive():
+        print("Stopping pynetdicom listener...")
+        if listener_stop_event:
+            listener_stop_event.set()
+        pynetdicom_thread.join(timeout=5)
+        print("Pynetdicom listener stopped.")
+
+
+def cleanup_handler(signum, frame):
+    """Handle cleanup on exit."""
+    stop_pynetdicom_listener()
+    sys.exit(0)
+
+
 def main():
     """Main function of the script that calls :func:`retrieve_dicoms_using_table`."""
     # Create parser object and parse command line arguments
@@ -790,6 +872,57 @@ def main():
             parser.print_help()
             sys.exit(1)
 
+        # Check Karnak-specific parameters if using --karnak
+        if args.karnak:
+            # Extract Karnak parameters from config
+            karnak_address = parameters.get("karnak_address")
+            karnak_port = parameters.get("karnak_port")
+            karnak_aet = parameters.get("karnak_aet")
+            pynetdicom_address = parameters.get("pynetdicom_address")
+            pynetdicom_port = parameters.get("pynetdicom_port")
+            pynetdicom_aet = parameters.get("pynetdicom_aet")
+            
+            missing_params = []
+            if karnak_address is None:
+                missing_params.append("karnak_address")
+            if karnak_port is None:
+                missing_params.append("karnak_port")
+            if karnak_aet is None:
+                missing_params.append("karnak_aet")
+            if pynetdicom_address is None:
+                missing_params.append("pynetdicom_address")
+            if pynetdicom_port is None:
+                missing_params.append("pynetdicom_port")
+            if pynetdicom_aet is None:
+                missing_params.append("pynetdicom_aet")
+            
+            if missing_params:
+                print(
+                    f"Missing mandatory Karnak parameters in config file: {', '.join(missing_params)}"
+                )
+                print(
+                    "Required Karnak parameters: karnak_address, karnak_port, "
+                    "karnak_aet, pynetdicom_address, pynetdicom_port, pynetdicom_aet"
+                )
+                sys.exit(1)
+            
+            # Convert port parameters to integers
+            karnak_port = int(karnak_port)
+            pynetdicom_port = int(pynetdicom_port)
+            
+            # Start the pynetdicom listener
+            print("Setting up Karnak integration...")
+            if not start_pynetdicom_listener(
+                pynetdicom_address, pynetdicom_port, pynetdicom_aet, output_dir
+            ):
+                print("Failed to start pynetdicom listener. Exiting.")
+                sys.exit(1)
+            
+            # Register cleanup handlers
+            signal.signal(signal.SIGINT, cleanup_handler)
+            signal.signal(signal.SIGTERM, cleanup_handler)
+            atexit.register(stop_pynetdicom_listener)
+
         # Read / parse the query file.
         try:
             table = read_csv(args.queryfile, dtype=str).fillna("")
@@ -806,6 +939,10 @@ def main():
             sys.exit(1)
 
         upload_dicoms(args.upload_directory, parameters)
+    
+    # Cleanup: stop pynetdicom listener if it was started
+    if karnak:
+        stop_pynetdicom_listener()
 
 
 if __name__ == "__main__":

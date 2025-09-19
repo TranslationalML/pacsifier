@@ -237,21 +237,26 @@ def get(
 def send_to_karnak(
     aet: str,
     study_date: str,
+    karnak_address: str,
+    karnak_port: int,
+    karnak_aet: str,
+    pynetdicom_address: str,
+    pynetdicom_port: int,
+    pynetdicom_aet: str,
     server_address: str = "www.dicomserver.co.uk",
     server_aet: str = "theServerAET",
     port: int = 104,
     patient_id: str = PATIENT_ID,
     study_instance_uid: str = STUDY_INSTANCE_UID,
     series_instance_uid: str = SERIES_INSTANCE_UID,
-    karnak_port: int = 11112,
     log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
     command_file: str = None,
 ) -> str:
-    """Builds a movescu command to send data directly to Karnak for depersonalization.
+    """Builds a movescu command to send data to Karnak for depersonalization with return flow.
 
-    Uses movescu with the -aem option to send data directly to Karnak instead of
-    saving locally. Karnak must be configured to accept the PACS server's AET/AEC
-    parameters and act as a Storage SCP.
+    Uses movescu with the -aem option to send data to Karnak, which then sends
+    the processed data back to a local pynetdicom listener. This creates a
+    bidirectional flow: Local -> Karnak -> Local pynetdicom listener.
 
     Args:
         aet: called AET (from PACS configuration).
@@ -264,7 +269,12 @@ def send_to_karnak(
                           pacsifier.core.execute_commands.study_instance_uid.
         series_instance_uid: series instance unique identifier. Default is
                            pacsifier.core.execute_commands.series_instance_uid.
-        karnak_port: port for Karnak service. Default is 11112.
+        karnak_address: Karnak server address.
+        karnak_port: port for Karnak service.
+        karnak_aet: Karnak AET.
+        pynetdicom_address: Local pynetdicom listener address.
+        pynetdicom_port: Local pynetdicom listener port.
+        pynetdicom_aet: Local pynetdicom listener AET.
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
@@ -280,18 +290,17 @@ def send_to_karnak(
     check_ids(study_instance_uid, attribute="Study instance UID")
     check_port(karnak_port)
     check_port(port)
+    check_port(pynetdicom_port)
 
-    # modified_params has: addr port -aec -aet
-    modified_params = replace_default_params(
-        PARAMETERS, aet, server_address, server_aet, port
-    )
-
-    # Use movescu with -aem to send directly to Karnak
+    # Use movescu with -aem to send to Karnak, which will forward to pynetdicom listener
+    # Karnak will receive the data and send it back to the pynetdicom listener
     karnak_command = (
-        f'movescu -ll debug {modified_params} -aem "{aet}" -k 0008,0052="PATIENT" --patient '
+        f'movescu -ll debug {karnak_address} {karnak_port} '
+        f'-aec "{karnak_aet}" -aet "{aet}" -aem "{pynetdicom_aet}" '
+        f'-k 0008,0052="PATIENT" --patient '
         f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
         f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
-        f"--port {karnak_port}"
+        f"--port {pynetdicom_port}"
     )
 
     # If command_file is provided, return command instead of executing
