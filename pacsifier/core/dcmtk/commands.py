@@ -15,12 +15,13 @@
 
 """This module contains functions to execute DCMTK commands."""
 
-from datetime import date
 import os
+import sys
 import warnings
 import shlex
 import subprocess
 import platform
+# from typing import List  # Not needed for current implementation
 
 from pacsifier.core.sanity_checks import (
     check_parameters_inputs,
@@ -179,6 +180,7 @@ def get(
     move_port: int = 4006,
     output_dir: str = OUTPUT_DIR,
     log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+    command_file: str = None,
 ) -> str:
     """Builds a query for movescu.
 
@@ -198,9 +200,11 @@ def get(
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
+        command_file: Optional path to file where commands will be written instead of executed.
+                     If provided, returns the command string instead of executing it.
 
     Returns:
-        string: The log lines.
+        string: The log lines from execution, or the command string if command_file is provided.
 
     """
     check_ids(patient_id)
@@ -220,10 +224,84 @@ def get(
         f"--port {move_port} -od {output_dir}"
     )
 
-    return run(
-        query=move_command,
-        log_dir=log_dir,
+    # If command_file is provided, return command instead of executing
+    if command_file:
+        return move_command
+    else:
+        return run(
+            query=move_command,
+            log_dir=log_dir,
+        )
+
+
+def send_to_karnak(
+    aet: str,
+    study_date: str,
+    server_address: str = "www.dicomserver.co.uk",
+    server_aet: str = "theServerAET",
+    port: int = 104,
+    patient_id: str = PATIENT_ID,
+    study_instance_uid: str = STUDY_INSTANCE_UID,
+    series_instance_uid: str = SERIES_INSTANCE_UID,
+    karnak_port: int = 11112,
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+    command_file: str = None,
+) -> str:
+    """Builds a movescu command to send data directly to Karnak for depersonalization.
+
+    Uses movescu with the -aem option to send data directly to Karnak instead of
+    saving locally. Karnak must be configured to accept the PACS server's AET/AEC
+    parameters and act as a Storage SCP.
+
+    Args:
+        aet: called AET (from PACS configuration).
+        study_date: study date.
+        server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
+        server_aet: PACS server AET. Default is "theServerAET".
+        port: PACS server port for incoming requests. Default is 104.
+        patient_id: patient id. Default is pacsifier.core.execute_commands.patient_id.
+        study_instance_uid: study instance unique identifier. Default is
+                          pacsifier.core.execute_commands.study_instance_uid.
+        series_instance_uid: series instance unique identifier. Default is
+                           pacsifier.core.execute_commands.series_instance_uid.
+        karnak_port: port for Karnak service. Default is 11112.
+        log_dir: Folder for the logs where the log file (log.txt) and
+                 the fails file (fails.txt) produced by run() will be written.
+                 Default is "./logs" e.g. the logs/ folder in the current working directory.
+        command_file: Optional path to file where commands will be written instead of executed.
+                     If provided, returns the command string instead of executing it.
+
+    Returns:
+        string: The log lines from execution, or the command string if command_file is provided.
+
+    """
+    check_ids(patient_id)
+    check_ids(series_instance_uid, attribute="Series instance UID")
+    check_ids(study_instance_uid, attribute="Study instance UID")
+    check_port(karnak_port)
+    check_port(port)
+
+    # modified_params has: addr port -aec -aet
+    modified_params = replace_default_params(
+        PARAMETERS, aet, server_address, server_aet, port
     )
+
+    # Use movescu with -aem to send directly to Karnak
+    karnak_command = (
+        f'movescu -ll debug {modified_params} -aem "{aet}" -k 0008,0052="PATIENT" --patient '
+        f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
+        f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
+        f"--port {karnak_port}"
+    )
+
+    # If command_file is provided, return command instead of executing
+    if command_file:
+        return karnak_command
+    else:
+        return run(
+            query=karnak_command,
+            log_dir=log_dir,
+        )
 
 
 def move_remote(
@@ -386,10 +464,13 @@ def run(query: str, log_dir: str = ".") -> str:
     try:
         # The replace in the line below is necessary for the windows deployment.
         cmd = shlex.split(query.replace("\\", "\\\\"))
-        with open(os.path.join(log_dir, "log.txt"), "a") as f:
+        with open(os.path.join(log_dir, "log.txt"), "a", encoding="utf-8") as f:
             f.write(query + "\n")
-    except ValueError as e:
+    except ValueError:
         print("* Command parsing error: {}".format(" ".join(cmd)))
+        # Flush output to ensure immediate display
+        sys.stdout.flush()
+        sys.stderr.flush()
         exit()
 
     try:
@@ -402,6 +483,9 @@ def run(query: str, log_dir: str = ".") -> str:
             )
             lines = completed.stderr.decode("latin1").splitlines()
         lines = [line.replace("\x00", "") for line in lines]
+        # Flush output to ensure immediate display
+        sys.stdout.flush()
+        sys.stderr.flush()
     except subprocess.CalledProcessError as e:
         print(
             "* Command did not succeed: {}, return code {}".format(
@@ -409,12 +493,18 @@ def run(query: str, log_dir: str = ".") -> str:
             )
         )
         print("* Output: {}".format(e.stderr))
+        # Flush output to ensure immediate display
+        sys.stdout.flush()
+        sys.stderr.flush()
 
-        with open(os.path.join(log_dir, "fails.txt"), "a") as f:
+        with open(os.path.join(log_dir, "fails.txt"), "a", encoding="utf-8") as f:
             f.write(query + "\n")
 
         print(e.returncode)
         print(e.output)
+        # Flush output to ensure immediate display
+        sys.stdout.flush()
+        sys.stderr.flush()
         lines = ""
 
     return lines

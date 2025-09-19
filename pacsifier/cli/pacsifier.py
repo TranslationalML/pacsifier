@@ -32,7 +32,7 @@ import time
 import argparse
 
 from pacsifier.info import __version__
-from pacsifier.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file
+from pacsifier.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file, send_to_karnak
 from pacsifier.core.sanity_checks import (
     check_date,
     check_date_range,
@@ -227,6 +227,8 @@ def retrieve_dicoms_using_table(
     save: bool,
     info: bool,
     move: bool,
+    command_file: str = None,
+    karnak: bool = False,
 ) -> None:
     """Query and retrieve dicom images or / and  their info dumps using the input query table.
 
@@ -236,6 +238,9 @@ def retrieve_dicoms_using_table(
         output_dir: path to the output directory
         save: option to save the images
         info: option to save info dumps
+        move: option to move images to remote destination
+        command_file: optional path to file where commands will be written instead of executed
+        karnak: option to send data directly to Karnak for depersonalization
 
     """
     pacs_server = parameters["server_address"]
@@ -246,6 +251,14 @@ def retrieve_dicoms_using_table(
     move_aet = parameters["move_AET"]
     batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
+
+    # Karnak parameters (with defaults if not in config)
+    karnak_port = int(parameters.get("karnak_port", 11112))
+
+    # Initialize command collection if command file is provided
+    commands_to_write = []
+    if command_file:
+        print(f"Commands will be written to: {command_file}")
 
     # Flexible parsing.
     attributes_list = parse_query_table(table, ALLOWED_FILTERS)
@@ -444,7 +457,7 @@ def retrieve_dicoms_using_table(
             # Retrieving files of current patient, study and serie.
             # TODO: handle and report error 'F: cannot listen on port 104, insufficient privileges' in movescu
             if save:
-                get_res = get(
+                result = get(
                     client_aet,
                     query_attributes["StudyDate"],  # serie["StudyDate"],
                     server_address=pacs_server,
@@ -456,10 +469,15 @@ def retrieve_dicoms_using_table(
                     move_port=move_port,
                     output_dir=patient_serie_output_dir,
                     log_dir=os.path.join(output_dir, "logs"),
+                    command_file=command_file,
                 )
 
+                # Collect command if command_file is provided
+                if command_file and result:
+                    commands_to_write.append(result)
+
             if move:
-                move_res = move_remote(
+                move_remote(
                     client_aet,
                     query_attributes["StudyDate"],  # serie["StudyDate"],
                     server_address=pacs_server,
@@ -471,6 +489,25 @@ def retrieve_dicoms_using_table(
                     move_aet=move_aet,
                     log_dir=os.path.join(output_dir, "logs"),
                 )
+
+            if karnak:
+                result = send_to_karnak(
+                    client_aet,
+                    query_attributes["StudyDate"],  # serie["StudyDate"],
+                    server_address=pacs_server,
+                    server_aet=server_aet,
+                    port=port,
+                    patient_id=query_attributes["PatientID"],  # serie["PatientID"],
+                    study_instance_uid=serie["StudyInstanceUID"],
+                    series_instance_uid=serie["SeriesInstanceUID"],
+                    karnak_port=karnak_port,
+                    log_dir=os.path.join(output_dir, "logs"),
+                    command_file=command_file,
+                )
+
+                # Collect command if command_file is provided
+                if command_file and result:
+                    commands_to_write.append(result)
 
             if info:
                 # Writing series info to csv file.
@@ -496,7 +533,7 @@ def retrieve_dicoms_using_table(
                 os.remove(current_findscu_dump_file)
 
     # Path to save the CSV file
-    log_file_path = os.path.join(output_dir, "logs","pacsifier_log.csv")
+    log_file_path = os.path.join(output_dir, "logs", "pacsifier_log.csv")
 
     # Write the log entries to a CSV file
     with open(log_file_path, "w", newline="") as csvfile:
@@ -512,6 +549,21 @@ def retrieve_dicoms_using_table(
             writer.writerow(log_entry)
 
     print(f"Log written to {log_file_path}")
+
+    # Write all commands to file at the end if command_file is provided
+    if command_file and commands_to_write:
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(command_file), exist_ok=True)
+
+        # Write all commands to file at once
+        with open(command_file, "w", encoding="utf-8") as f:
+            for command in commands_to_write:
+                f.write(command + "\n")
+
+        print(f"Commands written to: {command_file}")
+        print(f"You can now run these commands with: bash {command_file}")
+        print(f"Total commands written: {len(commands_to_write)}")
+
     # Clean the tmp folder
     if os.path.isdir(os.path.join(output_dir, "tmp")):
         shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
@@ -674,6 +726,17 @@ def get_parser() -> argparse.ArgumentParser:
         default=os.path.join(".", "data"),
     )
     parser.add_argument(
+        "--command_file",
+        "-cf",
+        help="Write movescu commands to file instead of executing them (useful for batch processing)",
+    )
+    parser.add_argument(
+        "--karnak",
+        "-k",
+        action="store_true",
+        help="Send data directly to Karnak for depersonalization (cannot be used with '--save' or '--move')",
+    )
+    parser.add_argument(
         "--version",
         action="version",
         version=__version__,
@@ -692,6 +755,7 @@ def main():
     save = args.save
     info = args.info
     move = args.move
+    karnak = args.karnak
 
     # Reading config file.
     try:
@@ -704,26 +768,24 @@ def main():
 
     output_dir = args.out_directory
 
-    # Check the case where save & move are specified (it should be only one of the two)
-    if (
-        (args.save and args.move)
-        or (args.save and args.upload)
-        or (args.move and args.upload)
-        or (args.save and args.move and args.upload)
-    ):
+    # Check that only one operation is specified
+    operations = [args.save, args.move, args.upload, args.karnak]
+    if sum(operations) > 1:
         print(
-            "You must select either '--save' to save locally "
-            "or '--move' to define a remote destination "
-            "or '--upload' to upload, not all!"
+            "You must select only one operation: "
+            "'--save' to save locally, "
+            "'--move' to define a remote destination, "
+            "'--upload' to upload, "
+            "or '--karnak' to send to Karnak for depersonalization!"
         )
         parser.print_help()
         sys.exit(1)
 
-    if args.save or args.move:
+    if args.save or args.move or args.karnak:
         # Check the case where the queryfile option is missing. If it is the case print help.
         if args.queryfile is None:
             print(
-                "Missing mandatory parameter --queryfile for the '--save' or '--move' options!"
+                "Missing mandatory parameter --queryfile for the '--save', '--move', or '--karnak' options!"
             )
             parser.print_help()
             sys.exit(1)
@@ -736,7 +798,7 @@ def main():
             sys.exit(1)
 
         check_query_table_allowed_filters(table)
-        retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move)
+        retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move, args.command_file, karnak)
 
     elif args.upload:
         if not os.path.isdir(args.upload_directory):
