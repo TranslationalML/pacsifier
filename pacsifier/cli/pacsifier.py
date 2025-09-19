@@ -232,6 +232,12 @@ def retrieve_dicoms_using_table(
     move: bool,
     command_file: str = None,
     karnak: bool = False,
+    karnak_address: str = None,
+    karnak_port: int = None,
+    karnak_aet: str = None,
+    pynetdicom_address: str = None,
+    pynetdicom_port: int = None,
+    pynetdicom_aet: str = None,
 ) -> None:
     """Query and retrieve dicom images or / and  their info dumps using the input query table.
 
@@ -255,13 +261,7 @@ def retrieve_dicoms_using_table(
     batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
 
-    # Karnak parameters (extract from config if using --karnak)
-    karnak_address = parameters.get("karnak_address") if args.karnak else None
-    karnak_port = parameters.get("karnak_port") if args.karnak else None
-    karnak_aet = parameters.get("karnak_aet") if args.karnak else None
-    pynetdicom_address = parameters.get("pynetdicom_address") if args.karnak else None
-    pynetdicom_port = parameters.get("pynetdicom_port") if args.karnak else None
-    pynetdicom_aet = parameters.get("pynetdicom_aet") if args.karnak else None
+    # Karnak parameters are now passed as function arguments
 
     # Initialize command collection if command file is provided
     commands_to_write = []
@@ -850,6 +850,22 @@ def main():
 
     output_dir = args.out_directory
 
+    # Extract Karnak parameters if using --karnak
+    karnak_address = None
+    karnak_port = None
+    karnak_aet = None
+    pynetdicom_address = None
+    pynetdicom_port = None
+    pynetdicom_aet = None
+    
+    if args.karnak:
+        karnak_address = parameters.get("karnak_address")
+        karnak_port = parameters.get("karnak_port")
+        karnak_aet = parameters.get("karnak_aet")
+        pynetdicom_address = parameters.get("pynetdicom_address")
+        pynetdicom_port = parameters.get("pynetdicom_port")
+        pynetdicom_aet = parameters.get("pynetdicom_aet")
+
     # Check that only one operation is specified
     operations = [args.save, args.move, args.upload, args.karnak]
     if sum(operations) > 1:
@@ -923,7 +939,10 @@ def main():
             sys.exit(1)
 
         check_query_table_allowed_filters(table)
-        retrieve_dicoms_using_table(table, parameters, output_dir, save, info, move, args.command_file, karnak)
+        retrieve_dicoms_using_table(
+            table, parameters, output_dir, save, info, move, args.command_file, karnak,
+            karnak_address, karnak_port, karnak_aet, pynetdicom_address, pynetdicom_port, pynetdicom_aet
+        )
 
     elif args.upload:
         if not os.path.isdir(args.upload_directory):
