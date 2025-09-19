@@ -53,14 +53,57 @@ def create_ae():
     """Create and configure Application Entity for pynetdicom listener."""
     ae = AE()
     
-    # Add supported presentation contexts
+    # Add essential supported presentation contexts
     ae.add_supported_context(CTImageStorage)
     ae.add_supported_context(MRImageStorage)
     ae.add_supported_context(SecondaryCaptureImageStorage)
     
-    # Add all storage presentation contexts one by one
-    for context in StoragePresentationContexts:
-        ae.add_supported_context(context)
+    # Add common DICOM storage SOP classes that are most likely to be used
+    from pynetdicom.sop_class import (
+        ComputedRadiographyImageStorage,
+        DigitalXRayImageStorageForPresentation,
+        DigitalXRayImageStorageForProcessing,
+        UltrasoundImageStorage,
+        NuclearMedicineImageStorage,
+        PositronEmissionTomographyImageStorage,
+        RTImageStorage,
+        RTDoseStorage,
+        RTStructureSetStorage,
+        RTPlanStorage,
+        BasicTextSRStorage,
+        EnhancedSRStorage,
+        ComprehensiveSRStorage,
+        EncapsulatedPDFStorage,
+        JPEGBaseline8BitImageCompression,
+        JPEGLosslessImageCompression,
+        JPEG2000ImageCompression,
+        RLELosslessImageCompression,
+    )
+    
+    # Add the SOP classes
+    sop_classes = [
+        ComputedRadiographyImageStorage,
+        DigitalXRayImageStorageForPresentation,
+        DigitalXRayImageStorageForProcessing,
+        UltrasoundImageStorage,
+        NuclearMedicineImageStorage,
+        PositronEmissionTomographyImageStorage,
+        RTImageStorage,
+        RTDoseStorage,
+        RTStructureSetStorage,
+        RTPlanStorage,
+        BasicTextSRStorage,
+        EnhancedSRStorage,
+        ComprehensiveSRStorage,
+        EncapsulatedPDFStorage,
+        JPEGBaseline8BitImageCompression,
+        JPEGLosslessImageCompression,
+        JPEG2000ImageCompression,
+        RLELosslessImageCompression,
+    ]
+    
+    for sop_class in sop_classes:
+        ae.add_supported_context(sop_class)
     
     return ae
 
