@@ -74,6 +74,7 @@ def create_ae():
         EnhancedSRStorage,
         ComprehensiveSRStorage,
         EncapsulatedPDFStorage,
+        PatientRootQueryRetrieveInformationModelMove,
     )
     
     # Add the SOP classes
@@ -92,6 +93,7 @@ def create_ae():
         EnhancedSRStorage,
         ComprehensiveSRStorage,
         EncapsulatedPDFStorage,
+        PatientRootQueryRetrieveInformationModelMove,
     ]
     
     for sop_class in sop_classes:

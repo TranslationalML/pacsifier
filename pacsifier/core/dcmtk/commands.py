@@ -288,7 +288,7 @@ def send_to_karnak(
         raise ValueError("pynetdicom_aet (Forward AETitle) is required for Karnak mode")
 
     # Build the base command
-    karnak_command = f'movescu -ll debug {karnak_address} {karnak_port} -aec "{karnak_aet}"'
+    karnak_command = f'/usr/bin/movescu -ll debug {karnak_address} {karnak_port} -aec "{karnak_aet}"'
 
     # Add source AET only if provided
     if aet:
