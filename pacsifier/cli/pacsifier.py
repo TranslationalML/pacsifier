@@ -238,6 +238,7 @@ def retrieve_dicoms_using_table(
     pynetdicom_address: str = None,
     pynetdicom_port: int = None,
     pynetdicom_aet: str = None,
+    no_source_aet: bool = False,
 ) -> None:
     """Query and retrieve dicom images or / and  their info dumps using the input query table.
 
@@ -499,19 +500,18 @@ def retrieve_dicoms_using_table(
                 )
 
             if karnak:
+                # Use source AET only if not explicitly omitted
+                source_aet = None if no_source_aet else client_aet
+
                 result = send_to_karnak(
-                    client_aet,
-                    query_attributes["StudyDate"],  # serie["StudyDate"],
-                    server_address=pacs_server,
-                    server_aet=server_aet,
-                    port=port,
+                    aet=source_aet,
+                    study_date=query_attributes["StudyDate"],  # serie["StudyDate"],
                     patient_id=query_attributes["PatientID"],  # serie["PatientID"],
                     study_instance_uid=serie["StudyInstanceUID"],
                     series_instance_uid=serie["SeriesInstanceUID"],
                     karnak_address=karnak_address,
                     karnak_port=karnak_port,
                     karnak_aet=karnak_aet,
-                    pynetdicom_address=pynetdicom_address,
                     pynetdicom_port=pynetdicom_port,
                     pynetdicom_aet=pynetdicom_aet,
                     log_dir=os.path.join(output_dir, "logs"),
@@ -521,6 +521,9 @@ def retrieve_dicoms_using_table(
                 # Collect command if command_file is provided
                 if command_file and result:
                     commands_to_write.append(result)
+
+                # Add delay to prevent port conflicts between movescu commands
+                time.sleep(2)
 
             if info:
                 # Writing series info to csv file.
@@ -634,7 +637,7 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
             "Cannot associate with PACS server. Please check connectivity and firewall settings"
             " with respect to ports configured in your config file."
         )
-    
+
     counter = 0
     # Loop over all patients
     for patient in os.listdir(dicom_dir):
@@ -675,7 +678,7 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
                 continue
 
             # Upload the series to the PACS server
-            upload_res = upload(
+            upload(
                 client_aet,
                 series_dir,
                 server_address=pacs_server,
@@ -748,6 +751,37 @@ def get_parser() -> argparse.ArgumentParser:
         "-k",
         action="store_true",
         help="Send data directly to Karnak for depersonalization (cannot be used with '--save' or '--move')",
+    )
+    parser.add_argument(
+        "--karnak_address",
+        help="Karnak server address (required when using --karnak)",
+    )
+    parser.add_argument(
+        "--karnak_port",
+        type=int,
+        help="Karnak server port (required when using --karnak)",
+    )
+    parser.add_argument(
+        "--karnak_aet",
+        help="Karnak AET (Application Entity Title) (required when using --karnak)",
+    )
+    parser.add_argument(
+        "--pynetdicom_address",
+        help="Pynetdicom listener address (required when using --karnak)",
+    )
+    parser.add_argument(
+        "--pynetdicom_port",
+        type=int,
+        help="Pynetdicom listener port (required when using --karnak)",
+    )
+    parser.add_argument(
+        "--pynetdicom_aet",
+        help="Pynetdicom listener AET (Application Entity Title) (required when using --karnak)",
+    )
+    parser.add_argument(
+        "--no_source_aet",
+        action="store_true",
+        help="Omit source AET (-aet) parameter in Karnak mode movescu command",
     )
     parser.add_argument(
         "--version",
@@ -859,12 +893,13 @@ def main():
     pynetdicom_aet = None
     
     if args.karnak:
-        karnak_address = parameters.get("karnak_address")
-        karnak_port = parameters.get("karnak_port")
-        karnak_aet = parameters.get("karnak_aet")
-        pynetdicom_address = parameters.get("pynetdicom_address")
-        pynetdicom_port = parameters.get("pynetdicom_port")
-        pynetdicom_aet = parameters.get("pynetdicom_aet")
+        # Use command line arguments if provided, otherwise fall back to config file
+        karnak_address = args.karnak_address or parameters.get("karnak_address")
+        karnak_port = args.karnak_port or parameters.get("karnak_port")
+        karnak_aet = args.karnak_aet or parameters.get("karnak_aet")
+        pynetdicom_address = args.pynetdicom_address or parameters.get("pynetdicom_address")
+        pynetdicom_port = args.pynetdicom_port or parameters.get("pynetdicom_port")
+        pynetdicom_aet = args.pynetdicom_aet or parameters.get("pynetdicom_aet")
 
     # Check that only one operation is specified
     operations = [args.save, args.move, args.upload, args.karnak]
@@ -941,7 +976,8 @@ def main():
         check_query_table_allowed_filters(table)
         retrieve_dicoms_using_table(
             table, parameters, output_dir, save, info, move, args.command_file, karnak,
-            karnak_address, karnak_port, karnak_aet, pynetdicom_address, pynetdicom_port, pynetdicom_aet
+            karnak_address, karnak_port, karnak_aet, pynetdicom_address, pynetdicom_port, pynetdicom_aet,
+            args.no_source_aet
         )
 
     elif args.upload:

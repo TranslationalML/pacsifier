@@ -74,10 +74,6 @@ def create_ae():
         EnhancedSRStorage,
         ComprehensiveSRStorage,
         EncapsulatedPDFStorage,
-        JPEGBaseline8BitImageCompression,
-        JPEGLosslessImageCompression,
-        JPEG2000ImageCompression,
-        RLELosslessImageCompression,
     )
     
     # Add the SOP classes
@@ -96,10 +92,6 @@ def create_ae():
         EnhancedSRStorage,
         ComprehensiveSRStorage,
         EncapsulatedPDFStorage,
-        JPEGBaseline8BitImageCompression,
-        JPEGLosslessImageCompression,
-        JPEG2000ImageCompression,
-        RLELosslessImageCompression,
     ]
     
     for sop_class in sop_classes:

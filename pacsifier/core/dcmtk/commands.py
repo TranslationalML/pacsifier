@@ -235,17 +235,13 @@ def get(
 
 
 def send_to_karnak(
-    aet: str,
-    study_date: str,
-    karnak_address: str,
-    karnak_port: int,
-    karnak_aet: str,
-    pynetdicom_address: str,
-    pynetdicom_port: int,
-    pynetdicom_aet: str,
-    server_address: str = "www.dicomserver.co.uk",
-    server_aet: str = "theServerAET",
-    port: int = 104,
+    aet: str = None,
+    study_date: str = "",
+    karnak_address: str = "",
+    karnak_port: int = 0,
+    karnak_aet: str = "",
+    pynetdicom_port: int = 0,
+    pynetdicom_aet: str = "",
     patient_id: str = PATIENT_ID,
     study_instance_uid: str = STUDY_INSTANCE_UID,
     series_instance_uid: str = SERIES_INSTANCE_UID,
@@ -259,11 +255,8 @@ def send_to_karnak(
     bidirectional flow: Local -> Karnak -> Local pynetdicom listener.
 
     Args:
-        aet: called AET (from PACS configuration).
+        aet: called AET (from PACS configuration). Optional - if None, -aet parameter is omitted.
         study_date: study date.
-        server_address: PACS server IP address. Default is "www.dicomserver.co.uk".
-        server_aet: PACS server AET. Default is "theServerAET".
-        port: PACS server port for incoming requests. Default is 104.
         patient_id: patient id. Default is pacsifier.core.execute_commands.patient_id.
         study_instance_uid: study instance unique identifier. Default is
                           pacsifier.core.execute_commands.study_instance_uid.
@@ -272,9 +265,8 @@ def send_to_karnak(
         karnak_address: Karnak server address.
         karnak_port: port for Karnak service.
         karnak_aet: Karnak AET.
-        pynetdicom_address: Local pynetdicom listener address.
         pynetdicom_port: Local pynetdicom listener port.
-        pynetdicom_aet: Local pynetdicom listener AET.
+        pynetdicom_aet: Local pynetdicom listener AET (Forward AETitle). Required.
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
@@ -289,15 +281,25 @@ def send_to_karnak(
     check_ids(series_instance_uid, attribute="Series instance UID")
     check_ids(study_instance_uid, attribute="Study instance UID")
     check_port(karnak_port)
-    check_port(port)
     check_port(pynetdicom_port)
 
-    # Use movescu with -aem to send to Karnak, which will forward to pynetdicom listener
-    # Karnak will receive the data and send it back to the pynetdicom listener
-    karnak_command = (
-        f'movescu -ll debug {karnak_address} {karnak_port} '
-        f'-aec "{karnak_aet}" -aet "{aet}" -aem "{pynetdicom_aet}" '
-        f'-k 0008,0052="PATIENT" --patient '
+    # Validate that pynetdicom_aet (forward AET) is always provided
+    if not pynetdicom_aet:
+        raise ValueError("pynetdicom_aet (Forward AETitle) is required for Karnak mode")
+
+    # Build the base command
+    karnak_command = f'movescu -ll debug {karnak_address} {karnak_port} -aec "{karnak_aet}"'
+
+    # Add source AET only if provided
+    if aet:
+        karnak_command += f' -aet "{aet}"'
+
+    # Add forward AET (always required)
+    karnak_command += f' -aem "{pynetdicom_aet}"'
+
+    # Add the rest of the command
+    karnak_command += (
+        f' -k 0008,0052="PATIENT" --patient '
         f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
         f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
         f"--port {pynetdicom_port}"
@@ -476,7 +478,7 @@ def run(query: str, log_dir: str = ".") -> str:
         with open(os.path.join(log_dir, "log.txt"), "a", encoding="utf-8") as f:
             f.write(query + "\n")
     except ValueError:
-        print("* Command parsing error: {}".format(" ".join(cmd)))
+        print("* Command parsing error: {}".format(query))
         # Flush output to ensure immediate display
         sys.stdout.flush()
         sys.stderr.flush()
