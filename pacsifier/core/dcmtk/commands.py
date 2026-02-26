@@ -220,7 +220,8 @@ def find(
         f"--key 8,30 --key 18,1000={device_serial_number} "
         f"--key 8,60={modality} --key 8,8={image_type} "
         f"--key 8,1030={study_description} --key 8,50={accession_number} "
-        f"--key 18,24={sequence_name}"
+        f"--key 18,24={sequence_name} "
+        f"--key 20,1206 --key 20,1208"
     )
 
     return run(
@@ -241,6 +242,7 @@ def get(
     move_port: int = 4006,
     output_dir: str = OUTPUT_DIR,
     log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+    move_aet: str = "",
 ) -> str:
     """Builds a query for movescu.
 
@@ -260,6 +262,8 @@ def get(
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
+        move_aet: AET for the C-MOVE destination (-aem). When empty (default),
+                  falls back to ``aet`` for backward compatibility.
 
     Returns:
         string: The log lines.
@@ -271,6 +275,8 @@ def get(
     check_port(move_port)
     check_port(port)
 
+    destination_aet = move_aet if move_aet else aet
+
     modified_params = replace_default_params(
         PARAMETERS, aet, server_address, server_aet, port
     )
@@ -278,7 +284,7 @@ def get(
     ll = _dcmtk_log_level()
     move_command = (
         f"movescu -ll {ll} {modified_params} {_dcmtk_timeout_flags()}"
-        f' -aem "{aet}"'
+        f' -aem "{destination_aet}"'
         f" {_move_retrieve_level_flags()}"
         f" --key 0010,0020={patient_id}"
         f" --key 0020,000d={study_instance_uid}"

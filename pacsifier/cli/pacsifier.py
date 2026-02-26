@@ -62,6 +62,13 @@ TAG_TO_KEYWORD = {  # type: Dict[str,str]
     "(0018,0024)": "SequenceName",
 }
 
+COUNT_TAG_TO_KEYWORD = {  # type: Dict[str,str]
+    "(0010,0020)": "PatientID",
+    "(0020,000d)": "StudyInstanceUID",
+    "(0020,1206)": "NumberOfStudyRelatedSeries",
+    "(0020,1208)": "NumberOfStudyRelatedInstances",
+}
+
 ALLOWED_FILTERS = list(TAG_TO_KEYWORD.values())
 ALLOWED_FILTERS.append("new_ids")
 
@@ -150,6 +157,60 @@ def parse_findscu_dump_file(filename: str) -> List[Dict[str, str]]:
                 output_dict[TAG_TO_KEYWORD[tag]] = item
 
     return id_table
+
+
+def parse_findscu_count_dump_file(filename: str) -> List[Dict[str, str]]:
+    """Extract count-related information from a findscu dump file.
+
+    Args:
+        filename: path to textfile to be read
+
+    Returns:
+        list: list of dictionaries, one dictionary per study-level match
+    """
+    start = False
+
+    count_table = []  # type: List[Dict[str, str]]
+    output_dict = {"": ""}  # type: Dict[str,str]
+
+    for line in readLineByLine(filename):
+        sample_dict = {  # type: Dict[str,str]
+            "PatientID": "",
+            "StudyInstanceUID": "",
+            "NumberOfStudyRelatedSeries": "0",
+            "NumberOfStudyRelatedInstances": "0",
+        }
+
+        if "------------" in line or "Releasing Association" in line:
+            if start:
+                count_table.append(output_dict)
+
+            start = True
+            output_dict = sample_dict
+            continue
+
+        if not start:
+            continue
+
+        for tag in sorted(COUNT_TAG_TO_KEYWORD.keys()):
+            if tag in line:
+                item = ""
+                try:
+                    item = (
+                        line.split("[")[1]
+                        .split("]")[0]
+                        .replace(" ", "")
+                        .replace("'", "_")
+                        .replace("/", "")
+                    )
+                except IndexError:
+                    pass
+
+                if item == "(no":
+                    continue
+                output_dict[COUNT_TAG_TO_KEYWORD[tag]] = item
+
+    return count_table
 
 
 def check_query_table_allowed_filters(
@@ -509,7 +570,9 @@ def retrieve_dicoms_using_table(
             if save and not series_already_exists:
                 if verbose:
                     print(
-                        f"Retrieving series {serie['SeriesInstanceUID']} -> {patient_serie_output_dir}",
+                        f"Retrieving series "
+                        f"{serie['SeriesInstanceUID']}"
+                        f" -> {patient_serie_output_dir}",
                         flush=True,
                     )
                 get(
@@ -524,6 +587,7 @@ def retrieve_dicoms_using_table(
                     move_port=move_port,
                     output_dir=patient_serie_output_dir,
                     log_dir=os.path.join(output_dir, "logs"),
+                    move_aet=move_aet,
                 )
 
             if move and not series_already_exists:
@@ -590,6 +654,123 @@ def retrieve_dicoms_using_table(
 
     print(f"Log written to {log_file_path}")
     # Clean the tmp folder
+    if os.path.isdir(os.path.join(output_dir, "tmp")):
+        shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
+
+
+def count_dicoms_using_table(
+    table: DataFrame,
+    parameters: Dict[str, str],
+    output_dir: str,
+    verbose: bool = False,
+) -> None:
+    """Query study-level PACS metadata and print per-patient counts.
+
+    This mode only issues C-FIND requests and does not retrieve pixel data.
+    """
+    pacs_server = parameters["server_address"]
+    port = int(parameters["port"])
+    client_aet = parameters["AET"]
+    server_aet = parameters["server_AET"]
+
+    attributes_list = parse_query_table(table, ALLOWED_FILTERS)
+    count_summary = {}  # type: Dict[str, Dict[str, int]]
+
+    for i, query_attributes in enumerate(attributes_list):
+        check_query_attributes(query_attributes)
+        query_attributes["PatientName"] = process_person_names(
+            query_attributes["PatientName"]
+        )
+
+        check_date_range(query_attributes["StudyDate"])
+        check_date_range(query_attributes["AcquisitionDate"])
+        check_date(query_attributes["PatientBirthDate"])
+
+        echo_res = echo(
+            server_address=pacs_server,
+            port=port,
+            server_aet=server_aet,
+            aet=client_aet,
+            log_dir=os.path.join(output_dir, "logs"),
+        )
+        if not echo_res:
+            raise RuntimeError(
+                "Cannot associate with PACS server. Please check "
+                "connectivity and firewall settings"
+                " with respect to ports configured in your config file."
+            )
+
+        if verbose:
+            print(f"Counting element number {i + 1}...", flush=True)
+
+        find_study_res = find(
+            client_aet,
+            server_address=pacs_server,
+            server_aet=server_aet,
+            port=port,
+            query_retrieval_level="STUDY",
+            patient_id=query_attributes["PatientID"],
+            study_uid=query_attributes["StudyInstanceUID"],
+            series_instance_uid=query_attributes["SeriesInstanceUID"],
+            series_description=query_attributes["SeriesDescription"],
+            protocol_name=query_attributes["ProtocolName"],
+            acquisition_date=query_attributes["AcquisitionDate"],
+            study_date=query_attributes["StudyDate"],
+            patient_name=query_attributes["PatientName"],
+            patient_birthdate=query_attributes["PatientBirthDate"],
+            device_serial_number=query_attributes["DeviceSerialNumber"],
+            modality=query_attributes["Modality"],
+            image_type=query_attributes["ImageType"],
+            study_description=query_attributes["StudyDescription"],
+            accession_number=query_attributes["AccessionNumber"],
+            sequence_name=query_attributes["SequenceName"],
+            log_dir=os.path.join(output_dir, "logs"),
+        )
+
+        current_findscu_dump_file = os.path.join(output_dir, "tmp", "current_count.txt")
+        if os.path.isfile(current_findscu_dump_file):
+            os.remove(current_findscu_dump_file)
+
+        write_file(find_study_res, file=current_findscu_dump_file)
+        studies = parse_findscu_count_dump_file(current_findscu_dump_file)
+
+        for study in studies:
+            patient_id = study.get("PatientID", "") or query_attributes["PatientID"]
+            if patient_id == "":
+                patient_id = "UNKNOWN"
+
+            if patient_id not in count_summary:
+                count_summary[patient_id] = {"studies": 0, "series": 0, "instances": 0}
+
+            try:
+                num_series = int(study.get("NumberOfStudyRelatedSeries", "0") or 0)
+            except ValueError:
+                num_series = 0
+            try:
+                num_instances = int(study.get("NumberOfStudyRelatedInstances", "0") or 0)
+            except ValueError:
+                num_instances = 0
+
+            count_summary[patient_id]["studies"] += 1
+            count_summary[patient_id]["series"] += num_series
+            count_summary[patient_id]["instances"] += num_instances
+
+        if os.path.isfile(current_findscu_dump_file):
+            os.remove(current_findscu_dump_file)
+
+    print("Count summary:")
+    if count_summary:
+        for patient_id in sorted(count_summary.keys()):
+            counts = count_summary[patient_id]
+            print(
+                f"PatientID={patient_id}: "
+                f"studies={counts['studies']}, "
+                f"series={counts['series']}, "
+                f"instances={counts['instances']}"
+            )
+    else:
+        print("No matching studies found.")
+
     if os.path.isdir(os.path.join(output_dir, "tmp")):
         shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
 
@@ -700,7 +881,7 @@ def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
 def get_parser() -> argparse.ArgumentParser:
     """Return the parser object for this script."""
     parser = argparse.ArgumentParser(
-        description="Query, move and retrieve DICOM images from a PACS server."
+        description="Query, count, move and retrieve DICOM images from a PACS server."
     )
 
     parser.add_argument(
@@ -728,15 +909,21 @@ def get_parser() -> argparse.ArgumentParser:
         help="Move images resulting from query (cannot be used together with '--save')",
     )
     parser.add_argument(
+        "--count",
+        action="store_true",
+        help="Query PACS and print per-patient study/series/instance counts "
+             "(metadata-only, no image retrieval)",
+    )
+    parser.add_argument(
         "--queryfile",
         "-q",
-        help="Path to query file (mandatory if '--save' or '--move' is used)",
+        help="Path to query file (mandatory if '--save', '--move', or '--count' is used)",
     )
     parser.add_argument(
         "--out_directory",
         "-d",
         help="Output directory where images will be saved (used only with "
-             "'--save' or '--move' options)",
+             "'--save', '--move', or '--count' options)",
         default=os.path.join(".", "data"),
     )
     parser.add_argument(
@@ -782,6 +969,7 @@ def main():
     save = args.save
     info = args.info
     move = args.move
+    count = args.count
     resume = args.resume
     verbose = args.verbose
     if verbose:
@@ -804,26 +992,30 @@ def main():
     output_dir = os.path.normcase(os.path.abspath(
         os.path.expanduser(args.out_directory)))
 
-    # Check the case where save & move are specified (it should be only one of the two)
+    # Check incompatible action combinations.
     if (
         (args.save and args.move)
         or (args.save and args.upload)
         or (args.move and args.upload)
-        or (args.save and args.move and args.upload)
+        or (args.save and args.count)
+        or (args.move and args.count)
+        or (args.upload and args.count)
     ):
         print(
             "You must select either '--save' to save locally "
             "or '--move' to define a remote destination "
-            "or '--upload' to upload, not all!"
+            "or '--upload' to upload "
+            "or '--count' to query metadata counts, not all!"
         )
         parser.print_help()
         sys.exit(1)
 
-    if args.save or args.move:
+    if args.save or args.move or args.count:
         # Check the case where the queryfile option is missing. If it is the case print help.
         if args.queryfile is None:
             print(
-                "Missing mandatory parameter --queryfile for the '--save' or '--move' options!"
+                "Missing mandatory parameter --queryfile for "
+                "the '--save', '--move', or '--count' options!"
             )
             parser.print_help()
             sys.exit(1)
@@ -838,16 +1030,24 @@ def main():
             sys.exit(1)
 
         check_query_table_allowed_filters(table)
-        retrieve_dicoms_using_table(
-            table,
-            parameters,
-            output_dir,
-            save,
-            info,
-            move,
-            resume,
-            verbose,
-        )
+        if count:
+            count_dicoms_using_table(
+                table,
+                parameters,
+                output_dir,
+                verbose,
+            )
+        else:
+            retrieve_dicoms_using_table(
+                table,
+                parameters,
+                output_dir,
+                save,
+                info,
+                move,
+                resume,
+                verbose,
+            )
 
     elif args.upload:
         upload_directory = os.path.normcase(os.path.abspath(
