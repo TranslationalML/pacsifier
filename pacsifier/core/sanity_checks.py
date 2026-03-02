@@ -261,6 +261,26 @@ def check_config_parameters(config_parameters: Dict[str, str]) -> None:
             "move_port": {"type": "integer", "minimum": 1, "maximum": 65535},
             "batch_size": {"type": "integer", "minimum": 1},
             "batch_wait_time": {"type": "number", "minimum": 0.0},
+            "karnak_address": {
+                'anyOf': [
+                    {"format": 'ipv4'},
+                    {"format": 'ipv6'},
+                    {"format": 'hostname'},
+                    {"format": 'uri', "pattern": '^(https?|http?)://|^www.'}
+                ]
+            },
+            "karnak_port": {"type": "integer", "minimum": 1, "maximum": 65535},
+            "karnak_aet": {"type": "string", "maxLength": 16},
+            "pynetdicom_address": {
+                'anyOf': [
+                    {"format": 'ipv4'},
+                    {"format": 'ipv6'},
+                    {"format": 'hostname'},
+                    {"format": 'uri', "pattern": '^(https?|http?)://|^www.'}
+                ]
+            },
+            "pynetdicom_port": {"type": "integer", "minimum": 1, "maximum": 65535},
+            "pynetdicom_aet": {"type": "string", "maxLength": 16},
         },
         "required": [
             "server_address",

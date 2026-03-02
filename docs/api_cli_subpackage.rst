@@ -68,3 +68,12 @@ The ``pacsifier.cli`` subpackage contains multiple modules that define the comma
    :undoc-members:
    :show-inheritance:
    :noindex:
+
+`pacsifier.cli.pynetdicom_listener`
+===================================
+
+.. automodule:: pacsifier.cli.pynetdicom_listener
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :noindex:

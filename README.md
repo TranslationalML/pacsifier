@@ -56,8 +56,10 @@ pip install pacsifier
 
 ## Features
 
+- Query PACS metadata and count studies/series/instances per patient
 - Query and retrieve DICOM images from PACS servers
 - Move DICOM images between PACS nodes
+- Forward DICOM retrieval requests to Karnak (`--karnak`)
 - Upload DICOM images to PACS servers
 - Anonymize DICOM files (directly or via Karnak gateway)
 - Get pseudonyms from the De-ID API
@@ -80,7 +82,8 @@ PACSIFIER provides several CLI commands. How you run them depends on your instal
 
 | Command | Docker wrapper | Description |
 |---|---|---|
-| `pacsifier` | `docker_pacsifier` | Query, retrieve, and move DICOM images |
+| `pacsifier` | `docker_pacsifier` | Query metadata counts, retrieve, and move DICOM images |
+| `pacsifier-pynetdicom-listener` | N/A | Run standalone pynetdicom listener for Karnak forwarding |
 | `pacsifier-anonymize` | `docker_anonymize_dicoms` | Anonymize DICOM files |
 | `pacsifier-get-pseudonyms` | `docker_get_pseudonyms` | Get pseudonyms from De-ID API or custom mapping |
 | `pacsifier-add-karnak-tags` | `docker_add_karnak_tags` | Tag DICOM files for Karnak de-identification |
@@ -93,11 +96,25 @@ PACSIFIER provides several CLI commands. How you run them depends on your instal
 **With pip/source install** (requires DCMTK on your system):
 
 ```bash
+# Query metadata counts only (no image download)
+pacsifier --count -q query.csv -c config.json -d ./output
+
 # Query and save DICOM images locally
 pacsifier --save --info -q query.csv -c config.json -d ./output
 
 # Query and move images to a remote DICOM node
 pacsifier --move -q query.csv -c config.json
+
+# Query and forward move requests to Karnak
+pacsifier --karnak -q query.csv -c config.json -d ./output
+
+# Export Karnak movescu commands without executing
+pacsifier --karnak -q query.csv -c config.json -cf ./karnak_commands.txt
+
+# Override Karnak routing values from CLI
+pacsifier --karnak -q query.csv -c config.json \
+  --karnak_address 10.1.2.3 --karnak_port 104 --karnak_aet KARNAK \
+  --pynetdicom_address 0.0.0.0 --pynetdicom_port 11112 --pynetdicom_aet PACSIFIER
 
 # Upload DICOM images to a PACS server
 pacsifier --upload --upload_directory ./dicoms -c config.json
@@ -114,6 +131,7 @@ pacsifier-anonymize -d ./data -o ./anonymized --fuzz_acq_dates --remove_private_
 ```bash
 # Using wrapper scripts (pip install pacsifier for the wrappers only)
 docker_pacsifier -c config.json -s -i -q query.csv -d ./output
+docker_pacsifier -c config.json --count -q query.csv -d ./output
 docker_anonymize_dicoms -d ./data -o ./anonymized -a -p
 
 # Or directly with docker run
@@ -121,6 +139,13 @@ docker run --rm --net=host \
     -v /path/to/my_dir:/base \
     quay.io/translationalml/pacsifier:latest \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
+```
+
+`--count` prints a summary like:
+
+```text
+Count summary:
+PatientID=12345: studies=4, series=18, instances=1260
 ```
 
 Run any command with `--help` for the full list of options. See [Docker Wrappers](https://translationalml.github.io/pacsifier/docker_wrappers.html) for more details on the wrapper scripts.
@@ -140,9 +165,17 @@ PACSIFIER requires a JSON configuration file:
     "move_AET": "MOVE_DESTINATION_AET",
     "move_port": 11112,
     "batch_size": 30,
-    "batch_wait_time": 10
+    "batch_wait_time": 10,
+    "karnak_address": "KARNAK_IP_OR_HOSTNAME",
+    "karnak_port": 104,
+    "karnak_aet": "KARNAK_AET",
+    "pynetdicom_address": "0.0.0.0",
+    "pynetdicom_port": 11112,
+    "pynetdicom_aet": "PACSIFIER"
 }
 ```
+
+Karnak keys are required when using `--karnak` and optional otherwise.
 
 #### Migrating from PACSMAN
 

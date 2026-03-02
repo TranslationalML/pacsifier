@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+import types
 
 import pytest
 
@@ -29,6 +30,12 @@ def test_get_parser_accepts_count_flag():
     assert args.count is True
 
 
+def test_get_parser_accepts_karnak_flag():
+    parser = pacsifier_cli.get_parser()
+    args = parser.parse_args(["--config", "config.json", "--karnak"])
+    assert args.karnak is True
+
+
 def test_main_count_calls_count_handler(monkeypatch, tmp_path):
     config_path = tmp_path / "config.json"
     query_path = tmp_path / "query.csv"
@@ -45,7 +52,7 @@ def test_main_count_calls_count_handler(monkeypatch, tmp_path):
         assert isinstance(parameters, dict)
         assert verbose is False
 
-    def _fake_retrieve(*args, **kwargs):
+    def _fake_retrieve(*_args, **_kwargs):
         calls["retrieve"] += 1
 
     monkeypatch.setattr(pacsifier_cli, "count_dicoms_using_table", _fake_count)
@@ -69,6 +76,95 @@ def test_main_count_calls_count_handler(monkeypatch, tmp_path):
 
     assert calls["count"] == 1
     assert calls["retrieve"] == 0
+
+
+def test_main_karnak_calls_retrieve_handler(monkeypatch, tmp_path):
+    config_path = tmp_path / "config.json"
+    query_path = tmp_path / "query.csv"
+    out_dir = tmp_path / "out"
+    command_file = tmp_path / "commands.txt"
+    _write_valid_config(config_path)
+    query_path.write_text("PatientID\nPACSMAN1\n", encoding="utf-8")
+
+    with open(config_path, encoding="utf-8") as f:
+        config = json.load(f)
+    config.update({
+        "karnak_address": "127.0.0.1",
+        "karnak_port": 11113,
+        "karnak_aet": "KARNAK",
+        "pynetdicom_address": "127.0.0.1",
+        "pynetdicom_port": 11112,
+        "pynetdicom_aet": "PACSIFIER",
+    })
+    config_path.write_text(json.dumps(config), encoding="utf-8")
+
+    calls = {"retrieve": 0, "listener_start": 0, "listener_stop": 0}
+
+    class _FakeListener:
+        def __init__(self, address, port, aet, output_dir):
+            assert address == "127.0.0.1"
+            assert port == 11112
+            assert aet == "PACSIFIER"
+            assert os.path.normcase(output_dir) == os.path.normcase(str(out_dir))
+
+        def start(self):
+            calls["listener_start"] += 1
+
+        def stop(self):
+            calls["listener_stop"] += 1
+
+    def _fake_retrieve(
+        table,
+        parameters,
+        output_dir,
+        save,
+        info,
+        move,
+        karnak,
+        command_file_arg,
+        no_source_aet,
+        resume,
+        verbose,
+    ):
+        calls["retrieve"] += 1
+        assert karnak is True
+        assert command_file_arg == os.path.normcase(os.path.abspath(str(command_file)))
+        assert no_source_aet is True
+        assert save is False and info is False and move is False
+        assert resume is False and verbose is False
+        assert "PatientID" in table.columns
+        assert isinstance(parameters, dict)
+        assert os.path.normcase(output_dir) == os.path.normcase(str(out_dir))
+
+    monkeypatch.setattr(pacsifier_cli, "retrieve_dicoms_using_table", _fake_retrieve)
+    monkeypatch.setitem(
+        sys.modules,
+        "pacsifier.core.pynetdicom_listener",
+        types.SimpleNamespace(PynetdicomListener=_FakeListener),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "pacsifier",
+            "--config",
+            str(config_path),
+            "--karnak",
+            "--queryfile",
+            str(query_path),
+            "--out_directory",
+            str(out_dir),
+            "--command_file",
+            str(command_file),
+            "--no_source_aet",
+        ],
+    )
+
+    pacsifier_cli.main()
+
+    assert calls["retrieve"] == 1
+    assert calls["listener_start"] == 1
+    assert calls["listener_stop"] == 1
 
 
 def test_main_count_rejects_incompatible_flags(monkeypatch, tmp_path):
@@ -124,7 +220,7 @@ def test_main_count_integration_prints_summary(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(pacsifier_cli, "echo", lambda **_: True)
     monkeypatch.setattr(pacsifier_cli, "find", lambda *_, **__: "FIND")
 
-    def _fake_write_file(_results, file):
+    def _fake_write_file(_results, _file):
         file_path = tmp_path / "current_count.txt"
         file_path.write_text("dummy", encoding="utf-8")
 

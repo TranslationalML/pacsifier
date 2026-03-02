@@ -14,3 +14,12 @@ The ``pacsifier.core`` subpackage contains modules that define the core function
    :undoc-members:
    :show-inheritance:
    :noindex:
+
+`pacsifier.core.pynetdicom_listener`
+====================================
+
+.. automodule:: pacsifier.core.pynetdicom_listener
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :noindex:

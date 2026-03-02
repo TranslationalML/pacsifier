@@ -19,7 +19,7 @@ import os
 import pytest
 
 from pacsifier.core.dcmtk.commands import (
-    echo, find, get, upload, replace_default_params, run
+    echo, find, get, send_to_karnak, upload, replace_default_params, run
 )
 
 
@@ -229,3 +229,50 @@ def test_run():
     log_dir = "./logs"
     os.makedirs(log_dir, exist_ok=True)
     assert [] == run("echo California Dreaming.", log_dir=log_dir)
+
+
+def test_send_to_karnak_command_file(tmp_path):
+    command_file = tmp_path / "karnak_commands.txt"
+    cmd = send_to_karnak(
+        karnak_address="127.0.0.1",
+        karnak_port=11113,
+        karnak_aet="KARNAK",
+        pynetdicom_aet="PACSIFIER",
+        patient_id="PACSMAN1",
+        study_instance_uid="1.2.3",
+        series_instance_uid="1.2.3.4",
+        study_date="20240101",
+        source_aet="SRC_AET",
+        command_file=str(command_file),
+    )
+
+    assert 'movescu -ll debug -P -aec "KARNAK" -aem "PACSIFIER"' in cmd
+    assert '-aet "SRC_AET"' in cmd
+    assert "--key 0010,0020=PACSMAN1" in cmd
+    assert command_file.exists()
+
+
+def test_send_to_karnak_invalid_inputs(dummy_long_string):
+    with pytest.raises(ValueError):
+        send_to_karnak(
+            karnak_address="127.0.0.1",
+            karnak_port=0,
+            karnak_aet="KARNAK",
+            pynetdicom_aet="PACSIFIER",
+        )
+
+    with pytest.raises(ValueError):
+        send_to_karnak(
+            karnak_address="127.0.0.1",
+            karnak_port=11113,
+            karnak_aet=dummy_long_string,
+            pynetdicom_aet="PACSIFIER",
+        )
+
+    with pytest.raises(ValueError):
+        send_to_karnak(
+            karnak_address="127.0.0.1",
+            karnak_port=11113,
+            karnak_aet="KARNAK",
+            pynetdicom_aet=dummy_long_string,
+        )

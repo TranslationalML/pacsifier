@@ -24,7 +24,7 @@ In the following sections, we will describe the configuration files, how to run 
 Configuration File
 ==================
 
-PACSIFIER requires a JSON configuration file that specifies the PACS server connection parameters. The file must contain exactly these keys:
+PACSIFIER requires a JSON configuration file that specifies the PACS server connection parameters.
 
 .. code-block:: json
 
@@ -36,7 +36,13 @@ PACSIFIER requires a JSON configuration file that specifies the PACS server conn
         "move_AET": "MOVE_DESTINATION_AET",
         "move_port": 11112,
         "batch_size": 30,
-        "batch_wait_time": 10
+        "batch_wait_time": 10,
+        "karnak_address": "KARNAK_IP_OR_HOSTNAME",
+        "karnak_port": 104,
+        "karnak_aet": "KARNAK_AET",
+        "pynetdicom_address": "0.0.0.0",
+        "pynetdicom_port": 11112,
+        "pynetdicom_aet": "PACSIFIER"
     }
 
 .. list-table:: Configuration keys
@@ -70,6 +76,24 @@ PACSIFIER requires a JSON configuration file that specifies the PACS server conn
    * - ``batch_wait_time``
      - number
      - Sleep time (in seconds) after each batch
+   * - ``karnak_address``
+     - string
+     - Karnak destination host used by ``--karnak`` mode
+   * - ``karnak_port``
+     - integer
+     - Karnak destination port used by ``--karnak`` mode
+   * - ``karnak_aet``
+     - string
+     - Karnak called AE title (``-aec``)
+   * - ``pynetdicom_address``
+     - string
+     - Local bind address for the internal listener used in ``--karnak`` mode
+   * - ``pynetdicom_port``
+     - integer
+     - Local listener port for incoming C-STORE objects from Karnak flow
+   * - ``pynetdicom_aet``
+     - string
+     - Local listener AE title and C-MOVE destination (required in ``--karnak`` mode)
 
 .. note::
     The AET and corresponding IP of the workstation should be declared on the PACS server, including the storeable attribute.
@@ -173,6 +197,55 @@ Retrieves images for patient 124588 with study dates between 12/05/2015 and 12/0
 Retrieves all CT images with protocol names starting with ``BEAT_SelfNav`` for patients born on 11/06/1992.
 
 
+Count-only metadata query
+-------------------------
+
+Use ``--count`` to query PACS metadata only (no image retrieval) and print
+per-patient totals for studies, series, and instances.
+
+.. code-block:: bash
+
+    pacsifier --count --queryfile query.csv --config config.json --out_directory ./output
+
+Typical output:
+
+.. code-block:: text
+
+    Count summary:
+    PatientID=12345: studies=4, series=18, instances=1260
+
+
+Karnak forwarding
+-----------------
+
+Use ``--karnak`` to send C-MOVE requests to Karnak and receive returned files
+through the built-in pynetdicom listener.
+
+.. code-block:: bash
+
+    pacsifier --karnak --queryfile query.csv --config config.json --out_directory ./output
+
+To generate commands without executing them, use ``--command_file``:
+
+.. code-block:: bash
+
+    pacsifier --karnak --queryfile query.csv --config config.json --command_file ./karnak_commands.txt
+
+You can override Karnak config values from the CLI:
+
+.. code-block:: bash
+
+    pacsifier --karnak -q query.csv -c config.json \
+      --karnak_address 10.1.2.3 --karnak_port 104 --karnak_aet KARNAK \
+      --pynetdicom_address 0.0.0.0 --pynetdicom_port 11112 --pynetdicom_aet PACSIFIER
+
+Standalone listener entrypoint:
+
+.. code-block:: bash
+
+    pacsifier-pynetdicom-listener --address 0.0.0.0 --port 11112 --aet PACSIFIER --output_dir ./output
+
+
 Running ``PACSIFIER`` commands in a shell
 =========================================
 
@@ -225,6 +298,13 @@ Running ``PACSIFIER`` commands in a shell
 		:ref: pacsifier.cli.extract_carestream_report.get_parser
 		:prog: pacsifier-extract-carestream-report
 
+``pacsifier-pynetdicom-listener`` command
+-----------------------------------------
+
+.. argparse::
+		:ref: pacsifier.cli.pynetdicom_listener.get_parser
+		:prog: pacsifier-pynetdicom-listener
+
 
 .. _cmdusage-docker:
 
@@ -239,6 +319,7 @@ Recommended (wrapper scripts)
 .. code-block:: bash
 
 		docker_pacsifier -c config.json -q query.csv -d /output --save
+		docker_pacsifier -c config.json -q query.csv -d /output --count
 
 See :ref:`docker_wrappers` for the full list of wrapper scripts and examples.
 
@@ -250,4 +331,9 @@ Direct Docker invocation
 		docker run --rm --net=host -v /path/to/my_dir:/base \
 			quay.io/translationalml/pacsifier:latest \
 			pacsifier --save --info --queryfile /base/my_query.csv \
+			--config /base/my_config.json --out_directory /base/my_output_dir
+
+		docker run --rm --net=host -v /path/to/my_dir:/base \
+			quay.io/translationalml/pacsifier:latest \
+			pacsifier --count --queryfile /base/my_query.csv \
 			--config /base/my_config.json --out_directory /base/my_output_dir

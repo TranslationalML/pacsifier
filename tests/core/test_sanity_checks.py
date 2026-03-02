@@ -50,6 +50,25 @@ def test_check_config_parameters_valid():
     })
 
 
+def test_check_config_parameters_valid_with_karnak():
+    check_config_parameters({
+        "server_address": "localhost",
+        "port": 4444,
+        "server_AET": "SCU_STORE",
+        "AET": "PACSIFIER_SCU",
+        "move_port": 11112,
+        "move_AET": "PACSIFIER_SCU",
+        "batch_size": 30,
+        "batch_wait_time": 10,
+        "karnak_address": "127.0.0.1",
+        "karnak_port": 11113,
+        "karnak_aet": "KARNAK",
+        "pynetdicom_address": "127.0.0.1",
+        "pynetdicom_port": 11112,
+        "pynetdicom_aet": "PACSIFIER",
+    })
+
+
 def test_check_config_parameters_invalid_values():
     with pytest.raises(ValueError):
         check_config_parameters({

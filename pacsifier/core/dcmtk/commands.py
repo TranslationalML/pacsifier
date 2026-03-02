@@ -301,6 +301,69 @@ def move_remote(
     )
 
 
+def send_to_karnak(
+    karnak_address: str,
+    karnak_port: int,
+    karnak_aet: str,
+    pynetdicom_aet: str,
+    patient_id: str = PATIENT_ID,
+    study_instance_uid: str = STUDY_INSTANCE_UID,
+    series_instance_uid: str = SERIES_INSTANCE_UID,
+    study_date: str = "",
+    source_aet: str = "",
+    no_source_aet: bool = False,
+    command_file: str = "",
+    log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+) -> str:
+    """Build and execute a movescu command to request transfer through Karnak.
+
+    Args:
+        karnak_address: Karnak endpoint address.
+        karnak_port: Karnak endpoint port.
+        karnak_aet: Called AE title for Karnak (-aec).
+        pynetdicom_aet: Move destination AE title listened to by pynetdicom (-aem).
+        patient_id: DICOM PatientID query key.
+        study_instance_uid: DICOM StudyInstanceUID query key.
+        series_instance_uid: DICOM SeriesInstanceUID query key.
+        study_date: DICOM StudyDate query key.
+        source_aet: Optional source/calling AE title (-aet).
+        no_source_aet: If True, do not include -aet even if source_aet is set.
+        command_file: If set, append generated command to this file and return command.
+        log_dir: Directory for command logs when command is executed.
+    """
+    check_server_address(karnak_address)
+    check_port(karnak_port)
+    check_AET(karnak_aet, server=True)
+    check_AET(pynetdicom_aet)
+    check_ids(patient_id)
+    check_ids(study_instance_uid, attribute="Study instance UID")
+    check_ids(series_instance_uid, attribute="Series instance UID")
+
+    aet_part = ""
+    if source_aet and not no_source_aet:
+        check_AET(source_aet)
+        aet_part = f' -aet "{source_aet}"'
+
+    move_command = (
+        f'movescu -ll debug -P -aec "{karnak_aet}" -aem "{pynetdicom_aet}"'
+        f"{aet_part}"
+        f" --key 0010,0020={patient_id}"
+        f" --key 0020,000d={study_instance_uid}"
+        f" --key 0020,000e={series_instance_uid}"
+        f" --key 0008,0020={study_date}"
+        f" {karnak_address} {karnak_port}"
+    )
+
+    if command_file:
+        write_file([move_command], file=command_file)
+        return move_command
+
+    return run(
+        query=move_command,
+        log_dir=log_dir,
+    )
+
+
 def upload(
     aet: str,
     dicom_dir: str,

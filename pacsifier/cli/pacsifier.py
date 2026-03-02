@@ -30,9 +30,19 @@ from progressbar import ProgressBar
 import csv
 import time
 import argparse
+import atexit
+import signal
 
 from pacsifier.info import __version__
-from pacsifier.core.dcmtk.commands import echo, find, get, move_remote, upload, write_file
+from pacsifier.core.dcmtk.commands import (
+    echo,
+    find,
+    get,
+    move_remote,
+    send_to_karnak,
+    upload,
+    write_file,
+)
 from pacsifier.core.sanity_checks import (
     check_date,
     check_date_range,
@@ -292,6 +302,9 @@ def retrieve_dicoms_using_table(
     save: bool,
     info: bool,
     move: bool,
+    karnak: bool = False,
+    command_file: str = "",
+    no_source_aet: bool = False,
     resume: bool = False,
     verbose: bool = False,
 ) -> None:
@@ -313,8 +326,13 @@ def retrieve_dicoms_using_table(
     client_aet = parameters["AET"]
     server_aet = parameters["server_AET"]
     move_aet = parameters["move_AET"]
+    karnak_address = parameters.get("karnak_address", "")
+    karnak_port = int(parameters.get("karnak_port", 0) or 0)
+    karnak_aet = parameters.get("karnak_aet", "")
+    pynetdicom_aet = parameters.get("pynetdicom_aet", "")
     batch_wait_time = float(parameters["batch_wait_time"])
     batch_size = int(parameters["batch_size"])
+    karnak_wait_seconds = float(parameters.get("karnak_wait_seconds", 0.2))
 
     # Flexible parsing.
     attributes_list = parse_query_table(table, ALLOWED_FILTERS)
@@ -608,6 +626,29 @@ def retrieve_dicoms_using_table(
                     move_aet=move_aet,
                     log_dir=os.path.join(output_dir, "logs"),
                 )
+
+            if karnak and not series_already_exists:
+                if verbose:
+                    print(
+                        f"Forwarding series {serie['SeriesInstanceUID']} to Karnak",
+                        flush=True,
+                    )
+                send_to_karnak(
+                    karnak_address=karnak_address,
+                    karnak_port=karnak_port,
+                    karnak_aet=karnak_aet,
+                    pynetdicom_aet=pynetdicom_aet,
+                    patient_id=query_attributes["PatientID"],
+                    study_instance_uid=serie["StudyInstanceUID"],
+                    series_instance_uid=serie["SeriesInstanceUID"],
+                    study_date=query_attributes["StudyDate"],
+                    source_aet=client_aet,
+                    no_source_aet=no_source_aet,
+                    command_file=command_file,
+                    log_dir=os.path.join(output_dir, "logs"),
+                )
+                if command_file == "":
+                    time.sleep(karnak_wait_seconds)
 
             if info:
                 # Writing series info to csv file.
@@ -933,6 +974,17 @@ def get_parser() -> argparse.ArgumentParser:
         help="Upload DICOM images to PACS server",
     )
     parser.add_argument(
+        "--karnak",
+        "-k",
+        action="store_true",
+        help="Forward query results to Karnak using movescu",
+    )
+    parser.add_argument(
+        "--command_file",
+        "-cf",
+        help="Write generated Karnak movescu commands to file instead of executing",
+    )
+    parser.add_argument(
         "--upload_directory",
         "-ud",
         help="Directory containing the DICOM images to upload (only used with '--upload' option)",
@@ -947,6 +999,25 @@ def get_parser() -> argparse.ArgumentParser:
         "--resume",
         action="store_true",
         help="Resume extraction by skipping already downloaded series",
+    )
+    parser.add_argument("--karnak_address", help="Override Karnak address from config")
+    parser.add_argument(
+        "--karnak_port", type=int, help="Override Karnak port from config"
+    )
+    parser.add_argument("--karnak_aet", help="Override Karnak AE title from config")
+    parser.add_argument(
+        "--pynetdicom_address", help="Override pynetdicom listener bind address from config"
+    )
+    parser.add_argument(
+        "--pynetdicom_port", type=int, help="Override pynetdicom listener port from config"
+    )
+    parser.add_argument(
+        "--pynetdicom_aet", help="Override pynetdicom listener AE title from config"
+    )
+    parser.add_argument(
+        "--no_source_aet",
+        action="store_true",
+        help="Do not pass source AET (-aet) in Karnak movescu command",
     )
     parser.add_argument(
         "--verbose",
@@ -969,9 +1040,15 @@ def main():
     save = args.save
     info = args.info
     move = args.move
+    karnak = args.karnak
     count = args.count
     resume = args.resume
     verbose = args.verbose
+    command_file = (
+        os.path.normcase(os.path.abspath(os.path.expanduser(args.command_file)))
+        if args.command_file
+        else ""
+    )
     if verbose:
         os.environ["PACSIFIER_VERBOSE"] = "1"
         os.environ["PYTHONUNBUFFERED"] = "1"
@@ -986,6 +1063,17 @@ def main():
         with open(config_path, encoding="utf-8") as f:
             parameters = json.load(f)
         check_config_parameters(parameters)
+        override_map = {
+            "karnak_address": args.karnak_address,
+            "karnak_port": args.karnak_port,
+            "karnak_aet": args.karnak_aet,
+            "pynetdicom_address": args.pynetdicom_address,
+            "pynetdicom_port": args.pynetdicom_port,
+            "pynetdicom_aet": args.pynetdicom_aet,
+        }
+        for key, value in override_map.items():
+            if value is not None:
+                parameters[key] = value
     except FileNotFoundError:
         args.config = None
 
@@ -996,26 +1084,31 @@ def main():
     if (
         (args.save and args.move)
         or (args.save and args.upload)
+        or (args.save and args.karnak)
         or (args.move and args.upload)
+        or (args.move and args.karnak)
+        or (args.upload and args.karnak)
         or (args.save and args.count)
         or (args.move and args.count)
         or (args.upload and args.count)
+        or (args.karnak and args.count)
     ):
         print(
             "You must select either '--save' to save locally "
             "or '--move' to define a remote destination "
             "or '--upload' to upload "
+            "or '--karnak' to forward to Karnak "
             "or '--count' to query metadata counts, not all!"
         )
         parser.print_help()
         sys.exit(1)
 
-    if args.save or args.move or args.count:
+    if args.save or args.move or args.count or args.karnak:
         # Check the case where the queryfile option is missing. If it is the case print help.
         if args.queryfile is None:
             print(
                 "Missing mandatory parameter --queryfile for "
-                "the '--save', '--move', or '--count' options!"
+                "the '--save', '--move', '--karnak', or '--count' options!"
             )
             parser.print_help()
             sys.exit(1)
@@ -1038,16 +1131,64 @@ def main():
                 verbose,
             )
         else:
-            retrieve_dicoms_using_table(
-                table,
-                parameters,
-                output_dir,
-                save,
-                info,
-                move,
-                resume,
-                verbose,
-            )
+            listener = None
+            should_shutdown_listener = {"value": True}
+
+            def _shutdown_listener():
+                if listener is not None and should_shutdown_listener["value"]:
+                    listener.stop()
+                    should_shutdown_listener["value"] = False
+
+            if karnak:
+                required = [
+                    "karnak_address",
+                    "karnak_port",
+                    "karnak_aet",
+                    "pynetdicom_address",
+                    "pynetdicom_port",
+                    "pynetdicom_aet",
+                ]
+                missing = [key for key in required if str(parameters.get(key, "")).strip() == ""]
+                if missing:
+                    print(
+                        "Missing required Karnak parameters in config/CLI overrides: "
+                        + ", ".join(missing)
+                    )
+                    sys.exit(1)
+
+                from pacsifier.core.pynetdicom_listener import PynetdicomListener
+
+                listener = PynetdicomListener(
+                    address=parameters["pynetdicom_address"],
+                    port=int(parameters["pynetdicom_port"]),
+                    aet=parameters["pynetdicom_aet"],
+                    output_dir=output_dir,
+                )
+                listener.start()
+                atexit.register(_shutdown_listener)
+                def _handle_shutdown_signal(*_):
+                    _shutdown_listener()
+                    raise SystemExit(1)
+
+                signal.signal(signal.SIGINT, _handle_shutdown_signal)
+                signal.signal(signal.SIGTERM, _handle_shutdown_signal)
+
+            try:
+                retrieve_dicoms_using_table(
+                    table,
+                    parameters,
+                    output_dir,
+                    save,
+                    info,
+                    move,
+                    karnak,
+                    command_file,
+                    args.no_source_aet,
+                    resume,
+                    verbose,
+                )
+            finally:
+                _shutdown_listener()
 
     elif args.upload:
         upload_directory = os.path.normcase(os.path.abspath(
