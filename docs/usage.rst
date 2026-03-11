@@ -173,6 +173,24 @@ Retrieves images for patient 124588 with study dates between 12/05/2015 and 12/0
 Retrieves all CT images with protocol names starting with ``BEAT_SelfNav`` for patients born on 11/06/1992.
 
 
+Count-only metadata query
+-------------------------
+
+Use ``--count`` to query PACS metadata only (no image retrieval). It issues
+C-FIND requests at the series level and appends one row per series to
+``<output_dir>/count_results.csv``.
+
+.. code-block:: bash
+
+    pacsifier --count --queryfile query.csv --config config.json --out_directory ./output
+
+If the run is interrupted, restart with ``--resume`` to skip query rows already
+represented in the CSV:
+
+.. code-block:: bash
+
+    pacsifier --count --resume --queryfile query.csv --config config.json --out_directory ./output
+
 Running ``PACSIFIER`` commands in a shell
 =========================================
 
