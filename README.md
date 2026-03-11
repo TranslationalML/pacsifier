@@ -124,7 +124,7 @@ docker run --rm --net=host \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
 ```
 
-`--count` queries the PACS at series level and appends one row per series to `<output_dir>/count_results.csv` (see docs for columns). Results are written continuously; use `--resume` after an interrupted run.
+`--count` queries the PACS at series level and appends one row per series to `<output_dir>/count_results.csv` (see docs for columns). Console output is one progress line per query row. Results are written continuously; use `--resume` after an interrupted run.
 
 ```bash
 pacsifier --count -q query.csv -c config.json -d ./output

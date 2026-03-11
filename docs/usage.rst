@@ -192,6 +192,17 @@ represented in the CSV:
 
     pacsifier --count --resume --queryfile query.csv --config config.json --out_directory ./output
 
+Typical console output:
+
+.. code-block:: text
+
+    Counting element number 1...
+      -> 18 series found.
+    Counting element number 2...
+      -> 5 series found.
+    ...
+    Done. Results written to: ./output/count_results.csv
+
 Running ``PACSIFIER`` commands in a shell
 =========================================
 
