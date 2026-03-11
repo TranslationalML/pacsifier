@@ -141,18 +141,18 @@ docker run --rm --net=host \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
 ```
 
-`--count` queries the PACS at series level and writes one row per series to `<output_dir>/count_results.tsv`, printing each series as it is found:
+`--count` queries the PACS at series level and writes one row per series to `<output_dir>/count_results.csv`, printing each series as it is found:
 
 ```text
 Counting element number 1...
-  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | Series=1 T1w [MR] | instances=120
-  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | Series=2 T2w [MR] | instances=80
-Count results written to: ./output/count_results.tsv
+  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | instances=120
+  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | instances=80
+Count results written to: ./output/count_results.csv
 Count summary:
 PatientID=12345: series=2, instances=200
 ```
 
-The TSV file has columns: `PatientID`, `StudyInstanceUID`, `SeriesInstanceUID`, `SeriesDescription`, `SeriesNumber`, `Modality`, `NumberOfSeriesRelatedInstances`.
+The CSV file has columns: `PatientID`, `StudyInstanceUID`, `SeriesInstanceUID`, `NumberOfInstances`.
 
 Results are written **continuously** — if the run is interrupted, restart with `--resume` to skip already-completed query rows:
 

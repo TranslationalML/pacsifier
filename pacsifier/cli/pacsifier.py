@@ -83,10 +83,7 @@ SERIES_COUNT_TAG_TO_KEYWORD = {  # type: Dict[str, str]
     "(0010,0020)": "PatientID",
     "(0020,000d)": "StudyInstanceUID",
     "(0020,000e)": "SeriesInstanceUID",
-    "(0008,103e)": "SeriesDescription",
-    "(0020,0011)": "SeriesNumber",
-    "(0008,0060)": "Modality",
-    "(0020,1209)": "NumberOfSeriesRelatedInstances",
+    "(0020,1209)": "NumberOfInstances",
 }
 
 ALLOWED_FILTERS = list(TAG_TO_KEYWORD.values())
@@ -252,10 +249,7 @@ def parse_findscu_series_count_dump_file(filename: str) -> List[Dict[str, str]]:
             "PatientID": "",
             "StudyInstanceUID": "",
             "SeriesInstanceUID": "",
-            "SeriesDescription": "",
-            "SeriesNumber": "",
-            "Modality": "",
-            "NumberOfSeriesRelatedInstances": "0",
+            "NumberOfInstances": "0",
         }
 
         if "------------" in line or "Releasing Association" in line:
@@ -776,7 +770,7 @@ def count_dicoms_using_table(
     """Query series-level PACS metadata and write per-series counts to a file.
 
     This mode only issues C-FIND requests and does not retrieve pixel data.
-    Results are written to ``<output_dir>/count_results.tsv`` continuously so
+    Results are written to ``<output_dir>/count_results.csv`` continuously so
     that the ``--resume`` flag can skip already-processed query rows.
     """
     pacs_server = parameters["server_address"]
@@ -787,29 +781,24 @@ def count_dicoms_using_table(
     attributes_list = parse_query_table(table, ALLOWED_FILTERS)
 
     os.makedirs(output_dir, exist_ok=True)
-    output_file = os.path.join(output_dir, "count_results.tsv")
-    tsv_header = "\t".join([
-        "PatientID", "StudyInstanceUID", "SeriesInstanceUID",
-        "SeriesDescription", "SeriesNumber", "Modality",
-        "NumberOfSeriesRelatedInstances",
-    ])
+    output_file = os.path.join(output_dir, "count_results.csv")
+    progress_file = os.path.join(output_dir, "count_results.progress")
+    csv_header = ",".join(["PatientID", "StudyInstanceUID", "SeriesInstanceUID", "NumberOfInstances"])
 
     # Load completed query indices when resuming.
     completed_queries = set()  # type: Set[int]
-    if resume and os.path.isfile(output_file):
-        with open(output_file, "r", encoding="utf-8") as _f:
+    if resume and os.path.isfile(progress_file):
+        with open(progress_file, "r", encoding="utf-8") as _f:
             for _line in _f:
-                _line = _line.strip()
-                if _line.startswith("COMPLETED_QUERY\t"):
-                    try:
-                        completed_queries.add(int(_line.split("\t")[1]))
-                    except (ValueError, IndexError):
-                        pass
+                try:
+                    completed_queries.add(int(_line.strip()))
+                except ValueError:
+                    pass
 
-    # Write TSV header if the file is new or empty.
+    # Write CSV header if the file is new or empty.
     if not os.path.isfile(output_file) or os.path.getsize(output_file) == 0:
         with open(output_file, "w", encoding="utf-8") as _f:
-            _f.write(tsv_header + "\n")
+            _f.write(csv_header + "\n")
 
     tmp_dir = os.path.join(output_dir, "tmp")
     os.makedirs(tmp_dir, exist_ok=True)
@@ -884,26 +873,19 @@ def count_dicoms_using_table(
                 )
                 study_uid = serie.get("StudyInstanceUID", "")
                 series_uid = serie.get("SeriesInstanceUID", "")
-                series_desc = serie.get("SeriesDescription", "")
-                series_num = serie.get("SeriesNumber", "")
-                modality = serie.get("Modality", "")
                 try:
-                    num_instances = int(
-                        serie.get("NumberOfSeriesRelatedInstances", "0") or 0
-                    )
+                    num_instances = int(serie.get("NumberOfInstances", "0") or 0)
                 except ValueError:
                     num_instances = 0
 
-                _f.write("\t".join([
-                    patient_id, study_uid, series_uid,
-                    series_desc, series_num, modality, str(num_instances),
+                _f.write(",".join([
+                    patient_id, study_uid, series_uid, str(num_instances),
                 ]) + "\n")
 
                 print(
                     f"  PatientID={patient_id}"
                     f" | StudyUID={study_uid}"
                     f" | SeriesUID={series_uid}"
-                    f" | Series={series_num} {series_desc} [{modality}]"
                     f" | instances={num_instances}",
                     flush=True,
                 )
@@ -914,13 +896,16 @@ def count_dicoms_using_table(
                 count_summary[patient_id]["series"] += 1
                 count_summary[patient_id]["instances"] += num_instances
 
-            _f.write(f"COMPLETED_QUERY\t{i}\n")
             _f.flush()
+
+        with open(progress_file, "a", encoding="utf-8") as _pf:
+            _pf.write(f"{i}\n")
+            _pf.flush()
 
         if os.path.isfile(current_findscu_dump_file):
             os.remove(current_findscu_dump_file)
 
-    print(f"\nCount results written to: {output_file}")
+    print(f"\nCount results written to: {output_file}", flush=True)
     print("Count summary:")
     if count_summary:
         for patient_id in sorted(count_summary.keys()):

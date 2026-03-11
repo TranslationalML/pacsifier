@@ -235,19 +235,13 @@ def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys
                 "PatientID": "PACSMAN1",
                 "StudyInstanceUID": "1.2.3",
                 "SeriesInstanceUID": "1.2.3.1",
-                "SeriesDescription": "T1w",
-                "SeriesNumber": "1",
-                "Modality": "MR",
-                "NumberOfSeriesRelatedInstances": "42",
+                "NumberOfInstances": "42",
             },
             {
                 "PatientID": "PACSMAN1",
                 "StudyInstanceUID": "1.2.3",
                 "SeriesInstanceUID": "1.2.3.2",
-                "SeriesDescription": "T2w",
-                "SeriesNumber": "2",
-                "Modality": "MR",
-                "NumberOfSeriesRelatedInstances": "84",
+                "NumberOfInstances": "84",
             },
         ],
     )
@@ -272,15 +266,18 @@ def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys
     out = capsys.readouterr().out
     assert "Count summary:" in out
     assert "PatientID=PACSMAN1: series=2, instances=126" in out
-    assert "SeriesUID=1.2.3.1" in out
-    assert "SeriesUID=1.2.3.2" in out
+    assert "1.2.3.1" in out
+    assert "1.2.3.2" in out
     assert "instances=42" in out
     assert "instances=84" in out
 
-    output_file = out_dir / "count_results.tsv"
-    assert output_file.exists(), "count_results.tsv was not created"
+    output_file = out_dir / "count_results.csv"
+    assert output_file.exists(), "count_results.csv was not created"
     content = output_file.read_text(encoding="utf-8")
     assert "SeriesInstanceUID" in content  # header present
     assert "1.2.3.1" in content
     assert "1.2.3.2" in content
-    assert "COMPLETED_QUERY\t0" in content
+    assert "COMPLETED_QUERY" not in content  # progress tracked separately
+    progress_file = out_dir / "count_results.progress"
+    assert progress_file.exists(), "count_results.progress was not created"
+    assert "0" in progress_file.read_text(encoding="utf-8")

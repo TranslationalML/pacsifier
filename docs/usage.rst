@@ -202,21 +202,18 @@ Count-only metadata query
 
 Use ``--count`` to query PACS metadata only (no image retrieval). It issues
 C-FIND requests at the series level and writes one row per series to
-``<output_dir>/count_results.tsv``, then prints a per-patient summary.
+``<output_dir>/count_results.csv``, then prints a per-patient summary.
 
 .. code-block:: bash
 
     pacsifier --count --queryfile query.csv --config config.json --out_directory ./output
 
-The output TSV file contains the following columns:
+The output CSV file contains the following columns:
 
 - ``PatientID``
 - ``StudyInstanceUID``
 - ``SeriesInstanceUID``
-- ``SeriesDescription``
-- ``SeriesNumber``
-- ``Modality``
-- ``NumberOfSeriesRelatedInstances``
+- ``NumberOfInstances``
 
 Results are written **continuously** as each query row is processed. If the run
 is interrupted, restart with ``--resume`` to skip already-completed query rows:
@@ -230,9 +227,9 @@ Typical console output:
 .. code-block:: text
 
     Counting element number 1...
-      PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | Series=1 T1w [MR] | instances=120
-      PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | Series=2 T2w [MR] | instances=80
-    Count results written to: ./output/count_results.tsv
+      PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | instances=120
+      PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | instances=80
+    Count results written to: ./output/count_results.csv
     Count summary:
     PatientID=12345: series=2, instances=200
 
