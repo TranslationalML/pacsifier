@@ -184,6 +184,7 @@ C-FIND requests at the series level and appends one row per series to
 
     pacsifier --count --queryfile query.csv --config config.json --out_directory ./output
 
+The output CSV columns are documented in the CLI ``--help`` for ``--count``.
 If the run is interrupted, restart with ``--resume`` to skip query rows already
 represented in the CSV:
 
