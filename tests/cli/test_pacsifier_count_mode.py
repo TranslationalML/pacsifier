@@ -264,12 +264,8 @@ def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys
     pacsifier_cli.main()
 
     out = capsys.readouterr().out
-    assert "Count summary:" in out
-    assert "PatientID=PACSMAN1: series=2, instances=126" in out
-    assert "1.2.3.1" in out
-    assert "1.2.3.2" in out
-    assert "instances=42" in out
-    assert "instances=84" in out
+    assert "Done." in out
+    assert "2 series found" in out
 
     output_file = out_dir / "count_results.csv"
     assert output_file.exists(), "count_results.csv was not created"

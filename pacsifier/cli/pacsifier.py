@@ -882,14 +882,6 @@ def count_dicoms_using_table(
                     patient_id, study_uid, series_uid, str(num_instances),
                 ]) + "\n")
 
-                print(
-                    f"  PatientID={patient_id}"
-                    f" | StudyUID={study_uid}"
-                    f" | SeriesUID={series_uid}"
-                    f" | instances={num_instances}",
-                    flush=True,
-                )
-
                 # Accumulate for the end-of-run summary.
                 if patient_id not in count_summary:
                     count_summary[patient_id] = {"series": 0, "instances": 0}
@@ -898,6 +890,8 @@ def count_dicoms_using_table(
 
             _f.flush()
 
+        print(f"  -> {len(series_list)} series found.", flush=True)
+
         with open(progress_file, "a", encoding="utf-8") as _pf:
             _pf.write(f"{i}\n")
             _pf.flush()
@@ -905,18 +899,7 @@ def count_dicoms_using_table(
         if os.path.isfile(current_findscu_dump_file):
             os.remove(current_findscu_dump_file)
 
-    print(f"\nCount results written to: {output_file}", flush=True)
-    print("Count summary:")
-    if count_summary:
-        for patient_id in sorted(count_summary.keys()):
-            counts = count_summary[patient_id]
-            print(
-                f"PatientID={patient_id}: "
-                f"series={counts['series']}, "
-                f"instances={counts['instances']}"
-            )
-    else:
-        print("No matching series found.")
+    print(f"\nDone. Results written to: {output_file}", flush=True)
 
     if os.path.isdir(tmp_dir):
         shutil.rmtree(tmp_dir, ignore_errors=True)

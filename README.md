@@ -145,11 +145,9 @@ docker run --rm --net=host \
 
 ```text
 Counting element number 1...
-  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | instances=120
-  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | instances=80
-Count results written to: ./output/count_results.csv
-Count summary:
-PatientID=12345: series=2, instances=200
+  -> 18 series found.
+...
+Done. Results written to: ./output/count_results.csv
 ```
 
 The CSV file has columns: `PatientID`, `StudyInstanceUID`, `SeriesInstanceUID`, `NumberOfInstances`.
