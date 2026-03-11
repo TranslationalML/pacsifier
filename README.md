@@ -56,7 +56,7 @@ pip install pacsifier
 
 ## Features
 
-- Query PACS metadata and count studies/series/instances per patient
+- Query PACS metadata and count series/instances per series, written to a TSV file
 - Query and retrieve DICOM images from PACS servers
 - Move DICOM images between PACS nodes
 - Forward DICOM retrieval requests to Karnak (`--karnak`)
@@ -141,11 +141,23 @@ docker run --rm --net=host \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
 ```
 
-`--count` prints a summary like:
+`--count` queries the PACS at series level and writes one row per series to `<output_dir>/count_results.tsv`, printing each series as it is found:
 
 ```text
+Counting element number 1...
+  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | Series=1 T1w [MR] | instances=120
+  PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | Series=2 T2w [MR] | instances=80
+Count results written to: ./output/count_results.tsv
 Count summary:
-PatientID=12345: studies=4, series=18, instances=1260
+PatientID=12345: series=2, instances=200
+```
+
+The TSV file has columns: `PatientID`, `StudyInstanceUID`, `SeriesInstanceUID`, `SeriesDescription`, `SeriesNumber`, `Modality`, `NumberOfSeriesRelatedInstances`.
+
+Results are written **continuously** — if the run is interrupted, restart with `--resume` to skip already-completed query rows:
+
+```bash
+pacsifier --count --resume -q query.csv -c config.json -d ./output
 ```
 
 Run any command with `--help` for the full list of options. See [Docker Wrappers](https://translationalml.github.io/pacsifier/docker_wrappers.html) for more details on the wrapper scripts.

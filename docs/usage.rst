@@ -200,19 +200,41 @@ Retrieves all CT images with protocol names starting with ``BEAT_SelfNav`` for p
 Count-only metadata query
 -------------------------
 
-Use ``--count`` to query PACS metadata only (no image retrieval) and print
-per-patient totals for studies, series, and instances.
+Use ``--count`` to query PACS metadata only (no image retrieval). It issues
+C-FIND requests at the series level and writes one row per series to
+``<output_dir>/count_results.tsv``, then prints a per-patient summary.
 
 .. code-block:: bash
 
     pacsifier --count --queryfile query.csv --config config.json --out_directory ./output
 
-Typical output:
+The output TSV file contains the following columns:
+
+- ``PatientID``
+- ``StudyInstanceUID``
+- ``SeriesInstanceUID``
+- ``SeriesDescription``
+- ``SeriesNumber``
+- ``Modality``
+- ``NumberOfSeriesRelatedInstances``
+
+Results are written **continuously** as each query row is processed. If the run
+is interrupted, restart with ``--resume`` to skip already-completed query rows:
+
+.. code-block:: bash
+
+    pacsifier --count --resume --queryfile query.csv --config config.json --out_directory ./output
+
+Typical console output:
 
 .. code-block:: text
 
+    Counting element number 1...
+      PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.1 | Series=1 T1w [MR] | instances=120
+      PatientID=12345 | StudyUID=1.2.3 | SeriesUID=1.2.3.2 | Series=2 T2w [MR] | instances=80
+    Count results written to: ./output/count_results.tsv
     Count summary:
-    PatientID=12345: studies=4, series=18, instances=1260
+    PatientID=12345: series=2, instances=200
 
 
 Karnak forwarding

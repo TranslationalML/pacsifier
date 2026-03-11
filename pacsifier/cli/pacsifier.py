@@ -24,7 +24,7 @@ import warnings
 from pandas import read_csv, DataFrame
 from pandas.errors import ParserError
 import json
-from typing import Iterator, Dict, List
+from typing import Iterator, Dict, List, Set
 from cerberus import Validator
 from progressbar import ProgressBar
 import csv
@@ -77,6 +77,16 @@ COUNT_TAG_TO_KEYWORD = {  # type: Dict[str,str]
     "(0020,000d)": "StudyInstanceUID",
     "(0020,1206)": "NumberOfStudyRelatedSeries",
     "(0020,1208)": "NumberOfStudyRelatedInstances",
+}
+
+SERIES_COUNT_TAG_TO_KEYWORD = {  # type: Dict[str, str]
+    "(0010,0020)": "PatientID",
+    "(0020,000d)": "StudyInstanceUID",
+    "(0020,000e)": "SeriesInstanceUID",
+    "(0008,103e)": "SeriesDescription",
+    "(0020,0011)": "SeriesNumber",
+    "(0008,0060)": "Modality",
+    "(0020,1209)": "NumberOfSeriesRelatedInstances",
 }
 
 ALLOWED_FILTERS = list(TAG_TO_KEYWORD.values())
@@ -221,6 +231,63 @@ def parse_findscu_count_dump_file(filename: str) -> List[Dict[str, str]]:
                 output_dict[COUNT_TAG_TO_KEYWORD[tag]] = item
 
     return count_table
+
+
+def parse_findscu_series_count_dump_file(filename: str) -> List[Dict[str, str]]:
+    """Extract series-level count information from a findscu dump file.
+
+    Args:
+        filename: path to textfile to be read
+
+    Returns:
+        list: list of dictionaries, one dictionary per series-level match
+    """
+    start = False
+
+    series_table = []  # type: List[Dict[str, str]]
+    output_dict = {"": ""}  # type: Dict[str, str]
+
+    for line in readLineByLine(filename):
+        sample_dict = {  # type: Dict[str, str]
+            "PatientID": "",
+            "StudyInstanceUID": "",
+            "SeriesInstanceUID": "",
+            "SeriesDescription": "",
+            "SeriesNumber": "",
+            "Modality": "",
+            "NumberOfSeriesRelatedInstances": "0",
+        }
+
+        if "------------" in line or "Releasing Association" in line:
+            if start:
+                series_table.append(output_dict)
+
+            start = True
+            output_dict = sample_dict
+            continue
+
+        if not start:
+            continue
+
+        for tag in sorted(SERIES_COUNT_TAG_TO_KEYWORD.keys()):
+            if tag in line:
+                item = ""
+                try:
+                    item = (
+                        line.split("[")[1]
+                        .split("]")[0]
+                        .replace(" ", "")
+                        .replace("'", "_")
+                        .replace("/", "")
+                    )
+                except IndexError:
+                    pass
+
+                if item == "(no":
+                    continue
+                output_dict[SERIES_COUNT_TAG_TO_KEYWORD[tag]] = item
+
+    return series_table
 
 
 def check_query_table_allowed_filters(
@@ -703,11 +770,14 @@ def count_dicoms_using_table(
     table: DataFrame,
     parameters: Dict[str, str],
     output_dir: str,
+    resume: bool = False,
     verbose: bool = False,
 ) -> None:
-    """Query study-level PACS metadata and print per-patient counts.
+    """Query series-level PACS metadata and write per-series counts to a file.
 
     This mode only issues C-FIND requests and does not retrieve pixel data.
+    Results are written to ``<output_dir>/count_results.tsv`` continuously so
+    that the ``--resume`` flag can skip already-processed query rows.
     """
     pacs_server = parameters["server_address"]
     port = int(parameters["port"])
@@ -715,9 +785,42 @@ def count_dicoms_using_table(
     server_aet = parameters["server_AET"]
 
     attributes_list = parse_query_table(table, ALLOWED_FILTERS)
+
+    os.makedirs(output_dir, exist_ok=True)
+    output_file = os.path.join(output_dir, "count_results.tsv")
+    tsv_header = "\t".join([
+        "PatientID", "StudyInstanceUID", "SeriesInstanceUID",
+        "SeriesDescription", "SeriesNumber", "Modality",
+        "NumberOfSeriesRelatedInstances",
+    ])
+
+    # Load completed query indices when resuming.
+    completed_queries = set()  # type: Set[int]
+    if resume and os.path.isfile(output_file):
+        with open(output_file, "r", encoding="utf-8") as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if _line.startswith("COMPLETED_QUERY\t"):
+                    try:
+                        completed_queries.add(int(_line.split("\t")[1]))
+                    except (ValueError, IndexError):
+                        pass
+
+    # Write TSV header if the file is new or empty.
+    if not os.path.isfile(output_file) or os.path.getsize(output_file) == 0:
+        with open(output_file, "w", encoding="utf-8") as _f:
+            _f.write(tsv_header + "\n")
+
+    tmp_dir = os.path.join(output_dir, "tmp")
+    os.makedirs(tmp_dir, exist_ok=True)
+
     count_summary = {}  # type: Dict[str, Dict[str, int]]
 
     for i, query_attributes in enumerate(attributes_list):
+        if i in completed_queries:
+            print(f"Skipping query {i + 1} (already completed).", flush=True)
+            continue
+
         check_query_attributes(query_attributes)
         query_attributes["PatientName"] = process_person_names(
             query_attributes["PatientName"]
@@ -741,15 +844,14 @@ def count_dicoms_using_table(
                 " with respect to ports configured in your config file."
             )
 
-        if verbose:
-            print(f"Counting element number {i + 1}...", flush=True)
+        print(f"Counting element number {i + 1}...", flush=True)
 
-        find_study_res = find(
+        find_series_res = find(
             client_aet,
             server_address=pacs_server,
             server_aet=server_aet,
             port=port,
-            query_retrieval_level="STUDY",
+            query_retrieval_level="SERIES",
             patient_id=query_attributes["PatientID"],
             study_uid=query_attributes["StudyInstanceUID"],
             series_instance_uid=query_attributes["SeriesInstanceUID"],
@@ -768,52 +870,71 @@ def count_dicoms_using_table(
             log_dir=os.path.join(output_dir, "logs"),
         )
 
-        current_findscu_dump_file = os.path.join(output_dir, "tmp", "current_count.txt")
+        current_findscu_dump_file = os.path.join(tmp_dir, "current_count.txt")
         if os.path.isfile(current_findscu_dump_file):
             os.remove(current_findscu_dump_file)
 
-        write_file(find_study_res, file=current_findscu_dump_file)
-        studies = parse_findscu_count_dump_file(current_findscu_dump_file)
+        write_file(find_series_res, file=current_findscu_dump_file)
+        series_list = parse_findscu_series_count_dump_file(current_findscu_dump_file)
 
-        for study in studies:
-            patient_id = study.get("PatientID", "") or query_attributes["PatientID"]
-            if patient_id == "":
-                patient_id = "UNKNOWN"
+        with open(output_file, "a", encoding="utf-8") as _f:
+            for serie in series_list:
+                patient_id = (
+                    serie.get("PatientID", "") or query_attributes["PatientID"] or "UNKNOWN"
+                )
+                study_uid = serie.get("StudyInstanceUID", "")
+                series_uid = serie.get("SeriesInstanceUID", "")
+                series_desc = serie.get("SeriesDescription", "")
+                series_num = serie.get("SeriesNumber", "")
+                modality = serie.get("Modality", "")
+                try:
+                    num_instances = int(
+                        serie.get("NumberOfSeriesRelatedInstances", "0") or 0
+                    )
+                except ValueError:
+                    num_instances = 0
 
-            if patient_id not in count_summary:
-                count_summary[patient_id] = {"studies": 0, "series": 0, "instances": 0}
+                _f.write("\t".join([
+                    patient_id, study_uid, series_uid,
+                    series_desc, series_num, modality, str(num_instances),
+                ]) + "\n")
 
-            try:
-                num_series = int(study.get("NumberOfStudyRelatedSeries", "0") or 0)
-            except ValueError:
-                num_series = 0
-            try:
-                num_instances = int(study.get("NumberOfStudyRelatedInstances", "0") or 0)
-            except ValueError:
-                num_instances = 0
+                print(
+                    f"  PatientID={patient_id}"
+                    f" | StudyUID={study_uid}"
+                    f" | SeriesUID={series_uid}"
+                    f" | Series={series_num} {series_desc} [{modality}]"
+                    f" | instances={num_instances}",
+                    flush=True,
+                )
 
-            count_summary[patient_id]["studies"] += 1
-            count_summary[patient_id]["series"] += num_series
-            count_summary[patient_id]["instances"] += num_instances
+                # Accumulate for the end-of-run summary.
+                if patient_id not in count_summary:
+                    count_summary[patient_id] = {"series": 0, "instances": 0}
+                count_summary[patient_id]["series"] += 1
+                count_summary[patient_id]["instances"] += num_instances
+
+            _f.write(f"COMPLETED_QUERY\t{i}\n")
+            _f.flush()
 
         if os.path.isfile(current_findscu_dump_file):
             os.remove(current_findscu_dump_file)
 
+    print(f"\nCount results written to: {output_file}")
     print("Count summary:")
     if count_summary:
         for patient_id in sorted(count_summary.keys()):
             counts = count_summary[patient_id]
             print(
                 f"PatientID={patient_id}: "
-                f"studies={counts['studies']}, "
                 f"series={counts['series']}, "
                 f"instances={counts['instances']}"
             )
     else:
-        print("No matching studies found.")
+        print("No matching series found.")
 
-    if os.path.isdir(os.path.join(output_dir, "tmp")):
-        shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
+    if os.path.isdir(tmp_dir):
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 def upload_dicoms(dicom_dir: str, parameters: Dict[str, str]) -> None:
@@ -1128,6 +1249,7 @@ def main():
                 table,
                 parameters,
                 output_dir,
+                resume,
                 verbose,
             )
         else:

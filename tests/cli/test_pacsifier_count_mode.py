@@ -45,11 +45,12 @@ def test_main_count_calls_count_handler(monkeypatch, tmp_path):
 
     calls = {"count": 0, "retrieve": 0}
 
-    def _fake_count(table, parameters, output_dir, verbose):
+    def _fake_count(table, parameters, output_dir, resume, verbose):
         calls["count"] += 1
         assert "PatientID" in table.columns
         assert os.path.normcase(output_dir) == os.path.normcase(str(out_dir))
         assert isinstance(parameters, dict)
+        assert resume is False
         assert verbose is False
 
     def _fake_retrieve(*_args, **_kwargs):
@@ -210,7 +211,7 @@ def test_main_count_requires_queryfile(monkeypatch, tmp_path):
     assert exc_info.value.code == 1
 
 
-def test_main_count_integration_prints_summary(monkeypatch, tmp_path, capsys):
+def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys):
     config_path = tmp_path / "config.json"
     query_path = tmp_path / "query.csv"
     out_dir = tmp_path / "out"
@@ -220,26 +221,33 @@ def test_main_count_integration_prints_summary(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(pacsifier_cli, "echo", lambda **_: True)
     monkeypatch.setattr(pacsifier_cli, "find", lambda *_, **__: "FIND")
 
-    def _fake_write_file(_results, _file):
-        file_path = tmp_path / "current_count.txt"
-        file_path.write_text("dummy", encoding="utf-8")
+    def _fake_write_file(_results, file):
+        import pathlib
+        pathlib.Path(file).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(file).write_text("dummy", encoding="utf-8")
 
     monkeypatch.setattr(pacsifier_cli, "write_file", _fake_write_file)
     monkeypatch.setattr(
         pacsifier_cli,
-        "parse_findscu_count_dump_file",
+        "parse_findscu_series_count_dump_file",
         lambda *_: [
             {
                 "PatientID": "PACSMAN1",
                 "StudyInstanceUID": "1.2.3",
-                "NumberOfStudyRelatedSeries": "2",
-                "NumberOfStudyRelatedInstances": "42",
+                "SeriesInstanceUID": "1.2.3.1",
+                "SeriesDescription": "T1w",
+                "SeriesNumber": "1",
+                "Modality": "MR",
+                "NumberOfSeriesRelatedInstances": "42",
             },
             {
                 "PatientID": "PACSMAN1",
-                "StudyInstanceUID": "1.2.4",
-                "NumberOfStudyRelatedSeries": "3",
-                "NumberOfStudyRelatedInstances": "84",
+                "StudyInstanceUID": "1.2.3",
+                "SeriesInstanceUID": "1.2.3.2",
+                "SeriesDescription": "T2w",
+                "SeriesNumber": "2",
+                "Modality": "MR",
+                "NumberOfSeriesRelatedInstances": "84",
             },
         ],
     )
@@ -263,4 +271,16 @@ def test_main_count_integration_prints_summary(monkeypatch, tmp_path, capsys):
 
     out = capsys.readouterr().out
     assert "Count summary:" in out
-    assert "PatientID=PACSMAN1: studies=2, series=5, instances=126" in out
+    assert "PatientID=PACSMAN1: series=2, instances=126" in out
+    assert "SeriesUID=1.2.3.1" in out
+    assert "SeriesUID=1.2.3.2" in out
+    assert "instances=42" in out
+    assert "instances=84" in out
+
+    output_file = out_dir / "count_results.tsv"
+    assert output_file.exists(), "count_results.tsv was not created"
+    content = output_file.read_text(encoding="utf-8")
+    assert "SeriesInstanceUID" in content  # header present
+    assert "1.2.3.1" in content
+    assert "1.2.3.2" in content
+    assert "COMPLETED_QUERY\t0" in content

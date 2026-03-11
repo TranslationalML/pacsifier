@@ -168,7 +168,7 @@ def find(
         f"--key 8,60={modality} --key 8,8={image_type} "
         f"--key 8,1030={study_description} --key 8,50={accession_number} "
         f"--key 18,24={sequence_name} "
-        f"--key 20,1206 --key 20,1208"
+        f"--key 20,1206 --key 20,1208 --key 20,1209"
     )
 
     return run(
