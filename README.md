@@ -56,7 +56,7 @@ pip install pacsifier
 
 ## Features
 
-- Query PACS metadata and count series/instances per series, written to a TSV file
+- Query PACS metadata and count instances per series, written to a CSV file
 - Query and retrieve DICOM images from PACS servers
 - Move DICOM images between PACS nodes
 - Forward DICOM retrieval requests to Karnak (`--karnak`)
@@ -150,7 +150,7 @@ Counting element number 1...
 Done. Results written to: ./output/count_results.csv
 ```
 
-The CSV file has columns: `PatientID`, `StudyInstanceUID`, `SeriesInstanceUID`, `NumberOfInstances`.
+The CSV file has columns: `PatientID`, `StudyDate`, `StudyInstanceUID`, `SeriesInstanceUID`, `SeriesDescription`, `NumberOfInstances`.
 
 Results are written **continuously** — if the run is interrupted, restart with `--resume` to skip already-completed query rows:
 

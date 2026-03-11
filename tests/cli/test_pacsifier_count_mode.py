@@ -233,14 +233,18 @@ def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys
         lambda *_: [
             {
                 "PatientID": "PACSMAN1",
+                "StudyDate": "20240101",
                 "StudyInstanceUID": "1.2.3",
                 "SeriesInstanceUID": "1.2.3.1",
+                "SeriesDescription": "T1w",
                 "NumberOfInstances": "42",
             },
             {
                 "PatientID": "PACSMAN1",
+                "StudyDate": "20240101",
                 "StudyInstanceUID": "1.2.3",
                 "SeriesInstanceUID": "1.2.3.2",
+                "SeriesDescription": "T2w",
                 "NumberOfInstances": "84",
             },
         ],

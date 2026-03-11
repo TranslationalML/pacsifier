@@ -211,8 +211,10 @@ C-FIND requests at the series level and writes one row per series to
 The output CSV file contains the following columns:
 
 - ``PatientID``
+- ``StudyDate``
 - ``StudyInstanceUID``
 - ``SeriesInstanceUID``
+- ``SeriesDescription``
 - ``NumberOfInstances``
 
 Results are written **continuously** as each query row is processed. If the run
