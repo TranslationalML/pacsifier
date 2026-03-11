@@ -234,16 +234,12 @@ def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys
             {
                 "PatientID": "PACSMAN1",
                 "StudyDate": "20240101",
-                "StudyInstanceUID": "1.2.3",
-                "SeriesInstanceUID": "1.2.3.1",
                 "SeriesDescription": "T1w",
                 "NumberOfInstances": "42",
             },
             {
                 "PatientID": "PACSMAN1",
                 "StudyDate": "20240101",
-                "StudyInstanceUID": "1.2.3",
-                "SeriesInstanceUID": "1.2.3.2",
                 "SeriesDescription": "T2w",
                 "NumberOfInstances": "84",
             },
@@ -274,9 +270,9 @@ def test_main_count_integration_writes_output_file(monkeypatch, tmp_path, capsys
     output_file = out_dir / "count_results.csv"
     assert output_file.exists(), "count_results.csv was not created"
     content = output_file.read_text(encoding="utf-8")
-    assert "SeriesInstanceUID" in content  # header present
-    assert "1.2.3.1" in content
-    assert "1.2.3.2" in content
+    assert "SeriesDescription" in content  # header present
+    assert "T1w" in content
+    assert "T2w" in content
     assert "COMPLETED_QUERY" not in content  # progress tracked separately
     progress_file = out_dir / "count_results.progress"
     assert progress_file.exists(), "count_results.progress was not created"

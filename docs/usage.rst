@@ -212,8 +212,6 @@ The output CSV file contains the following columns:
 
 - ``PatientID``
 - ``StudyDate``
-- ``StudyInstanceUID``
-- ``SeriesInstanceUID``
 - ``SeriesDescription``
 - ``NumberOfInstances``
 

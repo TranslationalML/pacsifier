@@ -83,8 +83,6 @@ SERIES_COUNT_TAG_TO_KEYWORD = {  # type: Dict[str, str]
     "(0008,0020)": "StudyDate",
     "(0008,103e)": "SeriesDescription",
     "(0010,0020)": "PatientID",
-    "(0020,000d)": "StudyInstanceUID",
-    "(0020,000e)": "SeriesInstanceUID",
     "(0020,1209)": "NumberOfInstances",
 }
 
@@ -250,8 +248,6 @@ def parse_findscu_series_count_dump_file(filename: str) -> List[Dict[str, str]]:
         sample_dict = {  # type: Dict[str, str]
             "PatientID": "",
             "StudyDate": "",
-            "StudyInstanceUID": "",
-            "SeriesInstanceUID": "",
             "SeriesDescription": "",
             "NumberOfInstances": "0",
         }
@@ -787,7 +783,7 @@ def count_dicoms_using_table(
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, "count_results.csv")
     progress_file = os.path.join(output_dir, "count_results.progress")
-    csv_header = ",".join(["PatientID", "StudyDate", "StudyInstanceUID", "SeriesInstanceUID", "SeriesDescription", "NumberOfInstances"])
+    csv_header = ",".join(["PatientID", "StudyDate", "SeriesDescription", "NumberOfInstances"])
 
     # Load completed query indices when resuming.
     completed_queries = set()  # type: Set[int]
@@ -876,8 +872,6 @@ def count_dicoms_using_table(
                     serie.get("PatientID", "") or query_attributes["PatientID"] or "UNKNOWN"
                 )
                 study_date = serie.get("StudyDate", "")
-                study_uid = serie.get("StudyInstanceUID", "")
-                series_uid = serie.get("SeriesInstanceUID", "")
                 series_desc = serie.get("SeriesDescription", "")
                 try:
                     num_instances = int(serie.get("NumberOfInstances", "0") or 0)
@@ -885,7 +879,7 @@ def count_dicoms_using_table(
                     num_instances = 0
 
                 _f.write(",".join([
-                    patient_id, study_date, study_uid, series_uid, series_desc, str(num_instances),
+                    patient_id, study_date, series_desc, str(num_instances),
                 ]) + "\n")
 
                 # Accumulate for the end-of-run summary.
