@@ -150,7 +150,7 @@ Counting element number 1...
 Done. Results written to: ./output/count_results.csv
 ```
 
-The CSV file has columns: `PatientID`, `StudyDate`, `SeriesDescription`, `NumberOfInstances`.
+The CSV file has columns: `PatientID`, `StudyDate`, `SeriesNumber`, `SeriesDescription`, `NumberOfInstances`.
 
 Results are written **continuously** — if the run is interrupted, restart with `--resume` to skip already-completed query rows:
 
