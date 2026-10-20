@@ -24,7 +24,7 @@ import warnings
 from pandas import read_csv, DataFrame
 from pandas.errors import ParserError
 import json
-from typing import Iterator, Dict, List, Set
+from typing import Iterator, Dict, List, Set, TextIO
 from cerberus import Validator
 from progressbar import ProgressBar
 import csv
@@ -633,9 +633,7 @@ def retrieve_dicoms_using_table(
             if save and not series_already_exists:
                 if verbose:
                     print(
-                        f"Retrieving series "
-                        f"{serie['SeriesInstanceUID']}"
-                        f" -> {patient_serie_output_dir}",
+                        "Retrieving series to configured output directory",
                         flush=True,
                     )
                 get(
@@ -656,7 +654,7 @@ def retrieve_dicoms_using_table(
             if move and not series_already_exists:
                 if verbose:
                     print(
-                        f"Moving series {serie['SeriesInstanceUID']} to {move_aet}",
+                        f"Moving series to remote destination ({move_aet})",
                         flush=True,
                     )
                 move_remote(
@@ -719,6 +717,31 @@ def retrieve_dicoms_using_table(
     # Clean the tmp folder
     if os.path.isdir(os.path.join(output_dir, "tmp")):
         shutil.rmtree(os.path.join(output_dir, "tmp"), ignore_errors=True)
+
+
+def _write_count_series_csv_row(
+    sink: TextIO,
+    patient_id: str,
+    study_date: str,
+    series_number: str,
+    series_description: str,
+    number_of_instances: int,
+) -> None:
+    """Append one series row to ``count_results.csv``.
+
+    ``--count`` writes an operator-chosen export file (same trust boundary as ``--info`` CSVs).
+    """
+    writer = csv.writer(sink)
+    # codeql[py/clear-text-storage-sensitive-data]
+    writer.writerow(
+        [
+            patient_id,
+            study_date,
+            series_number,
+            series_description,
+            str(number_of_instances),
+        ]
+    )
 
 
 def count_dicoms_using_table(
@@ -840,9 +863,14 @@ def count_dicoms_using_table(
                 except ValueError:
                     num_instances = 0
 
-                _f.write(",".join([
-                    patient_id, study_date, series_num, series_desc, str(num_instances),
-                ]) + "\n")
+                _write_count_series_csv_row(
+                    _f,
+                    patient_id,
+                    study_date,
+                    series_num,
+                    series_desc,
+                    num_instances,
+                )
 
                 # Accumulate for the end-of-run summary.
                 if patient_id not in count_summary:
