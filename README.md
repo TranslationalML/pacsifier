@@ -56,6 +56,7 @@ pip install pacsifier
 
 ## Features
 
+- Query PACS metadata and count series/instances per series, written to a CSV file
 - Query and retrieve DICOM images from PACS servers
 - Move DICOM images between PACS nodes
 - Upload DICOM images to PACS servers
@@ -121,6 +122,13 @@ docker run --rm --net=host \
     -v /path/to/my_dir:/base \
     quay.io/translationalml/pacsifier:latest \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
+```
+
+`--count` queries the PACS at series level and appends one row per series to `<output_dir>/count_results.csv` (columns: `PatientID`, `StudyDate`, `SeriesNumber`, `SeriesDescription`, `NumberOfInstances`). Console output is one progress line per query row. Results are written continuously; use `--resume` after an interrupted run.
+
+```bash
+pacsifier --count -q query.csv -c config.json -d ./output
+pacsifier --count --resume -q query.csv -c config.json -d ./output
 ```
 
 Run any command with `--help` for the full list of options. See [Docker Wrappers](https://translationalml.github.io/pacsifier/docker_wrappers.html) for more details on the wrapper scripts.

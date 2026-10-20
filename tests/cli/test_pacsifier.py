@@ -30,11 +30,13 @@ from pathlib import Path
 from pacsifier.cli import (
     readLineByLine,
     parse_findscu_dump_file,
+    parse_findscu_count_dump_file,
     check_query_table_allowed_filters,
     parse_query_table,
     process_person_names,
     generate_new_folder_name,
     add_or_retrieve_name,
+    count_dicoms_using_table,
     retrieve_dicoms_using_table,
     upload_dicoms,
     ALLOWED_FILTERS,
@@ -91,6 +93,34 @@ def test_process_findscu_dump_file(test_dir):
             k: res[i][k] for k in res[i] if k in dict_ and res[i][k] == dict_[k]
         }
         assert len(shared_items) == len(res[i])
+
+
+def test_parse_findscu_count_dump_file(tmp_path):
+    dump_content = "\n".join(
+        [
+            "I: Requesting Association",
+            "------------",
+            "(0010,0020) LO [PACSMAN1]",
+            "(0020,000d) UI [1.2.3]",
+            "(0020,1206) IS [2]",
+            "(0020,1208) IS [42]",
+            "------------",
+            "(0010,0020) LO [PACSMAN1]",
+            "(0020,000d) UI [1.2.4]",
+            "(0020,1206) IS [3]",
+            "(0020,1208) IS [84]",
+            "Releasing Association",
+        ]
+    )
+    dump_file = tmp_path / "count_dump.txt"
+    dump_file.write_text(dump_content, encoding="utf-8")
+
+    parsed = parse_findscu_count_dump_file(str(dump_file))
+    assert len(parsed) == 2
+    assert parsed[0]["PatientID"] == "PACSMAN1"
+    assert parsed[0]["NumberOfStudyRelatedSeries"] == "2"
+    assert parsed[0]["NumberOfStudyRelatedInstances"] == "42"
+    assert parsed[1]["StudyInstanceUID"] == "1.2.4"
 
 
 def test_check_table(test_dir):
@@ -261,6 +291,50 @@ def test_upload_dicoms(test_dir):
     with open(config_path) as f:
         parameters = json.load(f)
     upload_dicoms(dicomseries_karnak_tags_dir, parameters)
+
+
+def test_count_dicoms_using_table(monkeypatch, tmp_path, capsys):
+    table = _build_minimal_table()
+    parameters = _build_minimal_parameters()
+    output_dir = tmp_path / "out"
+
+    monkeypatch.setattr(pacsifier_cli, "echo", lambda **_: True)
+    monkeypatch.setattr(pacsifier_cli, "find", lambda *_, **__: "FIND")
+
+    def _fake_write_file(_results, file):
+        os.makedirs(os.path.dirname(file), exist_ok=True)
+        Path(file).write_text("dummy", encoding="utf-8")
+
+    monkeypatch.setattr(pacsifier_cli, "write_file", _fake_write_file)
+    monkeypatch.setattr(
+        pacsifier_cli,
+        "parse_findscu_count_dump_file",
+        lambda *_: [
+            {
+                "PatientID": "PACSMAN1",
+                "StudyInstanceUID": "1.2.3",
+                "NumberOfStudyRelatedSeries": "2",
+                "NumberOfStudyRelatedInstances": "42",
+            },
+            {
+                "PatientID": "PACSMAN1",
+                "StudyInstanceUID": "1.2.4",
+                "NumberOfStudyRelatedSeries": "3",
+                "NumberOfStudyRelatedInstances": "84",
+            },
+        ],
+    )
+
+    count_dicoms_using_table(
+        table=table,
+        parameters=parameters,
+        output_dir=str(output_dir),
+        verbose=False,
+    )
+
+    out = capsys.readouterr().out
+    assert "Count summary:" in out
+    assert "PatientID=PACSMAN1: studies=2, series=5, instances=126" in out
 
 
 def _build_minimal_table():
