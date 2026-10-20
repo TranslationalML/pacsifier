@@ -45,7 +45,7 @@ _REDACTED = "<REDACTED>"
 
 
 def _redact_phi_keys(command: str) -> str:
-    """Mask PatientID / PatientName / DOB values in a command string for log files."""
+    """Mask PatientID / PatientName / DOB values in a command string."""
 
     def _replace(m: re.Match) -> str:
         value = m.group(4)
@@ -54,6 +54,12 @@ def _redact_phi_keys(command: str) -> str:
         return f"{m.group(1)}{m.group(2)}{m.group(3)}{_REDACTED}"
 
     return _PHI_TAG_RE.sub(_replace, command)
+
+
+def _audit_log_line(cmd: list[str]) -> str:
+    """One-line, PHI-free record for log.txt / fails.txt (CodeQL-safe, no query body)."""
+    tool = cmd[0] if cmd else "unknown"
+    return f"dcmtk tool={tool} (command details not persisted)\n"
 
 
 def _dcmtk_log_level() -> str:
@@ -492,9 +498,8 @@ def run(query: str, log_dir: str = ".") -> str:
     try:
         # The replace in the line below is necessary for the windows deployment.
         cmd = shlex.split(query.replace("\\", "\\\\"))
-        safe_query = _redact_phi_keys(query)
         with open(os.path.join(log_dir, "log.txt"), "a") as f:
-            f.write(safe_query + "\n")
+            f.write(_audit_log_line(cmd))
     except ValueError:
         print("* Command parsing error: {}".format(" ".join(cmd)))
         exit()
@@ -541,7 +546,7 @@ def run(query: str, log_dir: str = ".") -> str:
                 )
             )
         with open(os.path.join(log_dir, "fails.txt"), "a") as f:
-            f.write(safe_query + "\n")
+            f.write(_audit_log_line(cmd))
         lines = ""
     except subprocess.CalledProcessError as e:
         print(
@@ -561,7 +566,7 @@ def run(query: str, log_dir: str = ".") -> str:
             )
 
         with open(os.path.join(log_dir, "fails.txt"), "a") as f:
-            f.write(safe_query + "\n")
+            f.write(_audit_log_line(cmd))
 
         print(e.returncode)
         print(e.output)
