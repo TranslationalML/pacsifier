@@ -95,6 +95,70 @@ def test_main_count_rejects_incompatible_flags(monkeypatch, tmp_path):
     assert exc_info.value.code == 1
 
 
+def test_main_info_only_calls_retrieve(monkeypatch, tmp_path):
+    config_path = tmp_path / "config.json"
+    query_path = tmp_path / "query.csv"
+    out_dir = tmp_path / "out"
+    _write_valid_config(config_path)
+    query_path.write_text("PatientID\nPACSMAN1\n", encoding="utf-8")
+
+    calls = {"retrieve": []}
+
+    def _fake_retrieve(table, parameters, output_dir, save, info, move, resume, verbose):
+        calls["retrieve"].append(
+            {
+                "save": save,
+                "info": info,
+                "move": move,
+            }
+        )
+
+    monkeypatch.setattr(pacsifier_cli, "retrieve_dicoms_using_table", _fake_retrieve)
+    monkeypatch.setattr(pacsifier_cli, "count_dicoms_using_table", lambda *a, **k: None)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "pacsifier",
+            "--config",
+            str(config_path),
+            "--info",
+            "--queryfile",
+            str(query_path),
+            "--out_directory",
+            str(out_dir),
+        ],
+    )
+
+    pacsifier_cli.main()
+
+    assert len(calls["retrieve"]) == 1
+    assert calls["retrieve"][0] == {"save": False, "info": True, "move": False}
+
+
+def test_main_info_rejects_count(monkeypatch, tmp_path):
+    config_path = tmp_path / "config.json"
+    _write_valid_config(config_path)
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "pacsifier",
+            "--config",
+            str(config_path),
+            "--info",
+            "--count",
+            "--queryfile",
+            "query.csv",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        pacsifier_cli.main()
+    assert exc_info.value.code == 1
+
+
 def test_main_count_requires_queryfile(monkeypatch, tmp_path):
     config_path = tmp_path / "config.json"
     _write_valid_config(config_path)

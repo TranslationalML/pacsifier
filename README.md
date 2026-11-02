@@ -128,7 +128,13 @@ docker run --rm --net=host \
 
 ```bash
 pacsifier --count -q query.csv -c config.json -d ./output
-pacsifier --count --resume -q query.csv -c config.json -d ./output
+    pacsifier --count --resume -q query.csv -c config.json -d ./output
+```
+
+**Metadata-only with `--info` (no image download)** — same layout as legacy PACSMAN (patient/study/series folders plus one CSV per series):
+
+```bash
+pacsifier --info -q query.csv -c config.json -d ./output
 ```
 
 Run any command with `--help` for the full list of options. See [Docker Wrappers](https://translationalml.github.io/pacsifier/docker_wrappers.html) for more details on the wrapper scripts.

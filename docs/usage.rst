@@ -210,6 +210,22 @@ Typical console output:
     ...
     Done. Results written to: ./output/count_results.csv
 
+Series metadata without download (``--info``)
+---------------------------------------------
+
+Use ``--info`` alone to query the PACS and write per-series metadata CSV files
+without downloading images (legacy PACSMAN behaviour). Output uses the usual
+``sub-*/ses-*`` folder layout; each series gets a ``.csv`` file beside its series
+directory name.
+
+.. code-block:: bash
+
+    pacsifier --info --queryfile query.csv --config config.json --out_directory ./output
+
+Combine with ``--save`` or ``--move`` when you also want images retrieved or
+moved.
+
+
 Running ``PACSIFIER`` commands in a shell
 =========================================
 

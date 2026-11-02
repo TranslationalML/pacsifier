@@ -1020,7 +1020,9 @@ def get_parser() -> argparse.ArgumentParser:
         "--info",
         "-i",
         action="store_true",
-        help="Store parsed version of findscu output (DICOM header subset)",
+        help="Store parsed version of findscu output (DICOM header subset). "
+             "May be used alone for metadata-only queries (no image download), "
+             "or together with --save or --move",
     )
     parser.add_argument(
         "--move",
@@ -1037,13 +1039,13 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--queryfile",
         "-q",
-        help="Path to query file (mandatory if '--save', '--move', or '--count' is used)",
+        help="Path to query file (mandatory with '--save', '--move', '--count', or '--info')",
     )
     parser.add_argument(
         "--out_directory",
         "-d",
-        help="Output directory where images will be saved (used only with "
-             "'--save', '--move', or '--count' options)",
+        help="Output directory for retrieval, info CSVs, or count results (with "
+             "'--save', '--move', '--count', or '--info')",
         default=os.path.join(".", "data"),
     )
     parser.add_argument(
@@ -1120,22 +1122,24 @@ def main():
         or (args.save and args.count)
         or (args.move and args.count)
         or (args.upload and args.count)
+        or (args.info and args.count)
     ):
         print(
             "You must select either '--save' to save locally "
             "or '--move' to define a remote destination "
             "or '--upload' to upload "
-            "or '--count' to query metadata counts, not all!"
+            "or '--count' to query metadata counts "
+            "or '--info' for series metadata CSVs, not incompatible combinations!"
         )
         parser.print_help()
         sys.exit(1)
 
-    if args.save or args.move or args.count:
+    if args.save or args.move or args.count or args.info:
         # Check the case where the queryfile option is missing. If it is the case print help.
         if args.queryfile is None:
             print(
                 "Missing mandatory parameter --queryfile for "
-                "the '--save', '--move', or '--count' options!"
+                "the '--save', '--move', '--count', or '--info' options!"
             )
             parser.print_help()
             sys.exit(1)
@@ -1178,6 +1182,14 @@ def main():
             sys.exit(1)
 
         upload_dicoms(upload_directory, parameters)
+
+    else:
+        print(
+            "No action selected. Use one of: '--save', '--move', '--count', "
+            "'--info', or '--upload'."
+        )
+        parser.print_help()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
