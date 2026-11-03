@@ -648,7 +648,6 @@ def retrieve_dicoms_using_table(
                     move_port=move_port,
                     output_dir=patient_serie_output_dir,
                     log_dir=os.path.join(output_dir, "logs"),
-                    move_aet=move_aet,
                 )
 
             if move and not series_already_exists:
