@@ -308,19 +308,21 @@ def test_count_dicoms_using_table(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(pacsifier_cli, "write_file", _fake_write_file)
     monkeypatch.setattr(
         pacsifier_cli,
-        "parse_findscu_count_dump_file",
+        "parse_findscu_series_count_dump_file",
         lambda *_: [
             {
                 "PatientID": "PACSMAN1",
-                "StudyInstanceUID": "1.2.3",
-                "NumberOfStudyRelatedSeries": "2",
-                "NumberOfStudyRelatedInstances": "42",
+                "StudyDate": "20231016",
+                "SeriesNumber": "1",
+                "SeriesDescription": "TestSeries",
+                "NumberOfInstances": "42",
             },
             {
                 "PatientID": "PACSMAN1",
-                "StudyInstanceUID": "1.2.4",
-                "NumberOfStudyRelatedSeries": "3",
-                "NumberOfStudyRelatedInstances": "84",
+                "StudyDate": "20231016",
+                "SeriesNumber": "2",
+                "SeriesDescription": "OtherSeries",
+                "NumberOfInstances": "84",
             },
         ],
     )
@@ -333,8 +335,16 @@ def test_count_dicoms_using_table(monkeypatch, tmp_path, capsys):
     )
 
     out = capsys.readouterr().out
-    assert "Count summary:" in out
-    assert "PatientID=PACSMAN1: studies=2, series=5, instances=126" in out
+    assert "Counting element number 1..." in out
+    assert "2 series found" in out
+    assert "Done. Results written to:" in out
+
+    csv_path = output_dir / "count_results.csv"
+    assert csv_path.is_file()
+    csv_text = csv_path.read_text(encoding="utf-8")
+    assert "PatientID,StudyDate,SeriesNumber,SeriesDescription,NumberOfInstances" in csv_text
+    assert "TestSeries" in csv_text
+    assert "OtherSeries" in csv_text
 
 
 def _build_minimal_table():
