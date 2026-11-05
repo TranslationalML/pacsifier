@@ -1,3 +1,4 @@
+#checkov:skip=CKV_DOCKER_2:No need for HEALTHCHECK, This image is used for one-shot CLI commands, not a long-running service.
 FROM ubuntu:22.04
 
 WORKDIR /app
@@ -69,16 +70,27 @@ RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
 # Create initial folders for testing / code coverage with correct permissions
 ###############################################################################
 
+# The container runs as a non-root user. At runtime, the user can be overridden
+# with `docker run --user <uid>:<gid>` (e.g. to match the owner of bind-mounted
+# directories), so writable directories are world-writable and HOME does not
+# depend on a passwd entry.
+RUN groupadd --gid 1000 pacsifier && \
+    useradd --uid 1000 --gid 1000 --no-create-home --home-dir /home/pacsifier \
+        --shell /usr/sbin/nologin pacsifier && \
+    mkdir -p /home/pacsifier && chmod 1777 /home/pacsifier
+
+ENV HOME=/home/pacsifier
+
 # Create directories for reporting tests and code coverage
 # with correct permissions
-RUN mkdir -p "/tests/report" && chmod -R 775 "/tests"
+RUN mkdir -p "/tests/report" && chmod -R 777 "/tests"
 
 # Create directory for storing DICOM files (SCU_STORE) with correct permissions
-RUN mkdir -p "/tmp/SCU_STORE" && chmod -R 775 "/tmp/SCU_STORE"
-RUN mkdir -p "/tmp/SCU_UPLOAD_STORE" && chmod -R 775 "/tmp/SCU_UPLOAD_STORE"
+RUN mkdir -p "/tmp/SCU_STORE" && chmod -R 777 "/tmp/SCU_STORE"
+RUN mkdir -p "/tmp/SCU_UPLOAD_STORE" && chmod -R 777 "/tmp/SCU_UPLOAD_STORE"
 
 # Create directory for pytest cache with correct permissions
-RUN mkdir -p "/app/pacsifier/.pytest_cache" && chmod -R 775 "/app/pacsifier/.pytest_cache"
+RUN mkdir -p "/app/pacsifier/.pytest_cache" && chmod -R 777 "/app/pacsifier/.pytest_cache"
 
 ###############################################################################
 # Set environment variables
@@ -101,6 +113,9 @@ RUN chmod +x /entrypoint.sh
 # Copy the pytest entrypoint script and make it executable
 COPY scripts/docker/entrypoint_pytest.sh /entrypoint_pytest.sh
 RUN chmod +x /entrypoint_pytest.sh
+
+# Run as a non-root user
+USER pacsifier
 
 # Set the entrypoint to the main entrypoint script
 ENTRYPOINT ["/entrypoint.sh"]

@@ -30,6 +30,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 env:
     QUAY_SERVER: ${{ secrets.QUAY_SERVER }}
     QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}

@@ -21,7 +21,15 @@ The script can be used in two modes:
 - custom: use a custom mapping file in CSV format that specifies the mapping of old / new pseudonyms
 
 In case of the de-id mode, the script requires a PACSIFIER query file and a
-configuration file for the de-ID API.
+configuration file for the de-ID API. The configuration file is a JSON file with
+the keys ``deid_URL`` and ``deid_token``, and an optional ``deid_verify`` key
+controlling the TLS certificate verification of the API server:
+
+- omitted or ``true``: verify with the system CA bundle (default);
+- a path to a CA bundle file: verify with this custom CA bundle (e.g. for a
+  hospital internal CA);
+- ``false``: disable the verification (not recommended, a warning is issued).
+
 In case of the custom mode, the script requires a custom mapping file in
 CSV format.
 
@@ -45,14 +53,19 @@ import os
 import argparse
 import json
 import csv
+import warnings
 import requests
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union
 import numpy as np
 import pandas as pd
 from pacsifier.cli.pacsifier import check_query_table_allowed_filters
 
+DEID_REQUEST_TIMEOUT = 300
+DEID_REQUIRED_KEYS = ["deid_URL", "deid_token"]
+DEID_OPTIONAL_KEYS = ["deid_verify"]
 
-def check_config_file_deid(config_file: Dict[str, str]) -> None:
+
+def check_config_file_deid(config_file: Dict[str, Any]) -> None:
     """Check that the config file passed as a parameter is valid.
 
     Args:
@@ -60,12 +73,41 @@ def check_config_file_deid(config_file: Dict[str, str]) -> None:
 
     """
     items = set(config_file.keys())
-    valid_keys = ["deid_URL", "deid_token"]
-    if items != set(valid_keys):
+    if not set(DEID_REQUIRED_KEYS) <= items <= set(DEID_REQUIRED_KEYS + DEID_OPTIONAL_KEYS):
         raise ValueError(
-            "Invalid config file! Must contain these and only these keys: "
-            + " ".join(valid_keys)
+            "Invalid config file! Must contain these keys: "
+            + " ".join(DEID_REQUIRED_KEYS)
+            + ". Optional keys: "
+            + " ".join(DEID_OPTIONAL_KEYS)
         )
+    verify = config_file.get("deid_verify", True)
+    if not isinstance(verify, (bool, str)):
+        raise ValueError(
+            "Invalid config file! 'deid_verify' must be a boolean or a path to a CA bundle."
+        )
+
+
+def get_deid_tls_verify(deid_parameters: Dict[str, Any]) -> Union[bool, str]:
+    """Get the TLS certificate verification setting for the de-ID API requests.
+
+    Args:
+        deid_parameters: dictionary loaded from the config json file
+
+    Returns:
+        ``True`` (default) to verify with the system CA bundle, a path to a custom
+        CA bundle, or ``False`` to disable the verification (a warning is issued).
+
+    """
+    verify = deid_parameters.get("deid_verify", True)
+    if verify is False:
+        warnings.warn(
+            "TLS certificate verification is disabled for the de-ID API requests "
+            "('deid_verify' is false). The token and patient identifiers can be "
+            "intercepted. Prefer setting 'deid_verify' to the path of a CA bundle.",
+            UserWarning,
+            stacklevel=2,
+        )
+    return verify
 
 
 def convert_csv_to_deid_json(queryfile: str, project_name: str) -> Dict[str, Any]:
@@ -126,7 +168,11 @@ def get_deid_pseudonyms(deid_parameters: Dict[str, str], query_json: Dict[str, A
     head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
 
     response = requests.post(
-        deid_parameters["deid_URL"], headers=head, json=query_json, verify=False
+        deid_parameters["deid_URL"],
+        headers=head,
+        json=query_json,
+        verify=get_deid_tls_verify(deid_parameters),
+        timeout=DEID_REQUEST_TIMEOUT,
     )
 
     resp = ast.literal_eval(response.text)
@@ -158,7 +204,8 @@ def get_deid_day_shifts(deid_parameters: Dict[str, str], query_json: Dict[str, A
         deid_parameters["deid_URL"] + "_shift",
         headers=head,
         json=query_json,
-        verify=False,
+        verify=get_deid_tls_verify(deid_parameters),
+        timeout=DEID_REQUEST_TIMEOUT,
     )
 
     resp = ast.literal_eval(response.text)

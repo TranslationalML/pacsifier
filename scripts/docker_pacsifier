@@ -37,7 +37,7 @@ fi
 echo "Running: sudo docker run --rm --net=host -v $CONFIG_PATH:/config.json -v $QUERY_PATH:/query.csv -v $OUTPUT_PATH:/output pacsifier:1.0.0 pacsifier -c /config.json -q /query.csv -d /output ${EXTRA_ARGS[*]}"
 
 # Run the Docker command with proper volume mounts
-sudo docker run --rm --net=host \
+sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$CONFIG_PATH:/config.json" \
   -v "$QUERY_PATH:/query.csv" \
   -v "$OUTPUT_PATH:/output" \

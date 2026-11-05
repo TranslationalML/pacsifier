@@ -56,11 +56,16 @@ Run a query:
 
 .. code-block:: bash
 
-    docker run --rm --net=host \
+    docker run --rm --net=host --user "$(id -u):$(id -g)" \
         -v /path/to/my_dir:/base \
         quay.io/translationalml/pacsifier:latest \
         pacsifier --save --info --queryfile /base/my_query.csv \
             --config /base/my_config.json --out_directory /base/my_output_dir
+
+.. note::
+    The image runs as a non-root user. ``--user "$(id -u):$(id -g)"`` makes the container
+    run as your own user so that it can write to the mounted directories
+    and the output files are owned by you.
 
 .. tip::
     You can pin to a specific version instead of ``latest`` (e.g., ``quay.io/translationalml/pacsifier:1.0.0``).

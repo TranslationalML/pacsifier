@@ -28,7 +28,7 @@ fi
 
 echo "Running: sudo docker run --rm --net=host -v $INPUT_PATH:/input -v $NEW_IDS_PATH:/new_ids.json pacsifier:1.0.0 pacsifier-add-karnak-tags ${EXTRA_ARGS[*]}"
 
-sudo docker run --rm --net=host \
+sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$INPUT_PATH:/input" \
   -v "$NEW_IDS_PATH:/new_ids.json" \
   pacsifier:1.0.0 pacsifier-add-karnak-tags "${EXTRA_ARGS[@]}"
