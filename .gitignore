@@ -45,3 +45,6 @@ tests/tmp
 # Environment files
 .env
 .env.*
+
+# Ignore AWS ASH (automated security helper)
+.ash
