@@ -39,7 +39,6 @@ Example usage::
 
 """
 
-import ast
 import sys
 import os
 import argparse
@@ -125,11 +124,21 @@ def get_deid_pseudonyms(deid_parameters: Dict[str, str], query_json: Dict[str, A
     """
     head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
 
-    response = requests.post(
-        deid_parameters["deid_URL"], headers=head, json=query_json, verify=False
+    verify_ssl = os.environ.get("PACSIFIER_DEID_VERIFY_SSL", "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
     )
+    response = requests.post(
+        deid_parameters["deid_URL"],
+        headers=head,
+        json=query_json,
+        verify=verify_ssl,
+        timeout=60,
+    )
+    response.raise_for_status()
 
-    resp = ast.literal_eval(response.text)
+    resp = response.json()
     json_resp = json.dumps(resp, indent=4)
 
     return json_resp
@@ -154,14 +163,21 @@ def get_deid_day_shifts(deid_parameters: Dict[str, str], query_json: Dict[str, A
     """
     head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
 
+    verify_ssl = os.environ.get("PACSIFIER_DEID_VERIFY_SSL", "1").strip().lower() not in (
+        "0",
+        "false",
+        "no",
+    )
     response = requests.post(
         deid_parameters["deid_URL"] + "_shift",
         headers=head,
         json=query_json,
-        verify=False,
+        verify=verify_ssl,
+        timeout=60,
     )
+    response.raise_for_status()
 
-    resp = ast.literal_eval(response.text)
+    resp = response.json()
 
     # Force day shift in integer for tml compatibility (if provided in str)
     for key in resp.keys():
