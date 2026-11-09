@@ -22,9 +22,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
       - name: Build image for scanning
         run: |
-          docker build --build-arg VERSION=0.0.0-scan -t pacsifier:scan .
+          VERSION=$(python get_version.py)
+          docker build --build-arg VERSION="${VERSION}" -t pacsifier:scan .
 
       - name: Trivy (OS and app packages in image)
         uses: aquasecurity/trivy-action@v0.36.0
