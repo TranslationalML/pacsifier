@@ -4,7 +4,10 @@
 
 Do **not** open a public GitHub issue for security-sensitive reports (credentials, PHI leakage, RCE).
 
-Email **security@translationalml.org** with:
+Use GitHub's private vulnerability reporting:
+<https://github.com/TranslationalML/pacsifier/security/advisories/new>
+
+Please include:
 
 - Affected component (CLI, Docker image, de-ID integration, etc.)
 - Steps to reproduce
@@ -18,11 +21,14 @@ Security fixes are applied on the latest release tag and `master`. Hospital depl
 
 ## Automated checks
 
-Pull requests run:
+Pull requests, and a weekly schedule on `master`, run:
 
-- `pip-audit` on declared dependency pins (`requirements-security-audit.txt`)
+- `pip-audit` on the full installed environment (`pip install ".[all]"`), transitive dependencies included
 - Bandit on the `pacsifier` package
 - Ruff syntax-level checks
+- Trivy on the built Docker image (CRITICAL and HIGH, fixable findings)
 - CodeQL (on GitHub)
+
+GitHub Actions are pinned to full commit SHAs; Dependabot proposes updates.
 
 Local: `pre-commit run --all-files` (includes Betterleaks).
