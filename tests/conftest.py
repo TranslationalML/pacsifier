@@ -7,6 +7,9 @@ import pytest
 
 TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# dcmqrscp in ``make test`` accepts series-level C-MOVE; production default is PATIENT.
+os.environ.setdefault("PACSIFIER_RETRIEVE_LEVEL", "SERIES")
+
 
 @pytest.fixture(scope="session")
 def test_dir():
