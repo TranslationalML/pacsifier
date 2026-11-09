@@ -25,10 +25,14 @@ import pandas as pd
 from unittest import mock
 
 from pacsifier.cli.get_pseudonyms import (
+    DEID_REQUEST_TIMEOUT,
     check_config_file_deid,
     check_queryfile_content,
     convert_csv_to_deid_json,
     generate_csv_with_pseudonyms_and_day_shifts,
+    get_deid_day_shifts,
+    get_deid_pseudonyms,
+    get_deid_tls_verify,
     split_deid_query_json_in_batch
 )
 
@@ -80,6 +84,64 @@ def test_check_config_file_deid():
     config_file = {"deid_URL": "https://dummy.url.example"}
     with pytest.raises(ValueError):
         check_config_file_deid(config_file)
+
+
+@pytest.mark.parametrize("verify", [True, False, "/path/to/ca_bundle.pem"])
+def test_check_config_file_deid_optional_verify(verify):
+    config_file = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "1234567890",
+        "deid_verify": verify,
+    }
+    check_config_file_deid(config_file)
+
+
+def test_check_config_file_deid_invalid_verify():
+    config_file = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "1234567890",
+        "deid_verify": 1.5,
+    }
+    with pytest.raises(ValueError):
+        check_config_file_deid(config_file)
+
+
+def test_get_deid_tls_verify():
+    base = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+    assert get_deid_tls_verify(base) is True
+    assert get_deid_tls_verify({**base, "deid_verify": "/ca.pem"}) == "/ca.pem"
+    with pytest.warns(UserWarning, match="TLS certificate verification is disabled"):
+        assert get_deid_tls_verify({**base, "deid_verify": False}) is False
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_verify_tls_by_default(mock_post):
+    params = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+    mock_post.return_value = mock.Mock(text='{"P1": "1"}')
+
+    get_deid_pseudonyms(params, {"PatientIDList": []})
+    get_deid_day_shifts(params, {"PatientIDList": []})
+
+    assert mock_post.call_count == 2
+    for call in mock_post.call_args_list:
+        assert call.kwargs["verify"] is True
+        assert call.kwargs["timeout"] == DEID_REQUEST_TIMEOUT
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_custom_ca_bundle(mock_post):
+    params = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "1234567890",
+        "deid_verify": "/ca.pem",
+    }
+    mock_post.return_value = mock.Mock(text='{"P1": "1"}')
+
+    get_deid_pseudonyms(params, {"PatientIDList": []})
+    get_deid_day_shifts(params, {"PatientIDList": []})
+
+    for call in mock_post.call_args_list:
+        assert call.kwargs["verify"] == "/ca.pem"
 
 
 def test_convert_csv_to_deid_json(test_dir):
