@@ -1,0 +1,15 @@
+# Trivy ignore list for the container scan (.github/workflows/container-scan.yml).
+# Keep this list as short as possible and re-review it when an entry expires:
+# once `expired_at` has passed the scan fails again on purpose.
+vulnerabilities:
+  # setuptools 70.3.0 is not installed as a package. It is the copy of `pkg_resources`
+  # that pip bundles (listed in pip/_vendor/bom.cdx.json, which Trivy reads). The flaw
+  # is in `setuptools.package_index`, which pip does not bundle, and pip is only used
+  # at build time. The standalone setuptools in both environments is 84.x.
+  # Remove this entry once pip stops bundling setuptools 70.3.0 or Trivy stops
+  # reporting it.
+  - id: CVE-2025-47273
+    purls:
+      - "pkg:pypi/setuptools@70.3.0"
+    statement: "Only pip's bundled pkg_resources; setuptools.package_index is not shipped; build-time only."
+    expired_at: 2027-03-01

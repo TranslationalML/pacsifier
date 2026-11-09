@@ -5,6 +5,7 @@ on:
     paths:
       - Dockerfile
       - environment/**
+      - .trivyignore.yaml
       - .github/workflows/container-scan.yml
   push:
     branches:
@@ -37,6 +38,10 @@ jobs:
 
       - name: Trivy (OS and app packages in image)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          # Passed as an env var instead of the action's `trivyignores` input, which has had
+          # trouble with .yaml ignore files (aquasecurity/trivy-action#284).
+          TRIVY_IGNOREFILE: .trivyignore.yaml
         with:
           image-ref: pacsifier:scan
           format: table

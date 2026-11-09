@@ -38,11 +38,12 @@ RUN mkdir -p /opt/conda && \
     # OpenTelemetry and gRPC stack (known CVEs, no fixed build in the defaults channel) ...
     /opt/conda/bin/conda remove -y -n base conda-anaconda-telemetry anaconda-opentelemetry && \
     /opt/conda/bin/conda config --add channels conda-forge && \
-    # ... and pin the two packages the defaults channel has no fixed build for yet.
-    # The base interpreter is marked externally managed, hence --break-system-packages
-    # (build-time only).
+    # ... and pin the packages the defaults channel has no fixed build for yet. pip itself
+    # is one of them: pip 26.3 bundles fixed msgpack and urllib3 (see bom.cdx.json in
+    # pip/_vendor, which Trivy reads). The base interpreter is marked externally managed,
+    # hence --break-system-packages (build-time only).
     /opt/conda/bin/python -m pip install --no-cache-dir --break-system-packages \
-        --upgrade "brotlicffi>=1.2.1.0" "msgpack>=1.2.3" && \
+        --upgrade "pip>=26.3" "brotlicffi>=1.2.1.0" "msgpack>=1.2.3" && \
     /opt/conda/bin/conda clean --all --yes
 
 ###############################################################################
@@ -76,6 +77,7 @@ COPY pacsifier ./pacsifier
 # Install pacsifier with static version taken from the argument
 ARG VERSION=1.0.0
 RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
+    && conda run -n pacsifier_minimal pip install --upgrade "pip>=26.3" \
     && conda run -n pacsifier_minimal pip install -e ".[all]" \
     && conda run -n pacsifier_minimal pip install pytest-order
 
