@@ -118,17 +118,19 @@ docker_pacsifier -c config.json -s -i -q query.csv -d ./output
 docker_anonymize_dicoms -d ./data -o ./anonymized -a -p
 
 # Or directly with docker run
-docker run --rm --net=host \
+docker run --rm --net=host --user "$(id -u):$(id -g)" \
     -v /path/to/my_dir:/base \
     quay.io/translationalml/pacsifier:latest \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
 ```
 
+The image runs as a non-root user; `--user "$(id -u):$(id -g)"` lets the container write to the mounted directories as you.
+
 `--count` queries the PACS at series level and appends one row per series to `<output_dir>/count_results.csv` (columns: `PatientID`, `StudyDate`, `SeriesNumber`, `SeriesDescription`, `NumberOfInstances`). Console output is one progress line per query row. Results are written continuously; use `--resume` after an interrupted run.
 
 ```bash
 pacsifier --count -q query.csv -c config.json -d ./output
-    pacsifier --count --resume -q query.csv -c config.json -d ./output
+pacsifier --count --resume -q query.csv -c config.json -d ./output
 ```
 
 **Metadata-only with `--info` (no image download)** — same layout as legacy PACSMAN (patient/study/series folders plus one CSV per series):

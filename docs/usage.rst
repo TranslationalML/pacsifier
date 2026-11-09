@@ -300,7 +300,10 @@ Direct Docker invocation
 
 .. code-block:: bash
 
-		docker run --rm --net=host -v /path/to/my_dir:/base \
+		docker run --rm --net=host --user "$(id -u):$(id -g)" -v /path/to/my_dir:/base \
 			quay.io/translationalml/pacsifier:latest \
 			pacsifier --save --info --queryfile /base/my_query.csv \
 			--config /base/my_config.json --out_directory /base/my_output_dir
+
+The image runs as a non-root user: ``--user "$(id -u):$(id -g)"`` makes the container run
+as your own user so that it can write to the mounted directories.

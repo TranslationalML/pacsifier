@@ -49,7 +49,7 @@ def test_process_findscu_dump_file(test_dir):
         {
             "SeriesInstanceUID": "1.2.840.114358.359.1.20171101170336.3712639202739",
             "StudyDate": "20171001",
-            "SeriesDescription": "4metas24Gy_PTV18Gy_68min-RTDOSE",
+            "SeriesDescription": "4metas24Gy_PTV18Gy_68min-RTDOSE", # pragma: allowlist secret
             "PatientBirthDate": "19640101",
             "ProtocolName": "",
             "SeriesNumber": "",
