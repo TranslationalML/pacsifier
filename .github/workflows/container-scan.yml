@@ -1,0 +1,37 @@
+name: Container scan
+
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - environment/**
+      - .github/workflows/container-scan.yml
+  push:
+    branches:
+      - master
+    paths:
+      - Dockerfile
+      - environment/**
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image for scanning
+        run: |
+          docker build --build-arg VERSION=0.0.0-scan -t pacsifier:scan .
+
+      - name: Trivy (OS and app packages in image)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: pacsifier:scan
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
