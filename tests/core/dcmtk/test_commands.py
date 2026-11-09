@@ -19,7 +19,15 @@ import os
 import pytest
 
 from pacsifier.core.dcmtk.commands import (
-    echo, find, get, upload, replace_default_params, run
+    echo,
+    find,
+    get,
+    move_remote,
+    upload,
+    replace_default_params,
+    run,
+    _redact_phi_keys,
+    _move_result_line,
 )
 
 
@@ -229,3 +237,51 @@ def test_run():
     log_dir = "./logs"
     os.makedirs(log_dir, exist_ok=True)
     assert [] == run("echo California Dreaming.", log_dir=log_dir)
+
+
+def test_redact_phi_keys_masks_patient_id():
+    cmd = 'movescu --key 0010,0020=SECRET123 --key 0020,000e=1.2.3'
+    redacted = _redact_phi_keys(cmd)
+    assert "SECRET123" not in redacted
+    assert "<REDACTED>" in redacted
+    assert "0020,000e=1.2.3" in redacted
+
+
+def test_move_result_line_detects_final_response():
+    output = (
+        "I: Received Final Move Response (Success)\n"
+        "I: Completed Suboperations: 10\n"
+        "I: Failed Suboperations: 0\n"
+    )
+    cmd = "movescu --key 0020,000e=1.2.3 --key 0020,000d=1.2.2 --key 0010,0020=P1"
+    line = _move_result_line(cmd, output, "ok")
+    assert line.startswith("* MOVE_RESULT ")
+    assert "final=1" in line
+    assert "series=1.2.3" in line
+    assert "status=success" in line
+
+
+def test_move_remote_series_retrieve_level(monkeypatch):
+    captured = {}
+
+    def fake_run(query, log_dir="."):
+        captured["query"] = query
+        return ""
+
+    monkeypatch.setattr("pacsifier.core.dcmtk.commands.run", fake_run)
+    monkeypatch.setenv("PACSIFIER_RETRIEVE_LEVEL", "SERIES")
+
+    move_remote(
+        aet="CLIENT",
+        study_date="20190101",
+        server_address="127.0.0.1",
+        server_aet="PACS",
+        port=104,
+        patient_id="P1",
+        study_instance_uid="1.2.3",
+        series_instance_uid="1.2.4",
+        move_aet="DEST",
+    )
+
+    assert '0008,0052="SERIES"' in captured["query"]
+    assert "P1" in captured["query"]
