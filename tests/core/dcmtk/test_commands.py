@@ -225,7 +225,6 @@ def test_replace_default_parameters():
         replace_default_params(parameters, "AET", "214.54.1.1", "", 80)
 
 
-def test_run():
-    log_dir = "./logs"
-    os.makedirs(log_dir, exist_ok=True)
-    assert [] == run("echo California Dreaming.", log_dir=log_dir)
+def test_run(tmp_path):
+    log_dir = tmp_path / "logs"
+    assert [] == run("echo California Dreaming.", log_dir=str(log_dir))

@@ -28,7 +28,7 @@ fi
 
 echo "Running: sudo docker run --rm --net=host -v $DICOM_PATH:/dicom -v $INFO_PATH:/info pacsifier:1.0.0 pacsifier-move-csv ${EXTRA_ARGS[*]}"
 
-sudo docker run --rm --net=host \
+sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$DICOM_PATH:/dicom" \
   -v "$INFO_PATH:/info" \
   pacsifier:1.0.0 pacsifier-move-csv "${EXTRA_ARGS[@]}"

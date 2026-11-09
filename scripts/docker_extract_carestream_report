@@ -23,6 +23,6 @@ fi
 
 echo "Running: sudo docker run --rm --net=host -v $DATA_PATH:/data pacsifier:1.0.0 pacsifier-extract-carestream-report ${EXTRA_ARGS[*]}"
 
-sudo docker run --rm --net=host \
+sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$DATA_PATH:/data" \
   pacsifier:1.0.0 pacsifier-extract-carestream-report "${EXTRA_ARGS[@]}"

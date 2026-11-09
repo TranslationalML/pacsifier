@@ -117,11 +117,13 @@ docker_pacsifier -c config.json -s -i -q query.csv -d ./output
 docker_anonymize_dicoms -d ./data -o ./anonymized -a -p
 
 # Or directly with docker run
-docker run --rm --net=host \
+docker run --rm --net=host --user "$(id -u):$(id -g)" \
     -v /path/to/my_dir:/base \
     quay.io/translationalml/pacsifier:latest \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
 ```
+
+The image runs as a non-root user; `--user "$(id -u):$(id -g)"` lets the container write to the mounted directories as you.
 
 Run any command with `--help` for the full list of options. See [Docker Wrappers](https://translationalml.github.io/pacsifier/docker_wrappers.html) for more details on the wrapper scripts.
 
