@@ -1,0 +1,18 @@
+# Direct pins mirrored from setup.cfg for pip-audit (runtime + test/dev tooling).
+# Regenerate when setup.cfg dependency pins change.
+pandas==2.2
+Cerberus==1.3.5
+nibabel==5.2
+pydicom==3.0.2
+progressbar2==3.55
+beautifulsoup4==4.12
+jsonschema==4.21
+requests==2.33.0
+pytest==9.2.0
+pytest-console-scripts==1.4.1
+pytest-cov==7.1.0
+pytest-order==1.5.0
+hypothesis==6.98
+black==26.10.1
+pre-commit==4.0.1
+isort==5.13

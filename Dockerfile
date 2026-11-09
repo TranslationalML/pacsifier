@@ -63,9 +63,7 @@ COPY pacsifier ./pacsifier
 ARG VERSION=1.0.0
 RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
     && conda run -n pacsifier_minimal pip install -e ".[all]" \
-    && conda run -n pacsifier_minimal pip install pytest-order \
-    && conda run -n pacsifier_minimal pip install --upgrade \
-        "filelock>=4.2.1" "setuptools>=84.1" "tornado>=6.6"
+    && conda run -n pacsifier_minimal pip install pytest-order
 
 ###############################################################################
 # Create initial folders for testing / code coverage with correct permissions
