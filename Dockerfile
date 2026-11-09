@@ -10,7 +10,9 @@ WORKDIR /app
 # Reference to ch.archive.ubuntu.com instead of archive.ubuntu.com 
 # RUN sed -i'' 's/archive\.ubuntu\.com/ch\.archive\.ubuntu\.com/' /etc/apt/sources.list
 
-RUN apt-get -y update && apt-get -qq -y install curl dcmtk=3.6.6-5 bzip2 && \
+# `upgrade` pulls security fixes published since the base image was built.
+# dcmtk stays pinned (its bump is tracked separately).
+RUN apt-get -y update && apt-get -y upgrade && apt-get -qq -y install curl dcmtk=3.6.6-5 bzip2 && \
     apt-get autoremove -y --purge && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -29,8 +31,18 @@ RUN mkdir -p /opt/conda && \
     rm -rf /tmp/miniconda.sh && \
     /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
     /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
-    /opt/conda/bin/conda update -n base -c defaults conda && \
+    # conda's own (base) environment ships in the image too, and the Miniconda3-latest
+    # installer bundles packages that are already outdated. Refresh them all ...
+    /opt/conda/bin/conda update -y -n base -c defaults --all && \
+    # ... drop conda's anonymous-usage telemetry plugin: unused here, and it pulls in the
+    # OpenTelemetry and gRPC stack (known CVEs, no fixed build in the defaults channel) ...
+    /opt/conda/bin/conda remove -y -n base conda-anaconda-telemetry anaconda-opentelemetry && \
     /opt/conda/bin/conda config --add channels conda-forge && \
+    # ... and pin the two packages the defaults channel has no fixed build for yet.
+    # The base interpreter is marked externally managed, hence --break-system-packages
+    # (build-time only).
+    /opt/conda/bin/python -m pip install --no-cache-dir --break-system-packages \
+        --upgrade "brotlicffi>=1.2.1.0" "msgpack>=1.2.3" && \
     /opt/conda/bin/conda clean --all --yes
 
 ###############################################################################
@@ -42,7 +54,8 @@ COPY ./environment/environment_minimal_202401.yml .
 
 # Install the environment
 RUN conda env create -f environment_minimal_202401.yml && \
-    rm environment_minimal_202401.yml
+    rm environment_minimal_202401.yml && \
+    conda clean --all --yes
 
 ###############################################################################
 # Install PACSIFIER
@@ -64,8 +77,7 @@ COPY pacsifier ./pacsifier
 ARG VERSION=1.0.0
 RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
     && conda run -n pacsifier_minimal pip install -e ".[all]" \
-    && conda run -n pacsifier_minimal pip install pytest-order \
-    && conda run -n pacsifier_minimal pip install --upgrade "brotlicffi>=1.2.1.0"
+    && conda run -n pacsifier_minimal pip install pytest-order
 
 ###############################################################################
 # Create initial folders for testing / code coverage with correct permissions

@@ -5,7 +5,7 @@ PACSIFIER is an open-source tool written in Python to query, retrieve, and edit 
 [![Build](https://img.shields.io/github/actions/workflow/status/TranslationalML/pacsifier/build-test-deploy.yml?branch=master&label=build)](https://github.com/TranslationalML/pacsifier/actions/workflows/build-test-deploy.yml)
 [![Docs](https://img.shields.io/github/actions/workflow/status/TranslationalML/pacsifier/docs.yml?branch=master&label=docs)](https://github.com/TranslationalML/pacsifier/actions/workflows/docs.yml)
 [![License](https://img.shields.io/github/license/TranslationalML/pacsifier)](https://github.com/TranslationalML/pacsifier/blob/master/LICENSE)
-[![Python Version](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/python-%3E%3D3.11-blue)](https://www.python.org/)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://translationalml.github.io/pacsifier)
 
 <!-- Uncomment these once you publish a GitHub Release:
@@ -210,7 +210,7 @@ make test
 ```bash
 git clone https://github.com/TranslationalML/pacsifier.git
 cd pacsifier
-conda create -n pacsifier_minimal python=3.10
+conda create -n pacsifier_minimal python=3.12
 conda activate pacsifier_minimal
 pip install -e ".[all]"
 ```

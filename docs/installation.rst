@@ -160,13 +160,13 @@ For developing or customizing PACSIFIER:
       git clone https://github.com/TranslationalML/pacsifier.git
       cd pacsifier
 
-3. **Create a Python environment** (Python >= 3.10 required):
+3. **Create a Python environment** (Python >= 3.11 required):
 
    Using conda with a manual environment:
 
    .. code-block:: bash
 
-      conda create -n pacsifier_minimal python=3.10
+      conda create -n pacsifier_minimal python=3.12
       conda activate pacsifier_minimal
 
    Or using the provided environment file:
