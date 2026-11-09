@@ -30,6 +30,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 env:
     QUAY_SERVER: ${{ secrets.QUAY_SERVER }}
     QUAY_NAMESPACE: ${{ secrets.QUAY_NAMESPACE }}
@@ -43,7 +46,7 @@ jobs:
 
     steps:
         - name: Checkout code
-          uses: actions/checkout@v3
+          uses: actions/checkout@v4
 
         # Python / Docker setup and registry login
         - name: Set up Python
