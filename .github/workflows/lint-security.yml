@@ -40,4 +40,4 @@ jobs:
         run: bandit -r pacsifier -ll
 
       - name: pip-audit (declared pins)
-        run: pip-audit -r requirements-security-audit.txt
+        run: pip-audit -r requirements-security-audit.txt --no-deps

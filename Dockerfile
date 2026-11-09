@@ -63,7 +63,8 @@ COPY pacsifier ./pacsifier
 ARG VERSION=1.0.0
 RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
     && conda run -n pacsifier_minimal pip install -e ".[all]" \
-    && conda run -n pacsifier_minimal pip install pytest-order
+    && conda run -n pacsifier_minimal pip install pytest-order \
+    && conda run -n pacsifier_minimal pip install --upgrade "brotlicffi>=1.2.1.0"
 
 ###############################################################################
 # Create initial folders for testing / code coverage with correct permissions
