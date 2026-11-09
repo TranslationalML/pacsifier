@@ -27,7 +27,7 @@ from pacsifier.core.dcmtk.commands import (
     replace_default_params,
     run,
     _redact_phi_keys,
-    _move_result_line,
+    _format_cmove_result_line,
 )
 
 
@@ -246,14 +246,14 @@ def test_redact_phi_keys_masks_patient_id():
     assert "0020,000e=1.2.3" in redacted
 
 
-def test_move_result_line_detects_final_response():
+def test_format_cmove_result_line_detects_final_response():
     output = (
         "I: Received Final Move Response (Success)\n"
         "I: Completed Suboperations: 10\n"
         "I: Failed Suboperations: 0\n"
     )
     cmd = "movescu --key 0020,000e=1.2.3 --key 0020,000d=1.2.2 --key 0010,0020=P1"
-    line = _move_result_line(cmd, output, "ok")
+    line = _format_cmove_result_line(cmd, output, "ok")
     assert line.startswith("* MOVE_RESULT ")
     assert "final=1" in line
     assert "series=1.2.3" in line

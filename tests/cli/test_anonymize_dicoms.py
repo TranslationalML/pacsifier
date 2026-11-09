@@ -46,7 +46,7 @@ def test_anonymize(test_dir):
 
     # Get StudyInstanceUID, SeriesInstanceUID and SOPInstanceUID from the original file
     # to increment them by 1 in the anonymized file
-    dataset = pydicom.read_file(in_file)
+    dataset = pydicom.dcmread(in_file)
     StudyInstanceUID = dataset.StudyInstanceUID
     SeriesInstanceUID = dataset.SeriesInstanceUID
     SOPInstanceUID = dataset.SOPInstanceUID
@@ -75,7 +75,7 @@ def test_anonymize(test_dir):
         remove_private_tags=False,
     )
 
-    dataset = pydicom.read_file(out_file)
+    dataset = pydicom.dcmread(out_file)
     attributes = dataset.dir("")
 
     assert dataset.PatientID == "PACSIFIER2"
@@ -176,7 +176,7 @@ def test_anonymize(test_dir):
         remove_private_tags=False,
     )
 
-    dataset = pydicom.read_file(out_file_new_age)
+    dataset = pydicom.dcmread(out_file_new_age)
     assert dataset.PatientAge == "90Y"
 
 

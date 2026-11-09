@@ -32,7 +32,7 @@ from pacsifier.cli.get_pseudonyms import (
     generate_csv_with_pseudonyms_and_day_shifts,
     get_deid_day_shifts,
     get_deid_pseudonyms,
-    get_deid_tls_verify,
+    _get_deid_tls_verify,
     split_deid_query_json_in_batch
 )
 
@@ -108,10 +108,10 @@ def test_check_config_file_deid_invalid_verify():
 
 def test_get_deid_tls_verify():
     base = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
-    assert get_deid_tls_verify(base) is True
-    assert get_deid_tls_verify({**base, "deid_verify": "/ca.pem"}) == "/ca.pem"
+    assert _get_deid_tls_verify(base) is True
+    assert _get_deid_tls_verify({**base, "deid_verify": "/ca.pem"}) == "/ca.pem"
     with pytest.warns(UserWarning, match="TLS certificate verification is disabled"):
-        assert get_deid_tls_verify({**base, "deid_verify": False}) is False
+        assert _get_deid_tls_verify({**base, "deid_verify": False}) is False
 
 
 @mock.patch("pacsifier.cli.get_pseudonyms.requests.post")

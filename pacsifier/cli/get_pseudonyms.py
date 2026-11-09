@@ -55,39 +55,42 @@ import json
 import csv
 import warnings
 import requests
+from cerberus import Validator
 from typing import Dict, Any, List, Union
 import numpy as np
 import pandas as pd
 from pacsifier.cli.pacsifier import check_query_table_allowed_filters
 
 DEID_REQUEST_TIMEOUT = 300
-DEID_REQUIRED_KEYS = ["deid_URL", "deid_token"]
-DEID_OPTIONAL_KEYS = ["deid_verify"]
+
+DEID_CONFIG_SCHEMA = {
+    "deid_URL": {"type": "string", "required": True, "empty": False},
+    "deid_token": {"type": "string", "required": True, "empty": False},
+    "deid_verify": {
+        "type": ["boolean", "string"],
+        "required": False,
+        "default": True,
+        "empty": False,
+    },
+}
 
 
 def check_config_file_deid(config_file: Dict[str, Any]) -> None:
-    """Check that the config file passed as a parameter is valid.
+    """Validate the de-ID API JSON config with Cerberus.
 
     Args:
         config_file: dictionary loaded from the config json file
 
     """
-    items = set(config_file.keys())
-    if not set(DEID_REQUIRED_KEYS) <= items <= set(DEID_REQUIRED_KEYS + DEID_OPTIONAL_KEYS):
-        raise ValueError(
-            "Invalid config file! Must contain these keys: "
-            + " ".join(DEID_REQUIRED_KEYS)
-            + ". Optional keys: "
-            + " ".join(DEID_OPTIONAL_KEYS)
+    validator = Validator(DEID_CONFIG_SCHEMA, allow_unknown=False)
+    if not validator.validate(config_file):
+        errors = "; ".join(
+            f"{field}: {', '.join(msgs)}" for field, msgs in validator.errors.items()
         )
-    verify = config_file.get("deid_verify", True)
-    if not isinstance(verify, (bool, str)):
-        raise ValueError(
-            "Invalid config file! 'deid_verify' must be a boolean or a path to a CA bundle."
-        )
+        raise ValueError(f"Invalid de-ID config file: {errors}")
 
 
-def get_deid_tls_verify(deid_parameters: Dict[str, Any]) -> Union[bool, str]:
+def _get_deid_tls_verify(deid_parameters: Dict[str, Any]) -> Union[bool, str]:
     """Get the TLS certificate verification setting for the de-ID API requests.
 
     Args:
@@ -171,7 +174,7 @@ def get_deid_pseudonyms(deid_parameters: Dict[str, str], query_json: Dict[str, A
         deid_parameters["deid_URL"],
         headers=head,
         json=query_json,
-        verify=get_deid_tls_verify(deid_parameters),
+        verify=_get_deid_tls_verify(deid_parameters),
         timeout=DEID_REQUEST_TIMEOUT,
     )
 
@@ -204,7 +207,7 @@ def get_deid_day_shifts(deid_parameters: Dict[str, str], query_json: Dict[str, A
         deid_parameters["deid_URL"] + "_shift",
         headers=head,
         json=query_json,
-        verify=get_deid_tls_verify(deid_parameters),
+        verify=_get_deid_tls_verify(deid_parameters),
         timeout=DEID_REQUEST_TIMEOUT,
     )
 

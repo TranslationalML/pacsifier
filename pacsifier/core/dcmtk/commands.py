@@ -36,10 +36,10 @@ warnings.filterwarnings("ignore")
 # PHI-bearing DICOM tags in DCMTK --key / -k arguments (values redacted in log files).
 _PHI_TAG_RE = re.compile(
     r"(?i)"
-    r"((?:--key|-k)\s+)"
-    r"(0*10[,\s]+0*(?:20|10|30))"
-    r"(=)"
-    r"([^\s\"'][^\s]*|\"[^\"]*\"|'[^']*')"
+    r"(?P<prefix>(?:--key|-k)\s+)"
+    r"(?P<tag>0*10[,\s]+0*(?:20|10|30))"
+    r"(?P<eq>=)"
+    r"(?P<value>[^\s\"'][^\s]*|\"[^\"]*\"|'[^']*')"
 )
 _REDACTED = "<REDACTED>"
 
@@ -48,10 +48,10 @@ def _redact_phi_keys(command: str) -> str:
     """Mask PatientID / PatientName / DOB values in a command string."""
 
     def _replace(m: re.Match) -> str:
-        value = m.group(4)
+        value = m.group("value")
         if value == _REDACTED:
             return m.group(0)
-        return f"{m.group(1)}{m.group(2)}{m.group(3)}{_REDACTED}"
+        return f"{m.group('prefix')}{m.group('tag')}{m.group('eq')}{_REDACTED}"
 
     return _PHI_TAG_RE.sub(_replace, command)
 
@@ -70,6 +70,12 @@ def _dcmtk_log_level() -> str:
 
 
 def _dcmtk_timeout_flags() -> str:
+    """Build DCMTK network/DIMSE timeout CLI flags from environment variables.
+
+    ``PACSIFIER_CONN_TIMEOUT_SEC`` → ``--timeout`` (TCP connection, seconds).
+    ``PACSIFIER_ACSE_TIMEOUT_SEC`` → ``-ta`` (association negotiation, seconds).
+    ``PACSIFIER_DIMSE_TIMEOUT_SEC`` → ``-td`` (DIMSE message wait, seconds).
+    """
     conn = int(os.environ.get("PACSIFIER_CONN_TIMEOUT_SEC", "30"))
     acse = int(os.environ.get("PACSIFIER_ACSE_TIMEOUT_SEC", "30"))
     dimse = int(os.environ.get("PACSIFIER_DIMSE_TIMEOUT_SEC", "60"))
@@ -459,8 +465,28 @@ def _key(cmd_text: str, tag: str) -> str:
     return m.group(1) if m else ""
 
 
-def _move_result_line(cmd_text: str, output: str, reason: str) -> str:
-    """Machine-readable C-MOVE verdict for orchestrators (e.g. MiCo series ledger)."""
+def _decode_dcmtk_output(raw: bytes) -> str:
+    """Decode DCMTK tool stderr/stdout bytes to text.
+
+    DCMTK logs ASCII/status lines; hospital PACS may emit Latin-1 in some fields.
+    We use Latin-1 so every byte maps to a character (same behaviour as historic
+    pacsifier) on Linux, macOS, Windows, and inside the Docker image.
+    """
+    return raw.decode("latin1", errors="replace")
+
+
+def _format_cmove_result_line(cmd_text: str, output: str, reason: str) -> str:
+    """Assemble a single stdout line summarising a C-MOVE for log parsers.
+
+    Printed as ``* MOVE_RESULT key=value ...`` so batch orchestrators (for example
+    MiCo-BID series retrieval ledgers) can detect success, DIMSE status, and
+    sub-operation counts without scraping unstructured DCMTK logs.
+
+    Args:
+        cmd_text: Full movescu command line (used to extract Study/Series/Patient UIDs).
+        output: DCMTK stderr text captured for this invocation.
+        reason: Short outcome label (``ok``, ``timeout``, ``rc<n>``, ...).
+    """
     final_idx = output.rfind("Received Final Move Response")
     final = final_idx != -1
     chunk = output[final_idx:] if final else ""
@@ -525,7 +551,7 @@ def run(query: str, log_dir: str = ".") -> str:
             completed = subprocess.check_output(
                 cmd, stderr=subprocess.PIPE, timeout=subprocess_timeout
             )
-            lines = completed.decode("latin1").splitlines()
+            lines = _decode_dcmtk_output(completed).splitlines()
         else:
             completed = subprocess.run(
                 cmd,
@@ -534,10 +560,10 @@ def run(query: str, log_dir: str = ".") -> str:
                 check=True,
                 timeout=subprocess_timeout,
             )
-            lines = completed.stderr.decode("latin1").splitlines()
+            lines = _decode_dcmtk_output(completed.stderr).splitlines()
         lines = [line.replace("\x00", "") for line in lines]
         if is_move:
-            print(_move_result_line(cmd_text, "\n".join(lines), "ok"))
+            print(_format_cmove_result_line(cmd_text, "\n".join(lines), "ok"))
     except subprocess.TimeoutExpired as e:
         print(
             "* Command timed out after {}s: {}".format(
@@ -547,8 +573,8 @@ def run(query: str, log_dir: str = ".") -> str:
         if is_move:
             partial = e.stderr if isinstance(e.stderr, bytes) else b""
             print(
-                _move_result_line(
-                    cmd_text, partial.decode("latin1", errors="replace"), "timeout"
+                _format_cmove_result_line(
+                    cmd_text, _decode_dcmtk_output(partial), "timeout"
                 )
             )
         with open(os.path.join(log_dir, "fails.txt"), "a") as f:
@@ -564,9 +590,9 @@ def run(query: str, log_dir: str = ".") -> str:
         if is_move:
             err = e.stderr if isinstance(e.stderr, bytes) else b""
             print(
-                _move_result_line(
+                _format_cmove_result_line(
                     cmd_text,
-                    err.decode("latin1", errors="replace"),
+                    _decode_dcmtk_output(err),
                     f"rc{e.returncode}",
                 )
             )

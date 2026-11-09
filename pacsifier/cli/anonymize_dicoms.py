@@ -149,7 +149,7 @@ def anonymize_dicom_file(
     """
     # Load the current dicom file to depersonalise
     try:
-        dataset = pydicom.read_file(filename)
+        dataset = pydicom.dcmread(filename)
     except pydicom.errors.InvalidDicomError:
         print("Error at file at path:  " + filename)
         pass
@@ -442,7 +442,7 @@ def anonymize_all_dicoms_within_root_folder(
             # grab real birth date
             # TODO handle case where first file does not contain birthdate -
             # look for any file that does?
-            first_file = pydicom.read_file(all_filenames[0])
+            first_file = pydicom.dcmread(all_filenames[0])
             if "PatientBirthDate" in first_file:
                 real_birthdate = first_file.data_element("PatientBirthDate").value
                 fuzzed_birthdate, birthdate_offset_days = fuzz_date(real_birthdate)
