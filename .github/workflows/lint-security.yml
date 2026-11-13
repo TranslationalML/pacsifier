@@ -5,6 +5,7 @@ on:
     paths:
       - "pacsifier/**"
       - "tests/**"
+      - "scripts/**"
       - "setup.cfg"
       - "setup.py"
       - "pyproject.toml"
