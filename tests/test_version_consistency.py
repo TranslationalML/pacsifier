@@ -24,7 +24,16 @@ import pytest
 from pacsifier.info import __version__
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-WRAPPERS = sorted(glob.glob(os.path.join(ROOT, "scripts", "docker_*")))
+SCRIPTS_DIR = os.path.join(ROOT, "scripts")
+WRAPPERS = sorted(glob.glob(os.path.join(SCRIPTS_DIR, "docker_*")))
+
+# The Docker test image only mounts ``tests/`` (no ``scripts/``), so there is
+# nothing to check there. The guard runs on the repository checkout in the
+# ``lint-audit`` workflow instead (see .github/workflows/lint-security.yml).
+pytestmark = pytest.mark.skipif(
+    not os.path.isdir(SCRIPTS_DIR),
+    reason="scripts/ not available (running from the Docker test image)",
+)
 
 
 def test_docker_wrappers_found():
