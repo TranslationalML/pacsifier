@@ -21,7 +21,7 @@ Security fixes are applied on the latest release tag and `master`. Hospital depl
 
 ## Automated checks
 
-Pull requests, and a weekly schedule on `master`, run:
+Pull requests, a monthly schedule on `master`, and every release (the publish job waits for them), run:
 
 - `pip-audit` on the full installed environment (`pip install ".[all]"`), transitive dependencies included
 - Bandit on the `pacsifier` package

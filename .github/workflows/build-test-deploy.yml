@@ -58,6 +58,7 @@ jobs:
 
       - name: Validate the .zenodo.json file
         run: |
+          pip install jsonschema
           make validate-zenodo
 
       - name: Build Docker image
@@ -73,10 +74,20 @@ jobs:
         run: |
           make test
 
-  deploy:
-    # Release only. Needs the test job to have passed on the same release commit.
+  # Vulnerability scans run monthly and before every release, not on every PR
+  # push. They are reusable workflows; the release is blocked if either fails.
+  audit:
     if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
-    needs: test
+    uses: ./.github/workflows/lint-security.yml
+
+  image-scan:
+    if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+    uses: ./.github/workflows/container-scan.yml
+
+  deploy:
+    # Release only. Needs tests and both scans to have passed on the release commit.
+    if: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+    needs: [test, audit, image-scan]
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     # Configure required reviewers on the "release" environment in the repository

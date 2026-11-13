@@ -14,16 +14,18 @@ on:
   push:
     branches:
       - master
-  # New advisories appear against unchanged code: re-audit weekly on the default branch.
+  # New advisories appear against unchanged code: re-audit monthly on the default branch
+  # (and before every release, see build-test-deploy.yml).
   schedule:
-    - cron: "17 5 * * 1"
+    - cron: "17 5 1 * *"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: lint-security-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

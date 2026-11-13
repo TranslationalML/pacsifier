@@ -15,14 +15,15 @@ on:
       - environment/**
   # Base image / conda / OS packages drift without any change in this repo.
   schedule:
-    - cron: "41 5 * * 1"
+    - cron: "41 5 1 * *"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: container-scan-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
