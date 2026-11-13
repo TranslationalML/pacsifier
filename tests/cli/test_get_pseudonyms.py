@@ -791,3 +791,34 @@ def test_split_deid_query_json_in_batch_type_annotations():
     assert isinstance(batches[0], dict)
     assert "project" in batches[0]
     assert "PatientIDList" in batches[0]
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_timeout_gives_clear_error(mock_post):
+    import requests
+
+    params = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+    mock_post.side_effect = requests.exceptions.ReadTimeout("secret-url-detail")
+
+    for func in (get_deid_pseudonyms, get_deid_day_shifts):
+        with pytest.raises(RuntimeError, match="did not answer within") as exc:
+            func(params, {"PatientIDList": []})
+        assert "secret-url-detail" not in str(exc.value)
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_connection_and_http_errors(mock_post):
+    import requests
+
+    params = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+
+    mock_post.side_effect = requests.exceptions.ConnectionError("boom")
+    with pytest.raises(RuntimeError, match="request failed"):
+        get_deid_pseudonyms(params, {"PatientIDList": []})
+
+    response = mock.Mock(text="")
+    response.raise_for_status.side_effect = requests.exceptions.HTTPError("500")
+    mock_post.side_effect = None
+    mock_post.return_value = response
+    with pytest.raises(RuntimeError, match="request failed"):
+        get_deid_day_shifts(params, {"PatientIDList": []})

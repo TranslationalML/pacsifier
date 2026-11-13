@@ -130,6 +130,47 @@ def _get_deid_tls_verify(deid_parameters: Dict[str, Any]) -> Union[bool, str]:
     return verify
 
 
+def _post_deid(
+    deid_parameters: Dict[str, Any], url: str, query_json: Dict[str, Any]
+) -> requests.Response:
+    """POST a query to the de-ID API, turning network failures into clear errors.
+
+    The request is bounded by ``DEID_REQUEST_TIMEOUT`` seconds. Timeouts,
+    connection and TLS errors and HTTP error statuses are re-raised as
+    ``RuntimeError`` with a short message, instead of a raw requests traceback.
+
+    Args:
+        deid_parameters: dictionary loaded from the config json file
+        url: full endpoint URL
+        query_json: the PACSIFIER query formatted as a dictionary
+
+    Returns:
+        The successful HTTP response.
+
+    Raises:
+        RuntimeError: if the request times out, cannot connect or returns an error.
+
+    """
+    head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
+    try:
+        response = requests.post(
+            url,
+            headers=head,
+            json=query_json,
+            verify=_get_deid_tls_verify(deid_parameters),
+            timeout=DEID_REQUEST_TIMEOUT,
+        )
+        response.raise_for_status()
+    except requests.exceptions.Timeout as err:
+        raise RuntimeError(
+            f"de-ID API did not answer within {DEID_REQUEST_TIMEOUT}s"
+        ) from err
+    except requests.exceptions.RequestException as err:
+        # Message only: the exception text may embed the request URL/headers.
+        raise RuntimeError(f"de-ID API request failed ({type(err).__name__})") from None
+    return response
+
+
 def convert_csv_to_deid_json(queryfile: str, project_name: str) -> Dict[str, Any]:
     """Convert PACSIFIER query to json format the de-ID API can understand.
 
@@ -185,15 +226,7 @@ def get_deid_pseudonyms(deid_parameters: Dict[str, str], query_json: Dict[str, A
         JSON object containing the new pseudonyms for each patient
 
     """
-    head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
-
-    response = requests.post(
-        deid_parameters["deid_URL"],
-        headers=head,
-        json=query_json,
-        verify=_get_deid_tls_verify(deid_parameters),
-        timeout=DEID_REQUEST_TIMEOUT,
-    )
+    response = _post_deid(deid_parameters, deid_parameters["deid_URL"], query_json)
 
     resp = ast.literal_eval(response.text)
     json_resp = json.dumps(resp, indent=4)
@@ -218,14 +251,8 @@ def get_deid_day_shifts(deid_parameters: Dict[str, str], query_json: Dict[str, A
         JSON object containing the day shifts for each patient
 
     """
-    head = {"Authorization": f'token {deid_parameters["deid_token"]}'}
-
-    response = requests.post(
-        deid_parameters["deid_URL"] + "_shift",
-        headers=head,
-        json=query_json,
-        verify=_get_deid_tls_verify(deid_parameters),
-        timeout=DEID_REQUEST_TIMEOUT,
+    response = _post_deid(
+        deid_parameters, deid_parameters["deid_URL"] + "_shift", query_json
     )
 
     resp = ast.literal_eval(response.text)
