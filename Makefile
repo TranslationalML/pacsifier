@@ -42,6 +42,7 @@ validate-zenodo:
 test:
 	@echo "Launching dcmqrscp instance in separate container..."
 	docker run -d --rm --network=host \
+	    --user $(USER_ID):$(GROUP_ID) \
 	    --name docker-dcmqrscp \
 		--entrypoint "/usr/bin/dcmqrscp" \
 		-v $(PROJECT_DIR)/tests:/tests \
@@ -51,6 +52,7 @@ test:
 	sleep 5
 	@echo "Send initial data to dcmqrscp instance with storescu in separate container..."
 	docker run --rm --network=host \
+	    --user $(USER_ID):$(GROUP_ID) \
 	    --name docker-storescu \
 		--entrypoint "/usr/bin/storescu" \
 		-v $(PROJECT_DIR)/tests:/tests \
@@ -64,6 +66,7 @@ test:
 		/tests/test_data/dicomseries
 	@echo "Running pytest tests..."
 	docker run --rm --network=host \
+	    --user $(USER_ID):$(GROUP_ID) \
 	    --name docker-pytest \
 		--entrypoint "/entrypoint_pytest.sh" \
 		-v $(PROJECT_DIR)/tests:/tests \
@@ -71,8 +74,6 @@ test:
 		/tests
 	@echo "Stopping dcmqrscp instance..."
 	make kill-dcmqrscp
-	@echo "Fix ownership in tests..."
-	sudo chown -R $(USER_ID):$(GROUP_ID) $(PROJECT_DIR)/tests
 	@echo "Fix path in coverage xml report..."
 	sed -i -r  \
 		"s|/app/pacsifier/pacsifier|$(PROJECT_DIR)/pacsifier|g" \
@@ -95,10 +96,16 @@ clean-test:
 bash:
 	@echo "Running bash in the container..."
 	docker run -it --rm \
+		--user $(USER_ID):$(GROUP_ID) \
 		--entrypoint "/bin/bash" \
 		-v $(PROJECT_DIR)/tests:/tests \
 		-v $(PROJECT_DIR)/pacsifier:/app/pacsifier/pacsifier \
 		$(IMAGE_TAG)
+
+#bump-version: @ Set the version everywhere (usage: make bump-version V=1.2.0)
+.PHONY: bump-version
+bump-version:
+	python utils/bump_version.py $(V)
 
 #build-docker: @ Builds the Docker image
 build-docker:

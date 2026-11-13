@@ -47,7 +47,7 @@ How to install ``PACSIFIER`` locally
         source venv/bin/activate            
 
 .. important::
-    `PACSIFIER` requires a Python environment with `python>=3.10`.
+    `PACSIFIER` requires a Python environment with `python>=3.12`.
 
 3. Once the virtual environment is activated, install `PACSIFIER` along with all its Python dependencies (including dependencies to build the documentation and to test the package)::
 
