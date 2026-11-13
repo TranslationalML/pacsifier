@@ -1,0 +1,29 @@
+name: Security follow-up (phase 2)
+description: Track remaining supply-chain and CI security work after runtime hardening PRs
+title: "security: "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use after container/TLS hardening (e.g. PR #38). Phase 2 is dependency audits,
+        CI enforcement, and image supply chain.
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Phase 2 checklist
+      options:
+        - label: "`setup.cfg` pins pass `pip install \".[all]\" && pip-audit`"
+          required: false
+        - label: "`lint-security.yml` runs ruff/bandit on full tree and fails on pip-audit"
+          required: false
+        - label: "GitHub Actions on `@v4`/`@v5` with least-privilege `permissions`"
+          required: false
+        - label: "Dependabot covers pip, GitHub Actions, and Docker"
+          required: false
+        - label: "Quay image tagged by digest; release notes for hospital CA / `deid_verify`"
+          required: false
+        - label: "Optional container scan (Trivy/grype) on built image in CI"
+          required: false
+        - label: "Major upgrades (pandas 3, pydicom 3, Sphinx 9) in separate PRs"
+          required: false
