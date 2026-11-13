@@ -43,8 +43,8 @@ def test_get_docker_image_name_default():
 
 def test_get_docker_image_name_from_env():
     """Test that get_docker_image_name returns value from environment variable."""
-    with patch.dict(os.environ, {'PACSIFIER_DOCKER_IMAGE': 'pacsifier:1.0.0'}):
-        assert get_docker_image_name() == 'pacsifier:1.0.0'
+    with patch.dict(os.environ, {'PACSIFIER_DOCKER_IMAGE': 'pacsifier:test-tag'}):
+        assert get_docker_image_name() == 'pacsifier:test-tag'
 
 
 @pytest.mark.skipif(not hasattr(os, 'getuid'), reason="POSIX only")

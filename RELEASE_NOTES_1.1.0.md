@@ -1,10 +1,8 @@
 # PACSIFIER 1.1.0 release notes (draft)
 
-Use this text when publishing the GitHub Release.
-
 ## Summary
 
-Ships metadata-only workflows documented since 1.0.0 but missing from the Quay `latest` image, restores legacy PACSMAN `--info`-only behaviour, and includes MiCo-oriented C-MOVE improvements merged on master.
+Ships metadata-only workflows documented since 1.0.0 but missing from the Quay `latest` image, restores legacy PACSMAN `--info`-only behaviour, and includes PIER-oriented C-MOVE improvements merged on master.
 
 ## Features
 

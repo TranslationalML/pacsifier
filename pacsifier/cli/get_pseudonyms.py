@@ -63,14 +63,31 @@ from pacsifier.cli.pacsifier import check_query_table_allowed_filters
 
 DEID_REQUEST_TIMEOUT = 300
 
+# http(s) URL: hostname (or IPv4) with optional port and path, no whitespace.
+DEID_URL_REGEX = (
+    r"https?://[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:[0-9]{1,5})?(/[^\s]*)?"
+)
+
 DEID_CONFIG_SCHEMA = {
-    "deid_URL": {"type": "string", "required": True, "empty": False},
-    "deid_token": {"type": "string", "required": True, "empty": False},
+    "deid_URL": {
+        "type": "string",
+        "required": True,
+        "empty": False,
+        "maxlength": 2048,
+        "regex": DEID_URL_REGEX,
+    },
+    "deid_token": {
+        "type": "string",
+        "required": True,
+        "empty": False,
+        "maxlength": 4096,
+    },
     "deid_verify": {
         "type": ["boolean", "string"],
         "required": False,
         "default": True,
         "empty": False,
+        "maxlength": 4096,  # applies to the CA bundle path form only
     },
 }
 

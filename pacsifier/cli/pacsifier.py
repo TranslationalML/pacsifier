@@ -529,7 +529,7 @@ def retrieve_dicoms_using_table(
 
         # loop over series
         progress = ProgressBar()
-        for serie in progress(series):
+        for serie_idx, serie in enumerate(progress(series), start=1):
             # replace illegal chars with underscores
             patientID_sanitized = my_re_clean.sub(
                 "_",
@@ -633,7 +633,7 @@ def retrieve_dicoms_using_table(
             if save and not series_already_exists:
                 if verbose:
                     print(
-                        "Retrieving series to configured output directory",
+                        f"Retrieving series {serie_idx}/{len(series)} of query row {i + 1}",
                         flush=True,
                     )
                 get(
@@ -653,7 +653,7 @@ def retrieve_dicoms_using_table(
             if move and not series_already_exists:
                 if verbose:
                     print(
-                        f"Moving series to remote destination ({move_aet})",
+                        f"Moving series {serie_idx}/{len(series)} of query row {i + 1} to remote destination",
                         flush=True,
                     )
                 move_remote(

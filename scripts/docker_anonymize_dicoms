@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Image to run. Override with PACSIFIER_DOCKER_IMAGE; the version line below is
+# stamped automatically at release time (see .releaserc.json).
+PACSIFIER_VERSION="1.1.0"
+PACSIFIER_DOCKER_IMAGE="${PACSIFIER_DOCKER_IMAGE:-quay.io/translationalml/pacsifier:${PACSIFIER_VERSION}}"
+
 INPUT_PATH=""
 OUTPUT_PATH=""
 EXTRA_ARGS=()
@@ -26,9 +31,9 @@ if [[ -z "$INPUT_PATH" || -z "$OUTPUT_PATH" ]]; then
   exit 1
 fi
 
-echo "Running: sudo docker run --rm --net=host -v $INPUT_PATH:/input -v $OUTPUT_PATH:/output pacsifier:1.0.0 pacsifier-anonymize ${EXTRA_ARGS[*]}"
+echo "Running: sudo docker run --rm --net=host -v $INPUT_PATH:/input -v $OUTPUT_PATH:/output ${PACSIFIER_DOCKER_IMAGE} pacsifier-anonymize ${EXTRA_ARGS[*]}"
 
 sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$INPUT_PATH:/input" \
   -v "$OUTPUT_PATH:/output" \
-  pacsifier:1.0.0 pacsifier-anonymize "${EXTRA_ARGS[@]}"
+  ${PACSIFIER_DOCKER_IMAGE} pacsifier-anonymize "${EXTRA_ARGS[@]}"

@@ -34,13 +34,13 @@ By default, the wrapper scripts use the ``pacsifier:latest`` Docker image. You c
 
 .. code-block:: bash
 
-   export PACSIFIER_DOCKER_IMAGE=pacsifier:1.0.0
+   export PACSIFIER_DOCKER_IMAGE=pacsifier:X.Y.Z
 
 2. Use the ``--image`` flag with each command:
 
 .. code-block:: bash
 
-   docker_pacsifier --image pacsifier:1.0.0 -c config.json -i -q query.csv -d /output --save
+   docker_pacsifier --image pacsifier:X.Y.Z -c config.json -i -q query.csv -d /output --save
 
 Usage Examples
 ==============

@@ -68,7 +68,7 @@ Run a query:
     and the output files are owned by you.
 
 .. tip::
-    You can pin to a specific version instead of ``latest`` (e.g., ``quay.io/translationalml/pacsifier:1.0.0``).
+    You can pin to a specific version instead of ``latest`` (e.g., ``quay.io/translationalml/pacsifier:X.Y.Z``).
     See `available tags on Quay.io <https://quay.io/repository/translationalml/pacsifier?tab=tags>`_.
 
 .. note::
@@ -160,7 +160,7 @@ For developing or customizing PACSIFIER:
       git clone https://github.com/TranslationalML/pacsifier.git
       cd pacsifier
 
-3. **Create a Python environment** (Python >= 3.11 required):
+3. **Create a Python environment** (Python >= 3.12 required):
 
    Using conda with a manual environment:
 

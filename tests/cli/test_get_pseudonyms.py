@@ -86,6 +86,46 @@ def test_check_config_file_deid():
         check_config_file_deid(config_file)
 
 
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://dummy.url.example",
+        "http://localhost:8080",
+        "https://10.0.0.5:8443/api/v1/pseudonyms",
+        "https://deid.chuv.ch/path?x=1",
+    ],
+)
+def test_check_config_file_deid_valid_urls(url):
+    check_config_file_deid({"deid_URL": url, "deid_token": "1234567890"})
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "dummy.url.example",  # no scheme
+        "ftp://dummy.url.example",  # wrong scheme
+        "https://",  # no host
+        "https://bad host.example",  # whitespace
+        "https://-bad.example",  # host starting with a dash
+        "https://host.example:123456",  # invalid port
+        "javascript:alert(1)",
+        "https://" + "a" * 2050,  # too long
+    ],
+)
+def test_check_config_file_deid_invalid_urls(url):
+    with pytest.raises(ValueError):
+        check_config_file_deid({"deid_URL": url, "deid_token": "1234567890"})
+
+
+def test_check_config_file_deid_token_maxlength():
+    config_file = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "x" * 4097,
+    }
+    with pytest.raises(ValueError):
+        check_config_file_deid(config_file)
+
+
 @pytest.mark.parametrize("verify", [True, False, "/path/to/ca_bundle.pem"])
 def test_check_config_file_deid_optional_verify(verify):
     config_file = {

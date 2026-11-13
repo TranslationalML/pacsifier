@@ -75,8 +75,9 @@ COPY README.md ./README.md
 COPY pacsifier ./pacsifier
 
 # Install pacsifier with static version taken from the argument
-ARG VERSION=1.0.0
-RUN echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
+ARG VERSION
+RUN test -n "${VERSION}" || (echo "build-arg VERSION is required" >&2; exit 1) \
+    && echo "${VERSION}" > /app/pacsifier/pacsifier/VERSION \
     && conda run -n pacsifier_minimal pip install --upgrade "pip>=26.3" \
     && conda run -n pacsifier_minimal pip install -e ".[all]" \
     && conda run -n pacsifier_minimal pip install pytest-order

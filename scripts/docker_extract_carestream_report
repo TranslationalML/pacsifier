@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Image to run. Override with PACSIFIER_DOCKER_IMAGE; the version line below is
+# stamped automatically at release time (see .releaserc.json).
+PACSIFIER_VERSION="1.1.0"
+PACSIFIER_DOCKER_IMAGE="${PACSIFIER_DOCKER_IMAGE:-quay.io/translationalml/pacsifier:${PACSIFIER_VERSION}}"
+
 DATA_PATH=""
 EXTRA_ARGS=()
 
@@ -21,8 +26,8 @@ if [[ -z "$DATA_PATH" ]]; then
   exit 1
 fi
 
-echo "Running: sudo docker run --rm --net=host -v $DATA_PATH:/data pacsifier:1.0.0 pacsifier-extract-carestream-report ${EXTRA_ARGS[*]}"
+echo "Running: sudo docker run --rm --net=host -v $DATA_PATH:/data ${PACSIFIER_DOCKER_IMAGE} pacsifier-extract-carestream-report ${EXTRA_ARGS[*]}"
 
 sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$DATA_PATH:/data" \
-  pacsifier:1.0.0 pacsifier-extract-carestream-report "${EXTRA_ARGS[@]}"
+  ${PACSIFIER_DOCKER_IMAGE} pacsifier-extract-carestream-report "${EXTRA_ARGS[@]}"
