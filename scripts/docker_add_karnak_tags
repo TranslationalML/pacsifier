@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Image to run. Override with PACSIFIER_DOCKER_IMAGE; the version line below is
+# stamped automatically at release time (see .releaserc.json).
+PACSIFIER_VERSION="1.1.0"
+PACSIFIER_DOCKER_IMAGE="${PACSIFIER_DOCKER_IMAGE:-quay.io/translationalml/pacsifier:${PACSIFIER_VERSION}}"
+
 INPUT_PATH=""
 NEW_IDS_PATH=""
 EXTRA_ARGS=()
@@ -26,9 +31,9 @@ if [[ -z "$INPUT_PATH" || -z "$NEW_IDS_PATH" ]]; then
   exit 1
 fi
 
-echo "Running: sudo docker run --rm --net=host -v $INPUT_PATH:/input -v $NEW_IDS_PATH:/new_ids.json pacsifier:1.0.0 pacsifier-add-karnak-tags ${EXTRA_ARGS[*]}"
+echo "Running: sudo docker run --rm --net=host -v $INPUT_PATH:/input -v $NEW_IDS_PATH:/new_ids.json ${PACSIFIER_DOCKER_IMAGE} pacsifier-add-karnak-tags ${EXTRA_ARGS[*]}"
 
-sudo docker run --rm --net=host \
+sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$INPUT_PATH:/input" \
   -v "$NEW_IDS_PATH:/new_ids.json" \
-  pacsifier:1.0.0 pacsifier-add-karnak-tags "${EXTRA_ARGS[@]}"
+  ${PACSIFIER_DOCKER_IMAGE} pacsifier-add-karnak-tags "${EXTRA_ARGS[@]}"

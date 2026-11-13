@@ -36,6 +36,25 @@ def get_docker_image_name():
     return os.environ.get('PACSIFIER_DOCKER_IMAGE', f'{DOCKER_REGISTRY}:latest')
 
 
+def get_docker_user_args():
+    """Get the Docker arguments selecting the user the container runs as.
+
+    The image runs as a non-root user by default. To let it write to bind-mounted
+    host directories, the container is run with the UID:GID of the current user.
+    This can be overridden with the ``PACSIFIER_DOCKER_USER`` environment variable
+    (e.g. ``1000:1000``); an empty value keeps the image's default user.
+
+    Returns:
+        list: The ``--user`` arguments, or an empty list if none should be used
+    """
+    if 'PACSIFIER_DOCKER_USER' in os.environ:
+        user = os.environ['PACSIFIER_DOCKER_USER'].strip()
+        return ['--user', user] if user else []
+    if hasattr(os, 'getuid') and hasattr(os, 'getgid'):
+        return ['--user', f'{os.getuid()}:{os.getgid()}']
+    return []
+
+
 def run_docker_command(command_args, additional_volumes=None, additional_args=None):
     """Run a PACSIFIER command via Docker.
 
@@ -58,6 +77,9 @@ def run_docker_command(command_args, additional_volumes=None, additional_args=No
     # Only allocate a pseudo-TTY when running in an interactive terminal
     if sys.stdout.isatty():
         docker_cmd.insert(docker_cmd.index('-i') + 1, '-t')
+
+    # Run as the host user so files written to bind mounts are owned by that user
+    docker_cmd.extend(get_docker_user_args())
 
     # Add additional Docker arguments if provided
     if additional_args:
