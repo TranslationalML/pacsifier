@@ -102,6 +102,11 @@ bash:
 		-v $(PROJECT_DIR)/pacsifier:/app/pacsifier/pacsifier \
 		$(IMAGE_TAG)
 
+#bump-version: @ Set the version everywhere (usage: make bump-version V=1.2.0)
+.PHONY: bump-version
+bump-version:
+	python utils/bump_version.py $(V)
+
 #build-docker: @ Builds the Docker image
 build-docker:
 	docker build \
