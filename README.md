@@ -8,10 +8,8 @@ PACSIFIER is an open-source tool written in Python to query, retrieve, and edit 
 [![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue)](https://www.python.org/)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://translationalml.github.io/pacsifier)
 
-<!-- Uncomment these once you publish a GitHub Release:
 [![Latest GitHub Release](https://img.shields.io/github/v/release/TranslationalML/pacsifier)](https://github.com/TranslationalML/pacsifier/releases)
 [![GitHub Release Date](https://img.shields.io/github/release-date/TranslationalML/pacsifier)](https://github.com/TranslationalML/pacsifier/releases)
--->
 
 > **Full documentation**: [https://translationalml.github.io/pacsifier](https://translationalml.github.io/pacsifier)
 
@@ -21,28 +19,28 @@ PACSIFIER is an open-source tool written in Python to query, retrieve, and edit 
 
 ### Option 1: Pre-built Docker Image (Recommended)
 
-Pull the latest release from Quay.io — no cloning, no building, no dependency installation required:
+Pull a release from Quay.io — no cloning, no building, no dependency installation required:
 
 ```bash
-docker pull quay.io/translationalml/pacsifier:latest
+docker pull quay.io/translationalml/pacsifier:1.1.0
 ```
 
-Run PACSIFIER:
+Run PACSIFIER (Linux/macOS: map container UID to yours when writing to mounted volumes):
 
 ```bash
-docker run --rm --net=host \
+docker run --rm --net=host --user "$(id -u):$(id -g)" \
     -v /path/to/my_dir:/base \
-    quay.io/translationalml/pacsifier:latest \
+    quay.io/translationalml/pacsifier:1.1.0 \
     pacsifier --save --info --queryfile /base/my_query.csv \
     --config /base/my_config.json --out_directory /base/my_output_dir
 ```
 
-> **Tip:** You can pin to a specific version (e.g. `pacsifier:X.Y.Z`) instead of `latest`. See [available tags on Quay.io](https://quay.io/repository/translationalml/pacsifier?tab=tags).
+> **Tip:** Pin a version tag (e.g. `1.1.0`) instead of `latest`. See [available tags on Quay.io](https://quay.io/repository/translationalml/pacsifier?tab=tags). On Windows Docker Desktop you may omit `--user` when bind-mounting local paths; the `docker_pacsifier` wrappers handle this automatically.
 
 Or use the convenience [Docker wrapper scripts](https://translationalml.github.io/pacsifier/docker_wrappers.html):
 
 ```bash
-pip install pacsifier  # installs the wrapper scripts
+pip install pacsifier==1.1.0  # CLI + docker_* wrappers (default image tag matches package version)
 docker_pacsifier -c config.json -i -s -q query.csv -d /output
 ```
 
@@ -73,7 +71,7 @@ PACSIFIER provides several CLI commands. How you run them depends on your instal
 
 | Install method | How to run commands |
 |---|---|
-| **Docker** (no install) | `docker run --rm --net=host quay.io/translationalml/pacsifier:latest pacsifier ...` |
+| **Docker** (no install) | `docker run --rm --net=host --user "$(id -u):$(id -g)" quay.io/translationalml/pacsifier:X.Y.Z pacsifier ...` |
 | **Docker wrappers** (`pip install pacsifier`) | `docker_pacsifier ...`, `docker_anonymize_dicoms ...` |
 | **pip / source** (`pip install pacsifier`) | `pacsifier ...`, `pacsifier-anonymize ...` |
 
@@ -117,10 +115,10 @@ pacsifier-anonymize -d ./data -o ./anonymized --fuzz_acq_dates --remove_private_
 docker_pacsifier -c config.json -s -i -q query.csv -d ./output
 docker_anonymize_dicoms -d ./data -o ./anonymized -a -p
 
-# Or directly with docker run
+# Or directly with docker run (pin the image tag — do not rely on :latest alone)
 docker run --rm --net=host --user "$(id -u):$(id -g)" \
     -v /path/to/my_dir:/base \
-    quay.io/translationalml/pacsifier:latest \
+    quay.io/translationalml/pacsifier:1.1.0 \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
 ```
 

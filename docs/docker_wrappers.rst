@@ -28,19 +28,23 @@ Configuration
 Docker Image Selection
 ----------------------
 
-By default, the wrapper scripts use the ``pacsifier:latest`` Docker image. You can override this in two ways:
+By default, the ``docker_*`` commands installed with ``pip`` use
+``quay.io/translationalml/pacsifier:<version>`` where ``<version>`` matches the installed
+``pacsifier`` package (for example ``1.1.0`` after ``pip install pacsifier==1.1.0``).
+Override when you need another image or tag:
 
 1. Set the ``PACSIFIER_DOCKER_IMAGE`` environment variable:
 
 .. code-block:: bash
 
-   export PACSIFIER_DOCKER_IMAGE=pacsifier:X.Y.Z
+   export PACSIFIER_DOCKER_IMAGE=quay.io/translationalml/pacsifier:1.1.0
 
 2. Use the ``--image`` flag with each command:
 
 .. code-block:: bash
 
-   docker_pacsifier --image pacsifier:X.Y.Z -c config.json -i -q query.csv -d /output --save
+   docker_pacsifier --image quay.io/translationalml/pacsifier:1.1.0 \
+       -c config.json -q query.csv -d /output --count
 
 Usage Examples
 ==============
@@ -53,6 +57,8 @@ Run the main PACSIFIER command:
 .. code-block:: bash
 
    docker_pacsifier -c config.json -i -s -q query.csv -d /output
+   docker_pacsifier -c config.json -q query.csv -d /output --count
+   docker_pacsifier -c config.json -q query.csv -d /output --info
 
 Resume an interrupted extraction:
 

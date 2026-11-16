@@ -226,6 +226,21 @@ Combine with ``--save`` or ``--move`` when you also want images retrieved or
 moved.
 
 
+Environment variables (C-MOVE and logging)
+--------------------------------------------
+
+When using ``--save``, ``movescu`` honours:
+
+* ``PACSIFIER_RETRIEVE_LEVEL``: ``PATIENT`` (default) or ``SERIES``. Some hospital
+  PACS setups require ``SERIES`` for per-series C-MOVE (set in the shell or
+  ``docker run -e PACSIFIER_RETRIEVE_LEVEL=SERIES ...``).
+
+During ``--save``, each successful C-MOVE prints one machine-readable stdout line
+of the form ``* MOVE_RESULT key=value ...`` (series/study/patient UIDs, DIMSE
+status, sub-operation counts). Batch pipelines (for example MiCo-BID) can grep
+these lines; detailed DCMTK text remains in ``<out_directory>/logs/log.txt``.
+
+
 Running ``PACSIFIER`` commands in a shell
 =========================================
 
@@ -292,6 +307,8 @@ Recommended (wrapper scripts)
 .. code-block:: bash
 
 		docker_pacsifier -c config.json -q query.csv -d /output --save
+		docker_pacsifier -c config.json -q query.csv -d /output --count
+		docker_pacsifier -c config.json -q query.csv -d /output --info
 
 See :ref:`docker_wrappers` for the full list of wrapper scripts and examples.
 
@@ -301,9 +318,24 @@ Direct Docker invocation
 .. code-block:: bash
 
 		docker run --rm --net=host --user "$(id -u):$(id -g)" -v /path/to/my_dir:/base \
-			quay.io/translationalml/pacsifier:latest \
+			quay.io/translationalml/pacsifier:1.1.0 \
 			pacsifier --save --info --queryfile /base/my_query.csv \
 			--config /base/my_config.json --out_directory /base/my_output_dir
 
+		docker run --rm --net=host --user "$(id -u):$(id -g)" -v /path/to/my_dir:/base \
+			quay.io/translationalml/pacsifier:1.1.0 \
+			pacsifier --count --queryfile /base/my_query.csv \
+			--config /base/my_config.json --out_directory /base/my_output_dir
+
+		docker run --rm --net=host --user "$(id -u):$(id -g)" -v /path/to/my_dir:/base \
+			quay.io/translationalml/pacsifier:1.1.0 \
+			pacsifier --info --queryfile /base/my_query.csv \
+			--config /base/my_config.json --out_directory /base/my_output_dir
+
 The image runs as a non-root user: ``--user "$(id -u):$(id -g)"`` makes the container run
-as your own user so that it can write to the mounted directories.
+as your own user so that it can write to the mounted directories. Pin a release tag on the
+image (for example ``1.1.0``); do not rely on ``:latest`` alone for new CLI flags.
+
+.. note::
+    On Windows Docker Desktop you may omit ``--user`` when bind-mounting host paths.
+    The ``docker_*`` wrapper commands omit ``--user`` automatically on platforms without UIDs.
