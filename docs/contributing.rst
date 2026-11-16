@@ -75,7 +75,7 @@ Ready to contribute? Here's how to set up `PACSIFIER` for local development.
 6. Submit a pull request through the GitHub website.
 
    .. important::
-       Please make sure that the pull request is made against the ``main`` branch.
+       Please make sure that the pull request is made against the ``master`` branch.
 
 Pull Request Guidelines
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -129,7 +129,11 @@ This workflow runs on pull requests and releases. It performs the following step
 **docs.yml** — Documentation pipeline
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This workflow builds the Sphinx documentation and deploys it to `GitHub Pages <https://translationalml.github.io/pacsifier>`_ on pushes to the ``main`` branch.
+This workflow builds the Sphinx documentation and deploys it to `GitHub Pages <https://translationalml.github.io/pacsifier>`_ on pushes to the ``master`` branch (when ``docs/`` or related paths change).
+
+There is no separate PyPI-only doc file: the `PyPI <https://pypi.org/project/pacsifier/>`_ long description is the root ``README.md`` (``setup.cfg``). Narrative docs live under ``docs/*.rst``.
+
+`Read the Docs <https://readthedocs.org/>`_ can build the same Sphinx tree via ``.readthedocs.yaml`` if the project is linked on readthedocs.com (webhook on ``master``). The canonical public URL in package metadata is GitHub Pages, not RTD.
 
 
 Not listed as a contributor?

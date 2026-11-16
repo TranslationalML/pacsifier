@@ -40,17 +40,17 @@ On Linux, set Docker to be managed as a non-root user:
 Pull and Run
 ------------
 
-Pull the latest release image from Quay.io:
+Pull a release image from Quay.io (pin a version tag; ``latest`` may not match the newest GitHub release immediately):
 
 .. code-block:: bash
 
-    docker pull quay.io/translationalml/pacsifier:latest
+    docker pull quay.io/translationalml/pacsifier:1.1.0
 
 Test that it works:
 
 .. code-block:: bash
 
-    docker run --rm quay.io/translationalml/pacsifier:latest pacsifier --version
+    docker run --rm quay.io/translationalml/pacsifier:1.1.0 pacsifier --version
 
 Run a query:
 
@@ -58,7 +58,7 @@ Run a query:
 
     docker run --rm --net=host --user "$(id -u):$(id -g)" \
         -v /path/to/my_dir:/base \
-        quay.io/translationalml/pacsifier:latest \
+        quay.io/translationalml/pacsifier:1.1.0 \
         pacsifier --save --info --queryfile /base/my_query.csv \
             --config /base/my_config.json --out_directory /base/my_output_dir
 
@@ -68,8 +68,14 @@ Run a query:
     and the output files are owned by you.
 
 .. tip::
-    You can pin to a specific version instead of ``latest`` (e.g., ``quay.io/translationalml/pacsifier:X.Y.Z``).
-    See `available tags on Quay.io <https://quay.io/repository/translationalml/pacsifier?tab=tags>`_.
+    Pin a release tag (e.g., ``quay.io/translationalml/pacsifier:1.1.0``). The ``latest`` tag on Quay
+    may not match the newest GitHub release immediately. See
+    `available tags on Quay.io <https://quay.io/repository/translationalml/pacsifier?tab=tags>`_ and
+    `GitHub Releases <https://github.com/TranslationalML/pacsifier/releases>`_.
+
+.. note::
+    On Windows Docker Desktop you may omit ``--user`` when bind-mounting local paths; use the
+    ``docker_*`` wrapper scripts from ``pip install pacsifier`` if you prefer.
 
 .. note::
     DCMTK and all other dependencies are included inside the Docker image.
@@ -85,7 +91,11 @@ and :ref:`docker_wrappers` for convenience wrapper scripts that simplify the
 Option 2: Install via pip
 =========================
 
-PACSIFIER is published on `PyPI <https://pypi.org/project/pacsifier/>`_:
+PACSIFIER is published on `PyPI <https://pypi.org/project/pacsifier/>`_.
+
+The PyPI project page shows the repository root ``README.md`` (see ``setup.cfg`` ``long_description``).
+Sphinx docs here on GitHub Pages are built from ``docs/*.rst`` — keep Docker examples aligned with
+:ref:`install-docker-pull` when you change the README Quick Start.
 
 .. code-block:: bash
 

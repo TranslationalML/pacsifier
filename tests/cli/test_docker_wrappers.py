@@ -21,6 +21,7 @@ import pytest
 import subprocess
 from unittest.mock import patch, MagicMock
 
+from pacsifier.info import DOCKER_REGISTRY, __version__
 from pacsifier.cli.docker_wrappers import (
     get_docker_image_name,
     get_docker_user_args,
@@ -34,11 +35,13 @@ from pacsifier.cli.docker_wrappers import (
     docker_create_dicomdir,
 )
 
+DEFAULT_QUAY_IMAGE = f"{DOCKER_REGISTRY}:{__version__}"
+
 
 def test_get_docker_image_name_default():
     """Test that get_docker_image_name returns default when env var not set."""
     with patch.dict(os.environ, {}, clear=True):
-        assert get_docker_image_name() == 'quay.io/translationalml/pacsifier:latest'
+        assert get_docker_image_name() == DEFAULT_QUAY_IMAGE
 
 
 def test_get_docker_image_name_from_env():
@@ -84,7 +87,7 @@ def test_run_docker_command_user_before_image(mock_run, monkeypatch):
     call_args = mock_run.call_args[0][0]
     user_index = call_args.index('--user')
     assert call_args[user_index + 1] == '1234:5678'
-    assert user_index < call_args.index('quay.io/translationalml/pacsifier:latest')
+    assert user_index < call_args.index(DEFAULT_QUAY_IMAGE)
 
 
 @patch('pacsifier.cli.docker_wrappers.subprocess.run')
@@ -105,7 +108,7 @@ def test_run_docker_command_basic(mock_run, tmp_path):
     assert 'PYTHONUNBUFFERED=1' in call_args  # Python unbuffered output
     assert '-v' in call_args
     assert '/host:/container' in call_args
-    assert 'quay.io/translationalml/pacsifier:latest' in call_args
+    assert DEFAULT_QUAY_IMAGE in call_args
     assert 'pacsifier' in call_args
     assert '-c' in call_args
     assert '/config.json' in call_args
@@ -168,7 +171,7 @@ def test_run_docker_command_python_unbuffered_position(mock_run):
     # Find positions of key elements
     e_flag_index = call_args.index('-e')
     pyunbuf_index = call_args.index('PYTHONUNBUFFERED=1')
-    image_index = call_args.index('quay.io/translationalml/pacsifier:latest')
+    image_index = call_args.index(DEFAULT_QUAY_IMAGE)
 
     # PYTHONUNBUFFERED should come right after -e
     assert pyunbuf_index == e_flag_index + 1

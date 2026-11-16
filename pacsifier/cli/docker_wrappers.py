@@ -24,7 +24,7 @@ import os
 import subprocess
 import sys
 
-from pacsifier.info import DOCKER_REGISTRY
+from pacsifier.info import DOCKER_REGISTRY, __version__
 
 
 def get_docker_image_name():
@@ -32,8 +32,9 @@ def get_docker_image_name():
 
     Returns:
         str: The Docker image name, defaulting to the Quay.io registry image
+            for the installed package version (``quay.io/...:<version>``).
     """
-    return os.environ.get('PACSIFIER_DOCKER_IMAGE', f'{DOCKER_REGISTRY}:latest')
+    return os.environ.get('PACSIFIER_DOCKER_IMAGE', f'{DOCKER_REGISTRY}:{__version__}')
 
 
 def get_docker_user_args():
