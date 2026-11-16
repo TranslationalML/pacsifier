@@ -1,5 +1,5 @@
 #checkov:skip=CKV_DOCKER_2:No need for HEALTHCHECK, This image is used for one-shot CLI commands, not a long-running service.
-FROM ubuntu:22.04
+FROM ubuntu:25.10
 
 WORKDIR /app
 
