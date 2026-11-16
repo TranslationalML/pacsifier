@@ -70,7 +70,7 @@ def test_move_and_rename_files(test_dir):
         "00000-No_series_description"
     )
     for i, file in enumerate(sorted(glob(os.path.join(series_path, "*.dcm")))):
-        dataset = pydicom.read_file(file)
+        dataset = pydicom.dcmread(file)
         dataset.StudyID = "12345678"
         dataset.StudyTime = "101601.934000"
         dataset.SeriesNumber = str(i)

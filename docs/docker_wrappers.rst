@@ -34,13 +34,13 @@ By default, the wrapper scripts use the ``pacsifier:latest`` Docker image. You c
 
 .. code-block:: bash
 
-   export PACSIFIER_DOCKER_IMAGE=pacsifier:1.0.0
+   export PACSIFIER_DOCKER_IMAGE=pacsifier:X.Y.Z
 
 2. Use the ``--image`` flag with each command:
 
 .. code-block:: bash
 
-   docker_pacsifier --image pacsifier:1.0.0 -c config.json -i -q query.csv -d /output --save
+   docker_pacsifier --image pacsifier:X.Y.Z -c config.json -i -q query.csv -d /output --save
 
 Usage Examples
 ==============
@@ -143,6 +143,22 @@ Network Configuration
 ---------------------
 
 By default, the wrapper scripts use ``--net=host`` to allow the containerized PACSIFIER to communicate with PACS servers on the host network.
+
+User Configuration
+------------------
+
+The Docker image runs as a non-root user. To let the container write to the mounted
+directories, the Python wrappers (``docker_*`` commands) run it with your own
+UID and GID (``--user <uid>:<gid>``), so output files are owned by you.
+On platforms without UIDs (e.g. Windows), no ``--user`` option is passed.
+
+To use a different user, set the ``PACSIFIER_DOCKER_USER`` environment variable
+(an empty value keeps the image's default user):
+
+.. code-block:: bash
+
+   export PACSIFIER_DOCKER_USER=1000:1000
+   docker_pacsifier -c config.json -q query.csv -d /output --save
 
 Troubleshooting
 ===============

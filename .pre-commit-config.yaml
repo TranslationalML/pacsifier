@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.2
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/betterleaks/betterleaks
+    rev: ea102f10e2255c28a2e45cd58db643ee5864e05b  # v1.3.1
+    hooks:
+      - id: betterleaks

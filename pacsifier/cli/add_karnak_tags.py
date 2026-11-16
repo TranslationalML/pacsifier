@@ -43,7 +43,7 @@ def tag_dicom_file(
     """
     # Load the current dicom file to 'deidentify'
     try:
-        dataset = pydicom.read_file(filename)
+        dataset = pydicom.dcmread(filename)
     except pydicom.errors.InvalidDicomError as e:
         print("Dicom Error at file at path:  " + filename)
         print(e)

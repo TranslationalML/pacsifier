@@ -43,7 +43,7 @@ def test_tag_dicom_file(test_dir):
         patient_shift="10",
         album_name="PACSIFIERCohort",
     )
-    dataset = pydicom.read_file(file_to_tag)
+    dataset = pydicom.dcmread(file_to_tag)
 
     # Check that the tags have been added
     assert dataset[0x000B, 0x1001].value == "PACSIFIER2"
@@ -75,7 +75,7 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
                         os.path.join(in_folder, file), os.path.join(series_path, file)
                     )
                     # Update PatientID Tag
-                    dataset = pydicom.read_file(os.path.join(series_path, file))
+                    dataset = pydicom.dcmread(os.path.join(series_path, file))
                     dataset.PatientID = patient_id
                     # Update StudyDate Tag with correct VR DA format (YYYYMMDD)
                     dataset.StudyDate = str(session_folder.split("-")[1])
@@ -109,7 +109,7 @@ def test_tag_all_dicoms_within_root_folder(test_dir):
         for file in glob(
             os.path.join(folder_to_tag, f"sub-{patient_id}", "*", "*", "*")
         ):
-            dataset = pydicom.read_file(file)
+            dataset = pydicom.dcmread(file)
             assert dataset[0x000B, 0x1001].value == patient_code
             assert dataset[0x000B, 0x1002].value == "PACSIFIERCohort"
             assert dataset[0x000B, 0x1003].value == day_shift

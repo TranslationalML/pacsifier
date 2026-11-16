@@ -1,0 +1,57 @@
+name: Container scan
+
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - environment/**
+      - .trivyignore.yaml
+      - .github/workflows/container-scan.yml
+  push:
+    branches:
+      - master
+    paths:
+      - Dockerfile
+      - environment/**
+  # Base image / conda / OS packages drift without any change in this repo.
+  schedule:
+    - cron: "41 5 1 * *"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: container-scan-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  trivy:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Build image for scanning
+        run: |
+          VERSION=$(python get_version.py)
+          docker build --build-arg VERSION="${VERSION}" -t pacsifier:scan .
+
+      - name: Trivy (OS and app packages in image)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        env:
+          # Passed as an env var instead of the action's `trivyignores` input, which has had
+          # trouble with .yaml ignore files (aquasecurity/trivy-action#284).
+          TRIVY_IGNOREFILE: .trivyignore.yaml
+        with:
+          image-ref: pacsifier:scan
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH

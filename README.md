@@ -5,7 +5,7 @@ PACSIFIER is an open-source tool written in Python to query, retrieve, and edit 
 [![Build](https://img.shields.io/github/actions/workflow/status/TranslationalML/pacsifier/build-test-deploy.yml?branch=master&label=build)](https://github.com/TranslationalML/pacsifier/actions/workflows/build-test-deploy.yml)
 [![Docs](https://img.shields.io/github/actions/workflow/status/TranslationalML/pacsifier/docs.yml?branch=master&label=docs)](https://github.com/TranslationalML/pacsifier/actions/workflows/docs.yml)
 [![License](https://img.shields.io/github/license/TranslationalML/pacsifier)](https://github.com/TranslationalML/pacsifier/blob/master/LICENSE)
-[![Python Version](https://img.shields.io/badge/python-%3E%3D3.10-blue)](https://www.python.org/)
+[![Python Version](https://img.shields.io/badge/python-%3E%3D3.12-blue)](https://www.python.org/)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://translationalml.github.io/pacsifier)
 
 <!-- Uncomment these once you publish a GitHub Release:
@@ -37,7 +37,7 @@ docker run --rm --net=host \
     --config /base/my_config.json --out_directory /base/my_output_dir
 ```
 
-> **Tip:** You can pin to a specific version (e.g. `pacsifier:1.0.0`) instead of `latest`. See [available tags on Quay.io](https://quay.io/repository/translationalml/pacsifier?tab=tags).
+> **Tip:** You can pin to a specific version (e.g. `pacsifier:X.Y.Z`) instead of `latest`. See [available tags on Quay.io](https://quay.io/repository/translationalml/pacsifier?tab=tags).
 
 Or use the convenience [Docker wrapper scripts](https://translationalml.github.io/pacsifier/docker_wrappers.html):
 
@@ -56,6 +56,7 @@ pip install pacsifier
 
 ## Features
 
+- Query PACS metadata and count series/instances per series, written to a CSV file
 - Query and retrieve DICOM images from PACS servers
 - Move DICOM images between PACS nodes
 - Upload DICOM images to PACS servers
@@ -117,10 +118,25 @@ docker_pacsifier -c config.json -s -i -q query.csv -d ./output
 docker_anonymize_dicoms -d ./data -o ./anonymized -a -p
 
 # Or directly with docker run
-docker run --rm --net=host \
+docker run --rm --net=host --user "$(id -u):$(id -g)" \
     -v /path/to/my_dir:/base \
     quay.io/translationalml/pacsifier:latest \
     pacsifier --save --info -q /base/query.csv -c /base/config.json -d /base/output
+```
+
+The image runs as a non-root user; `--user "$(id -u):$(id -g)"` lets the container write to the mounted directories as you.
+
+`--count` queries the PACS at series level and appends one row per series to `<output_dir>/count_results.csv` (columns: `PatientID`, `StudyDate`, `SeriesNumber`, `SeriesDescription`, `NumberOfInstances`). Console output is one progress line per query row. Results are written continuously; use `--resume` after an interrupted run.
+
+```bash
+pacsifier --count -q query.csv -c config.json -d ./output
+pacsifier --count --resume -q query.csv -c config.json -d ./output
+```
+
+**Metadata-only with `--info` (no image download)** — same layout as legacy PACSMAN (patient/study/series folders plus one CSV per series):
+
+```bash
+pacsifier --info -q query.csv -c config.json -d ./output
 ```
 
 Run any command with `--help` for the full list of options. See [Docker Wrappers](https://translationalml.github.io/pacsifier/docker_wrappers.html) for more details on the wrapper scripts.
@@ -194,7 +210,7 @@ make test
 ```bash
 git clone https://github.com/TranslationalML/pacsifier.git
 cd pacsifier
-conda create -n pacsifier_minimal python=3.10
+conda create -n pacsifier_minimal python=3.12
 conda activate pacsifier_minimal
 pip install -e ".[all]"
 ```

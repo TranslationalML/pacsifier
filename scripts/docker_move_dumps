@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Image to run. Override with PACSIFIER_DOCKER_IMAGE; the version line below is
+# stamped automatically at release time (see .releaserc.json).
+PACSIFIER_VERSION="1.1.0"
+PACSIFIER_DOCKER_IMAGE="${PACSIFIER_DOCKER_IMAGE:-quay.io/translationalml/pacsifier:${PACSIFIER_VERSION}}"
+
 DICOM_PATH=""
 INFO_PATH=""
 EXTRA_ARGS=()
@@ -26,9 +31,9 @@ if [[ -z "$DICOM_PATH" || -z "$INFO_PATH" ]]; then
   exit 1
 fi
 
-echo "Running: sudo docker run --rm --net=host -v $DICOM_PATH:/dicom -v $INFO_PATH:/info pacsifier:1.0.0 pacsifier-move-csv ${EXTRA_ARGS[*]}"
+echo "Running: sudo docker run --rm --net=host -v $DICOM_PATH:/dicom -v $INFO_PATH:/info ${PACSIFIER_DOCKER_IMAGE} pacsifier-move-csv ${EXTRA_ARGS[*]}"
 
-sudo docker run --rm --net=host \
+sudo docker run --rm --net=host --user "$(id -u):$(id -g)" \
   -v "$DICOM_PATH:/dicom" \
   -v "$INFO_PATH:/info" \
-  pacsifier:1.0.0 pacsifier-move-csv "${EXTRA_ARGS[@]}"
+  ${PACSIFIER_DOCKER_IMAGE} pacsifier-move-csv "${EXTRA_ARGS[@]}"

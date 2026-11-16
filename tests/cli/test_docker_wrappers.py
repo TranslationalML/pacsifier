@@ -23,6 +23,7 @@ from unittest.mock import patch, MagicMock
 
 from pacsifier.cli.docker_wrappers import (
     get_docker_image_name,
+    get_docker_user_args,
     run_docker_command,
     docker_pacsifier,
     docker_get_pseudonyms,
@@ -42,8 +43,48 @@ def test_get_docker_image_name_default():
 
 def test_get_docker_image_name_from_env():
     """Test that get_docker_image_name returns value from environment variable."""
-    with patch.dict(os.environ, {'PACSIFIER_DOCKER_IMAGE': 'pacsifier:1.0.0'}):
-        assert get_docker_image_name() == 'pacsifier:1.0.0'
+    with patch.dict(os.environ, {'PACSIFIER_DOCKER_IMAGE': 'pacsifier:test-tag'}):
+        assert get_docker_image_name() == 'pacsifier:test-tag'
+
+
+@pytest.mark.skipif(not hasattr(os, 'getuid'), reason="POSIX only")
+def test_get_docker_user_args_default(monkeypatch):
+    """Test that the container runs as the current host user by default."""
+    monkeypatch.delenv('PACSIFIER_DOCKER_USER', raising=False)
+    assert get_docker_user_args() == ['--user', f'{os.getuid()}:{os.getgid()}']
+
+
+def test_get_docker_user_args_from_env(monkeypatch):
+    """Test that PACSIFIER_DOCKER_USER overrides the user."""
+    monkeypatch.setenv('PACSIFIER_DOCKER_USER', '1234:5678')
+    assert get_docker_user_args() == ['--user', '1234:5678']
+
+
+def test_get_docker_user_args_empty_env_disables(monkeypatch):
+    """Test that an empty PACSIFIER_DOCKER_USER keeps the image's default user."""
+    monkeypatch.setenv('PACSIFIER_DOCKER_USER', '')
+    assert get_docker_user_args() == []
+
+
+def test_get_docker_user_args_without_posix_ids(monkeypatch):
+    """Test that no --user is used where os.getuid is unavailable (e.g. Windows)."""
+    monkeypatch.delenv('PACSIFIER_DOCKER_USER', raising=False)
+    monkeypatch.delattr(os, 'getuid', raising=False)
+    assert get_docker_user_args() == []
+
+
+@patch('pacsifier.cli.docker_wrappers.subprocess.run')
+def test_run_docker_command_user_before_image(mock_run, monkeypatch):
+    """Test that --user is passed to docker run before the image name."""
+    monkeypatch.setenv('PACSIFIER_DOCKER_USER', '1234:5678')
+    mock_run.return_value = MagicMock(returncode=0)
+
+    run_docker_command(['pacsifier'])
+
+    call_args = mock_run.call_args[0][0]
+    user_index = call_args.index('--user')
+    assert call_args[user_index + 1] == '1234:5678'
+    assert user_index < call_args.index('quay.io/translationalml/pacsifier:latest')
 
 
 @patch('pacsifier.cli.docker_wrappers.subprocess.run')

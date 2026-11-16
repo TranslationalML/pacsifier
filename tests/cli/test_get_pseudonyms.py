@@ -25,10 +25,14 @@ import pandas as pd
 from unittest import mock
 
 from pacsifier.cli.get_pseudonyms import (
+    DEID_REQUEST_TIMEOUT,
     check_config_file_deid,
     check_queryfile_content,
     convert_csv_to_deid_json,
     generate_csv_with_pseudonyms_and_day_shifts,
+    get_deid_day_shifts,
+    get_deid_pseudonyms,
+    _get_deid_tls_verify,
     split_deid_query_json_in_batch
 )
 
@@ -80,6 +84,104 @@ def test_check_config_file_deid():
     config_file = {"deid_URL": "https://dummy.url.example"}
     with pytest.raises(ValueError):
         check_config_file_deid(config_file)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://dummy.url.example",
+        "http://localhost:8080",
+        "https://10.0.0.5:8443/api/v1/pseudonyms",
+        "https://deid.chuv.ch/path?x=1",
+    ],
+)
+def test_check_config_file_deid_valid_urls(url):
+    check_config_file_deid({"deid_URL": url, "deid_token": "1234567890"})
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "dummy.url.example",  # no scheme
+        "ftp://dummy.url.example",  # wrong scheme
+        "https://",  # no host
+        "https://bad host.example",  # whitespace
+        "https://-bad.example",  # host starting with a dash
+        "https://host.example:123456",  # invalid port
+        "javascript:alert(1)",
+        "https://" + "a" * 2050,  # too long
+    ],
+)
+def test_check_config_file_deid_invalid_urls(url):
+    with pytest.raises(ValueError):
+        check_config_file_deid({"deid_URL": url, "deid_token": "1234567890"})
+
+
+def test_check_config_file_deid_token_maxlength():
+    config_file = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "x" * 4097,
+    }
+    with pytest.raises(ValueError):
+        check_config_file_deid(config_file)
+
+
+@pytest.mark.parametrize("verify", [True, False, "/path/to/ca_bundle.pem"])
+def test_check_config_file_deid_optional_verify(verify):
+    config_file = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "1234567890",
+        "deid_verify": verify,
+    }
+    check_config_file_deid(config_file)
+
+
+def test_check_config_file_deid_invalid_verify():
+    config_file = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "1234567890",
+        "deid_verify": 1.5,
+    }
+    with pytest.raises(ValueError):
+        check_config_file_deid(config_file)
+
+
+def test_get_deid_tls_verify():
+    base = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+    assert _get_deid_tls_verify(base) is True
+    assert _get_deid_tls_verify({**base, "deid_verify": "/ca.pem"}) == "/ca.pem"
+    with pytest.warns(UserWarning, match="TLS certificate verification is disabled"):
+        assert _get_deid_tls_verify({**base, "deid_verify": False}) is False
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_verify_tls_by_default(mock_post):
+    params = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+    mock_post.return_value = mock.Mock(text='{"P1": "1"}')
+
+    get_deid_pseudonyms(params, {"PatientIDList": []})
+    get_deid_day_shifts(params, {"PatientIDList": []})
+
+    assert mock_post.call_count == 2
+    for call in mock_post.call_args_list:
+        assert call.kwargs["verify"] is True
+        assert call.kwargs["timeout"] == DEID_REQUEST_TIMEOUT
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_custom_ca_bundle(mock_post):
+    params = {
+        "deid_URL": "https://dummy.url.example",
+        "deid_token": "1234567890",
+        "deid_verify": "/ca.pem",
+    }
+    mock_post.return_value = mock.Mock(text='{"P1": "1"}')
+
+    get_deid_pseudonyms(params, {"PatientIDList": []})
+    get_deid_day_shifts(params, {"PatientIDList": []})
+
+    for call in mock_post.call_args_list:
+        assert call.kwargs["verify"] == "/ca.pem"
 
 
 def test_convert_csv_to_deid_json(test_dir):
@@ -689,3 +791,34 @@ def test_split_deid_query_json_in_batch_type_annotations():
     assert isinstance(batches[0], dict)
     assert "project" in batches[0]
     assert "PatientIDList" in batches[0]
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_timeout_gives_clear_error(mock_post):
+    import requests
+
+    params = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+    mock_post.side_effect = requests.exceptions.ReadTimeout("secret-url-detail")
+
+    for func in (get_deid_pseudonyms, get_deid_day_shifts):
+        with pytest.raises(RuntimeError, match="did not answer within") as exc:
+            func(params, {"PatientIDList": []})
+        assert "secret-url-detail" not in str(exc.value)
+
+
+@mock.patch("pacsifier.cli.get_pseudonyms.requests.post")
+def test_get_deid_requests_connection_and_http_errors(mock_post):
+    import requests
+
+    params = {"deid_URL": "https://dummy.url.example", "deid_token": "1234567890"}
+
+    mock_post.side_effect = requests.exceptions.ConnectionError("boom")
+    with pytest.raises(RuntimeError, match="request failed"):
+        get_deid_pseudonyms(params, {"PatientIDList": []})
+
+    response = mock.Mock(text="")
+    response.raise_for_status.side_effect = requests.exceptions.HTTPError("500")
+    mock_post.side_effect = None
+    mock_post.return_value = response
+    with pytest.raises(RuntimeError, match="request failed"):
+        get_deid_day_shifts(params, {"PatientIDList": []})

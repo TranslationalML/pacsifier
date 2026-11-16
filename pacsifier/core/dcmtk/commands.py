@@ -16,6 +16,7 @@
 """This module contains functions to execute DCMTK commands."""
 
 import os
+import re
 import warnings
 import shlex
 import subprocess
@@ -31,6 +32,62 @@ from pacsifier.core.sanity_checks import (
 )
 
 warnings.filterwarnings("ignore")
+
+# PHI-bearing DICOM tags in DCMTK --key / -k arguments (values redacted in log files).
+_PHI_TAG_RE = re.compile(
+    r"(?i)"
+    r"(?P<prefix>(?:--key|-k)\s+)"
+    r"(?P<tag>0*10[,\s]+0*(?:20|10|30))"
+    r"(?P<eq>=)"
+    r"(?P<value>[^\s\"'][^\s]*|\"[^\"]*\"|'[^']*')"
+)
+_REDACTED = "<REDACTED>"
+
+
+def _redact_phi_keys(command: str) -> str:
+    """Mask PatientID / PatientName / DOB values in a command string."""
+
+    def _replace(m: re.Match) -> str:
+        value = m.group("value")
+        if value == _REDACTED:
+            return m.group(0)
+        return f"{m.group('prefix')}{m.group('tag')}{m.group('eq')}{_REDACTED}"
+
+    return _PHI_TAG_RE.sub(_replace, command)
+
+
+def _audit_log_line(cmd: list[str]) -> str:
+    """One-line, PHI-free record for log.txt / fails.txt (CodeQL-safe, no query body)."""
+    tool = cmd[0] if cmd else "unknown"
+    return f"dcmtk tool={tool} (command details not persisted)\n"
+
+
+def _dcmtk_log_level() -> str:
+    """DCMTK ``-ll`` level from ``PACSIFIER_LOG_LEVEL`` (default ``info``)."""
+    level = os.environ.get("PACSIFIER_LOG_LEVEL", "info").lower().strip()
+    valid = {"trace", "debug", "info", "warn", "error", "fatal", "off"}
+    return level if level in valid else "info"
+
+
+def _dcmtk_timeout_flags() -> str:
+    """Build DCMTK network/DIMSE timeout CLI flags from environment variables.
+
+    ``PACSIFIER_CONN_TIMEOUT_SEC`` → ``--timeout`` (TCP connection, seconds).
+    ``PACSIFIER_ACSE_TIMEOUT_SEC`` → ``-ta`` (association negotiation, seconds).
+    ``PACSIFIER_DIMSE_TIMEOUT_SEC`` → ``-td`` (DIMSE message wait, seconds).
+    """
+    conn = int(os.environ.get("PACSIFIER_CONN_TIMEOUT_SEC", "30"))
+    acse = int(os.environ.get("PACSIFIER_ACSE_TIMEOUT_SEC", "30"))
+    dimse = int(os.environ.get("PACSIFIER_DIMSE_TIMEOUT_SEC", "60"))
+    return f"--timeout {conn} -ta {acse} -td {dimse}"
+
+
+def _move_retrieve_level_flags() -> str:
+    """C-MOVE QueryRetrieveLevel from ``PACSIFIER_RETRIEVE_LEVEL`` (default PATIENT)."""
+    retrieve_level = os.environ.get("PACSIFIER_RETRIEVE_LEVEL", "PATIENT").upper()
+    if retrieve_level == "SERIES":
+        return '-k 0008,0052="SERIES" --patient'
+    return '-k 0008,0052="PATIENT" --patient'
 
 
 # Query default parameters
@@ -76,8 +133,9 @@ def echo(
     check_AET(server_aet, server=True)
     check_AET(aet)
 
+    ll = _dcmtk_log_level()
     echo_command = (
-        f'echoscu -ll debug --timeout {timeout} -aec "{server_aet}" '
+        f'echoscu -ll {ll} --timeout {timeout} -aec "{server_aet}" '
         f'-aet "{aet}" {server_address} {port}'
     )
 
@@ -154,8 +212,9 @@ def find(
         PARAMETERS, aet, server_address, server_aet, port
     )
 
+    ll = _dcmtk_log_level()
     find_command = (
-        f"findscu -v {modified_params} --study "
+        f"findscu -ll {ll} {modified_params} {_dcmtk_timeout_flags()} --study "
         f"-k QueryRetrieveLevel={query_retrieval_level} "
         f"-k 0010,0020={patient_id} "
         f"-k 20,11 -k 10,10 -k 10,1010 -k 0020,000d={study_uid} "
@@ -167,7 +226,8 @@ def find(
         f"--key 8,30 --key 18,1000={device_serial_number} "
         f"--key 8,60={modality} --key 8,8={image_type} "
         f"--key 8,1030={study_description} --key 8,50={accession_number} "
-        f"--key 18,24={sequence_name}"
+        f"--key 18,24={sequence_name} "
+        f"--key 20,1206 --key 20,1208 --key 20,1209"
     )
 
     return run(
@@ -188,6 +248,7 @@ def get(
     move_port: int = 4006,
     output_dir: str = OUTPUT_DIR,
     log_dir: str = os.path.join(OUTPUT_DIR, "logs"),
+    move_aet: str = "",
 ) -> str:
     """Builds a query for movescu.
 
@@ -207,6 +268,8 @@ def get(
         log_dir: Folder for the logs where the log file (log.txt) and
                  the fails file (fails.txt) produced by run() will be written.
                  Default is "./logs" e.g. the logs/ folder in the current working directory.
+        move_aet: AET for the C-MOVE destination (-aem). When empty (default),
+                  falls back to ``aet`` for backward compatibility.
 
     Returns:
         string: The log lines.
@@ -218,15 +281,22 @@ def get(
     check_port(move_port)
     check_port(port)
 
+    destination_aet = move_aet if move_aet else aet
+
     modified_params = replace_default_params(
         PARAMETERS, aet, server_address, server_aet, port
     )
 
+    ll = _dcmtk_log_level()
     move_command = (
-        f'movescu -ll debug {modified_params} -aem "{aet}" -k 0008,0052="PATIENT" --patient '
-        f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
-        f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date} "
-        f"--port {move_port} -od {output_dir}"
+        f"movescu -ll {ll} {modified_params} {_dcmtk_timeout_flags()}"
+        f' -aem "{destination_aet}"'
+        f" {_move_retrieve_level_flags()}"
+        f" --key 0010,0020={patient_id}"
+        f" --key 0020,000d={study_instance_uid}"
+        f" --key 0020,000e={series_instance_uid}"
+        f" --key 0008,0020={study_date}"
+        f" --port {move_port} -od {output_dir}"
     )
 
     return run(
@@ -279,8 +349,10 @@ def move_remote(
         PARAMETERS, aet, server_address, server_aet, port
     )
 
+    ll = _dcmtk_log_level()
     move_remote_command = (
-        f'movescu -ll debug {modified_params} -aem "{move_aet}" -k 0008,0052="PATIENT" --patient '
+        f'movescu -ll {ll} {modified_params} {_dcmtk_timeout_flags()} -aem "{move_aet}" '
+        f"{_move_retrieve_level_flags()} "
         f"--key 0010,0020={patient_id} --key 0020,000d={study_instance_uid} "
         f"--key 0020,000e={series_instance_uid} --key 0008,0020={study_date}"
     )
@@ -316,8 +388,9 @@ def upload(
     check_server_address(server_address)
     check_AET(server_aet, server=True)
 
+    ll = _dcmtk_log_level()
     upload_command = (
-        f"storescu -ll debug {server_address} {port} "
+        f"storescu -ll {ll} {server_address} {port} "
         f'-aet "{aet}" -aec "{server_aet}" '
         f"--scan-directories {dicom_dir}"
     )
@@ -375,6 +448,68 @@ def replace_default_params(
     )
 
 
+_RE_DIMSE_STATUS = re.compile(r"DIMSE Status\s+:\s*(0x[0-9a-fA-F]+)")
+_RE_SUBOPS = {
+    name: re.compile(name.capitalize() + r" Suboperations\s+:\s*(\d+)")
+    for name in ("completed", "failed", "warning", "remaining")
+}
+
+
+def _last_int(pattern: re.Pattern[str], text: str) -> int | None:
+    found = pattern.findall(text)
+    return int(found[-1]) if found else None
+
+
+def _key(cmd_text: str, tag: str) -> str:
+    m = re.search(r"--key\s+" + tag + r"=(\S+)", cmd_text)
+    return m.group(1) if m else ""
+
+
+def _decode_dcmtk_output(raw: bytes) -> str:
+    """Decode DCMTK tool stderr/stdout bytes to text.
+
+    DCMTK logs ASCII/status lines; hospital PACS may emit Latin-1 in some fields.
+    We use Latin-1 so every byte maps to a character (same behaviour as historic
+    pacsifier) on Linux, macOS, Windows, and inside the Docker image.
+    """
+    return raw.decode("latin1", errors="replace")
+
+
+def _format_cmove_result_line(cmd_text: str, output: str, reason: str) -> str:
+    """Assemble a single stdout line summarising a C-MOVE for log parsers.
+
+    Printed as ``* MOVE_RESULT key=value ...`` so batch orchestrators (for example
+    MiCo-BID series retrieval ledgers) can detect success, DIMSE status, and
+    sub-operation counts without scraping unstructured DCMTK logs.
+
+    Args:
+        cmd_text: Full movescu command line (used to extract Study/Series/Patient UIDs).
+        output: DCMTK stderr text captured for this invocation.
+        reason: Short outcome label (``ok``, ``timeout``, ``rc<n>``, ...).
+    """
+    final_idx = output.rfind("Received Final Move Response")
+    final = final_idx != -1
+    chunk = output[final_idx:] if final else ""
+    status = _RE_DIMSE_STATUS.findall(chunk)
+    if status:
+        status_val = status[-1].lower()
+    else:
+        m = re.search(r"Received Final Move Response\s*\(([A-Za-z]+)", chunk)
+        status_val = m.group(1).lower() if m else ""
+    fields = {
+        "series": _key(cmd_text, "0020,000e"),
+        "study": _key(cmd_text, "0020,000d"),
+        "patient": _key(cmd_text, "0010,0020"),
+        "final": "1" if final else "0",
+        "status": status_val,
+        "reason": reason,
+    }
+    for name, rx in _RE_SUBOPS.items():
+        v = _last_int(rx, chunk)
+        fields[name] = "" if v is None else str(v)
+    return "* MOVE_RESULT " + " ".join(f"{k}={v}" for k, v in fields.items())
+
+
 def run(query: str, log_dir: str = ".") -> str:
     """Runs the command passed as parameter.
 
@@ -396,31 +531,74 @@ def run(query: str, log_dir: str = ".") -> str:
         # The replace in the line below is necessary for the windows deployment.
         cmd = shlex.split(query.replace("\\", "\\\\"))
         with open(os.path.join(log_dir, "log.txt"), "a") as f:
-            f.write(query + "\n")
+            f.write(_audit_log_line(cmd))
     except ValueError:
         print("* Command parsing error: {}".format(" ".join(cmd)))
         exit()
 
     try:
+        subprocess_timeout = (
+            int(os.environ.get("PACSIFIER_SUBPROCESS_TIMEOUT_SEC", "0")) or None
+        )
+    except ValueError:
+        subprocess_timeout = None
+
+    is_move = bool(cmd) and cmd[0] == "movescu"
+    cmd_text = " ".join(cmd)
+
+    try:
         if "Windows" in platform.platform():
-            completed = subprocess.check_output(cmd, stderr=subprocess.PIPE)
-            lines = completed.decode("latin1").splitlines()
+            completed = subprocess.check_output(
+                cmd, stderr=subprocess.PIPE, timeout=subprocess_timeout
+            )
+            lines = _decode_dcmtk_output(completed).splitlines()
         else:
             completed = subprocess.run(
-                cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, check=True
+                cmd,
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                check=True,
+                timeout=subprocess_timeout,
             )
-            lines = completed.stderr.decode("latin1").splitlines()
+            lines = _decode_dcmtk_output(completed.stderr).splitlines()
         lines = [line.replace("\x00", "") for line in lines]
+        if is_move:
+            print(_format_cmove_result_line(cmd_text, "\n".join(lines), "ok"))
+    except subprocess.TimeoutExpired as e:
+        print(
+            "* Command timed out after {}s: {}".format(
+                subprocess_timeout, cmd_text
+            )
+        )
+        if is_move:
+            partial = e.stderr if isinstance(e.stderr, bytes) else b""
+            print(
+                _format_cmove_result_line(
+                    cmd_text, _decode_dcmtk_output(partial), "timeout"
+                )
+            )
+        with open(os.path.join(log_dir, "fails.txt"), "a") as f:
+            f.write(_audit_log_line(cmd))
+        lines = ""
     except subprocess.CalledProcessError as e:
         print(
             "* Command did not succeed: {}, return code {}".format(
-                " ".join(cmd), e.returncode
+                cmd_text, e.returncode
             )
         )
         print("* Output: {}".format(e.stderr))
+        if is_move:
+            err = e.stderr if isinstance(e.stderr, bytes) else b""
+            print(
+                _format_cmove_result_line(
+                    cmd_text,
+                    _decode_dcmtk_output(err),
+                    f"rc{e.returncode}",
+                )
+            )
 
         with open(os.path.join(log_dir, "fails.txt"), "a") as f:
-            f.write(query + "\n")
+            f.write(_audit_log_line(cmd))
 
         print(e.returncode)
         print(e.output)
